@@ -12,8 +12,11 @@ git pull origin master
 echo "--------------- Adding all -----------------------------"
 git add .
 
+echo "-----Write a mesage if necessary, otherwise press enter----"
+read user_message
+
 echo "-------------- Making commit ---------------------------"
-git commit -m "Updated: $datetime"  
+git commit -m "Updated: $datetime. $user_message"  
 
 echo "------------ Pushing to server -------------------------"
 git push -u origin master
