@@ -1,10 +1,6 @@
 import numpy as np
 from skimage.measure import label
-
-#Imports para la prueba:
-from skimage.io import imread, imsave
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
 
 class Particle:
 	#Clase que define a cada partícula detectada
@@ -32,7 +28,7 @@ def detect_particles(img, seg_img):
 
 	M = img.shape[0]
 	N = img.shape[1]
-	labeled_img, total_particles = label(seg_img,8,return_num=True)			#Etiqueta cada partícula con un entero diferente
+	labeled_img, total_particles = label(seg_img,connectivity=2,return_num=True)			#Etiqueta cada partícula con un entero diferente
 	count = 0
 	particles = [None] * total_particles
 
@@ -61,24 +57,46 @@ def detect_particles(img, seg_img):
 
 	return particles
 
+def size_filter(particles,k):
+	'''
+	Toma la lista de partículas y filtra las que se alejan "k" desviaciones estándar de la media.
+
+	Parámetros:
+		particles (list(Particle)): Lista de objetos de tipo Particle a filtrar.
+		k (int/float): Las partículas que su tamaño se aleje k desviaciones estándar de la media son filtradas.
+
+	Retorna:
+		particles (list(Particle)): Lista de objetos de tipo Particle filtrada.
+	'''
+
+	N = len(particles)
+	sizes = np.zeros(N)
+
+	for n in range(N):
+		sizes[n] = particles[n].total_pixels
+
+	mean = np.mean(sizes)
+	std = np.std(sizes)
+
+	particles_out = []
+
+	for n in range(N):
+#		if (particles[n].total_pixels < mean + k*std and
+#				particles[n].total_pixels > mean - k*std):
+		if (particles[n].total_pixels > mean - k*std):
+			particles_out.append(particles[n])
 
 
-#Test:
-img = imread("sample.jpg")[:,:,0]
-seg_img = img.copy()
-for m in range(img.shape[0]):
-	for n in range(img.shape[1]):
-		if img[m,n]<50:
-			seg_img[m,n]=0
-		else:
-			seg_img[m,n]=1
+	#Test:
+	fig, ax = plt.subplots(1)
+	plt.hist(sizes, N//1)
+	plt.axvline(x=mean, label='mean'.format(mean), c='r')
 
-particles = detect_particles(img, seg_img)
-print(len(particles))
+	for i in range(1,4):
+		plt.axvline(x=mean+i*std, label='mean +'.format(k), c='g')
+		plt.axvline(x=mean-i*std, label='mean -'.format(k), c='g')
+	plt.savefig('Images_out/hist_sizes.png', bbox_inches='tight')
 
-fig, ax = plt.subplots(1)
-ax.imshow(seg_img,cmap='gray')
-for particle in particles:
-	patch = Circle((particle.coord[1],particle.coord[0]), radius=1, color='red')
-	ax.add_patch(patch)
-plt.show(fig)
+
+	return particles_out
+
