@@ -1,8 +1,8 @@
 #!/home/leo/anaconda3/bin/python
-import skimage.data as data
 import skimage.filters as filters
 import skimage.color as color
 import scipy.ndimage as nd
+import numpy as np
 
 
 def segmentation(image):
@@ -19,5 +19,5 @@ def segmentation(image):
     image_bw = color.rgb2gray(image)
     image_filtered = nd.gaussian_filter(image_bw, sigma=3)
     image_threshold = filters.threshold_otsu(image_filtered)
-    mask = image_bw > image_threshold
-    return mask
+    mask = (image_bw > image_threshold) * 255
+    return mask.astype(np.uint8)
