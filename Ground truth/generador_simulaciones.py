@@ -1,20 +1,19 @@
 
 from matplotlib import pyplot as plt
-import skimage
 from skimage.io import imread, imsave
 import numpy as np
 from skimage.draw import ellipse
 import math
 
-plt.rcParams['figure.figsize'] = (20.0, 15.0) 
+plt.rcParams['figure.figsize'] = (20.0, 15.0)
 plt.rcParams['image.cmap'] = 'gray'
 
 
-def genetate_sequence(M=512,N=512,frames=250,mean=[10,5],cov =[[103,21],[ 21,14]],vm=3,sigma_v=3,sigma_theta=10,particles=500,sigma_r=1,add_to_sequence=False):
-
+def genetate_sequence(M=512, N=512, frames=250, mean=[10, 5],
+	cov =[[103, 21], [21, 14]], vm=3, sigma_v=3, sigma_theta=10,
+	particles=500, sigma_r=1, add_to_sequence=False):
 	'''
 	Genera una secuencia simulada con las características dadas y la guarda en la carpeta "Simulated".
-
 	Parametros:
 		M (int): Largo de las imágenes (pixeles).
 		N (int): Ancho de las imágenes (pixeles).
@@ -34,14 +33,14 @@ def genetate_sequence(M=512,N=512,frames=250,mean=[10,5],cov =[[103,21],[ 21,14]
 
 	'''
 
-	I = np.zeros([M,N],dtype = "uint8")
-	x = np.zeros([particles,frames])
-	y = np.zeros([particles,frames])
+	I = np.zeros([M,N], dtype = "uint8")
+	x = np.zeros([particles, frames])
+	y = np.zeros([particles, frames])
 
-	x[:,0] = np.random.uniform(-M,2*M,particles)                # Posición inicial de las partículas
-	y[:,0] = np.random.uniform(-N,2*N,particles)    
+	x[:,0] = np.random.uniform(-M, 2*M, particles)                # Posición inicial de las partículas
+	y[:,0] = np.random.uniform(-N, 2*N, particles)    
 
-	d = np.random.multivariate_normal(mean,cov,particles)       # Se inicializa el tamaño de las partículas
+	d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
 	a = d[:,0]
 	l = d[:,1]
 
@@ -137,17 +136,16 @@ def mean_velocity(vel):
 
 mean = np.array([20.7247332,9.61818939])
 cov = np.array([[103.80124818,21.61793687],
- [ 21.61793687,14.59060681]])
-x,y= sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov)
+				 [ 21.61793687,14.59060681]])
+x,y= genetate_sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov)
 
-"""
-mean = np.array([10,5])
-cov = np.array([[103.80124818,21.61793687],
- [ 21.61793687,14.59060681]])
-x,y= sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov,add_to_sequence=True,vm=7,sigma1=1,sigma2=2)
-"""
 
-vel = velocity(x,y,512,512)
-vel_m = mean_velocity(vel)
-dis = total_distance(x,y,512,512)
+#mean = np.array([10,5])
+#cov = np.array([[103.80124818,21.61793687],
+#[ 21.61793687,14.59060681]])
+#x,y= genetate_sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov,add_to_sequence=True,vm=7,sigma1=1,sigma2=2)
+
+#vel = velocity(x,y,512,512)
+#vel_m = mean_velocity(vel)
+#dis = total_distance(x,y,512,512)
 
