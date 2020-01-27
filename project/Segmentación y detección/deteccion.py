@@ -57,13 +57,13 @@ def detect_particles(img, seg_img):
 
 	return particles
 
-def size_filter(particles,k):
+def size_filter(particles,pixel_size):
 	'''
 	Toma la lista de partículas y filtra las que se alejan "k" desviaciones estándar de la media.
 
 	Parámetros:
 		particles (list(Particle)): Lista de objetos de tipo Particle a filtrar.
-		k (int/float): Las partículas que su tamaño se aleje k desviaciones estándar de la media son filtradas.
+		pixel_size (list(float,float)): Las dimensiones de un pixel en micrometros.
 
 	Retorna:
 		particles (list(Particle)): Lista de objetos de tipo Particle filtrada.
@@ -72,31 +72,11 @@ def size_filter(particles,k):
 	N = len(particles)
 	sizes = np.zeros(N)
 
-	for n in range(N):
-		sizes[n] = particles[n].total_pixels
-
-	mean = np.mean(sizes)
-	std = np.std(sizes)
-
 	particles_out = []
 
 	for n in range(N):
-#		if (particles[n].total_pixels < mean + k*std and
-#				particles[n].total_pixels > mean - k*std):
-		if (particles[n].total_pixels > mean - k*std):
+		if (particles[n].total_pixels*(pixel_size[0]*pixel_size[1]) > 10):
 			particles_out.append(particles[n])
-
-
-	#Test:
-	fig, ax = plt.subplots(1)
-	plt.hist(sizes, N//1)
-	plt.axvline(x=mean, label='mean'.format(mean), c='r')
-
-	for i in range(1,4):
-		plt.axvline(x=mean+i*std, label='mean +'.format(k), c='g')
-		plt.axvline(x=mean-i*std, label='mean -'.format(k), c='g')
-	plt.savefig('Images_out/hist_sizes.png', bbox_inches='tight')
-
 
 	return particles_out
 

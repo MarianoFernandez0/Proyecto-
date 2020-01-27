@@ -2,6 +2,15 @@ from skimage.io import imread, imsave
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from deteccion import Particle, detect_particles, size_filter
+import tifffile
+
+#help(tifffile)
+tif = tifffile.TiffFile('Images_in/11.tif')
+
+x_res = tif.pages[0].tags['XResolution']
+y_res = tif.pages[0].tags['YResolution']
+
+pixel_size = [x_res.value[1]/x_res.value[0], y_res.value[1]/y_res.value[0]]
 
 
 img = imread("Images_in/sample.jpg")[:,:,0]
@@ -24,9 +33,9 @@ for particle in particles:
 plt.axis('off')
 plt.savefig('Images_out/coords.png', bbox_inches='tight')
 
-particles = size_filter(particles,1)
+particles = size_filter(particles,pixel_size)
 
-print('Total de partículas detectadas luego de filtrar (k=1):',len(particles))
+print('Total de partículas detectadas luego de filtrar:',len(particles))
 
 fig, ax = plt.subplots(1)
 ax.imshow(seg_img,cmap='gray')
