@@ -59,7 +59,7 @@ def detect_particles(img, seg_img):
 
 def size_filter(particles,pixel_size):
 	'''
-	Toma la lista de partículas y filtra las que se alejan "k" desviaciones estándar de la media.
+	Toma la lista de partículas y filtra las que son menores a - micrometros cuadrados.
 
 	Parámetros:
 		particles (list(Particle)): Lista de objetos de tipo Particle a filtrar.
