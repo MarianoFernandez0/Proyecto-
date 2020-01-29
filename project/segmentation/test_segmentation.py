@@ -5,4 +5,4 @@ from segmentation import segmentation
 
 image = imread('IMAGENES/sample.jpg')
 mask = segmentation(image)
-imsave('IMAGENES/sample_segmentd.jpg', mask)
+imsave('IMAGENES/sample_segmenetd.jpg', mask)
