@@ -1,0 +1,9 @@
+INTEGRATED DENSITY
+------------------
+Integrated density sums all of the pixels within a region and gives you a total value. Mean fluorescent intensity gives you just that, a mean (or average) intensity.
+Integrated density will capture very bright and very dim pixels in the same object more accurately in accordance with their contribution to the biological phenomenon versus an average which will just chop the bright pixels down and raise the dim pixels up in their contribution. If you have a few very bright pixels in a sea of dim pixels, then integrated density will capture that, whereas an average will likely just chop those bright pixels down to close to no change.
+In the most basic terms, an integrated density allows a pixel to be what it actually is (either dim or bright), while an average forces each pixel to be what every other pixel.
+------------------
+  -  RawIntDen = (sum of pixel values in selection)
+  -  IntDen = (sum of pixel values in selection) * (area of one pixel)
+If no Calibration is present it holds: “Raw integrated density” = “Integrated density”
