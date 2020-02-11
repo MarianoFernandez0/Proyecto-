@@ -1,7 +1,10 @@
+#!/usr/bin/python
+# coding: latin-1
+
 from matplotlib import pyplot as plt
 from skimage.io import imread, imsave
+from skimage.filters import gaussian
 import numpy as np
-import cv2
 import math
 
 plt.rcParams['figure.figsize'] = (20.0, 15.0)
@@ -34,6 +37,7 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 	I = np.zeros([M,N], dtype = "uint8")
 	x = np.zeros([particles, frames])
 	y = np.zeros([particles, frames])
+	intensity = np.random.normal(150, 80, particles)
 
 	x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
 	y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
@@ -56,12 +60,13 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 	        Iaux = I.copy()
 
 	    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-	        ellipse_outer = ((x[p, f], y[p, f]), (l[p]*2, a[p]*2), math.degrees(theta[p]))
 	        Iaux = cv2.ellipse(transparency, ellipse_outer, 255, -1, cv2.LINE_AA)
-
 	        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], I.shape,np.radians(theta[p]) - math.pi / 2)
-	        Iaux[rr,cc] = 255
+	        Iaux[rr,cc] = intensity[p]
 	                
+	    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
+	    Iaux = gaussian(Iaux, 5)
+
 	    Inoise = Iaux + np.random.normal(0,sigma_r,Iaux.shape) 			# Se agrega ruido a las imágenes
 
 	    imsave(name, np.uint8(np.round(((Inoise - np.min(Inoise)) / (np.max(Inoise) - np.min(Inoise)) * 255 ))))
