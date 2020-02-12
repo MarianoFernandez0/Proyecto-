@@ -37,7 +37,7 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 	'''
 
-	I = np.zeros([M,N], dtype = "uint16")
+	image = np.zeros([M,N], dtype = "uint16")
 	x = np.zeros([particles, frames])
 	y = np.zeros([particles, frames])
 	intensity = np.random.normal(150, 50, particles)
@@ -57,37 +57,32 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 	    if f > 0:
 	        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
 	        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
-	    name = 'output/imagen' + str(f) + '.png'
 	    if add_to_sequence:
-	        Iaux = imread(name)
+	        image_aux = imread(name)
 	    else:
-	        Iaux = I.copy()
+	        image_aux = image.copy()
 
 	    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-	        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], I.shape,np.radians(theta[p]) - math.pi / 2)
+	        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape,np.radians(theta[p]) - math.pi / 2)
 	        intensity[p] = intensity[p] + np.random.normal(0,10)
-	        Iaux[rr,cc] = intensity[p] 
+	        image_aux[rr,cc] = intensity[p] if intensity[p] > 0 else 0
 	                
 	    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
-	    Iblur = gaussian(Iaux, 5, mode='reflect')
+	    blured = gaussian(image_aux, 6, mode='reflect')
 
-	    Inoise = Iblur #+ np.random.normal(0,sigma_r,Iblur.shape) 			# Se agrega ruido a las imágenes
-	    Inormalized = np.uint16(np.round(((Inoise-np.min(Inoise))/(np.max(Inoise)-np.min(Inoise))*255))) 
-	    #imsave(name, np.uint8(np.round(((Inoise - np.min(Inoise)) / (np.max(Inoise) - np.min(Inoise)) * 255 ))))
-	    imsave(name, Inormalized)
-	    final_sequence[:, :, f] = Inormalized
+	    image_noise = blured #+ np.random.normal(0,sigma_r,Iblur.shape) 			# Se agrega ruido a las imágenes
+	    image_normalized = np.uint8(np.round(((image_noise - np.min(image_noise)) / (np.max(image_noise) - np.min(image_noise)) * 255))) 
+
+	    final_sequence[:, :, f] = np.uint8(image_normalized)
 	    v = np.abs(np.random.normal(v, sigma_v,particles))     #Próximo paso  
 	    theta = np.random.normal(theta, sigma_theta, particles)
 
-	    #Guardo como tiff
-	    #imwrite('output/salida.tif', np.uint8(final_sequence), photometric='minisblack')
+	#Guardo como tiff
 	with TiffWriter('output/salida.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
 
-
 	return x, y
-
 
 #Hago el gradiente para que quede con un brillo parecido al de las imágenes de fmed
 def make_gradient_v(width, height, h, k, a, b, theta):
@@ -170,7 +165,7 @@ def mean_velocity(vel):
 mean = np.array([20.7247332, 9.61818939])
 cov = np.array([[103.80124818, 21.61793687],
 				 [ 21.61793687, 14.59060681]])
-x, y= generate_sequence(frames = 100, sigma_r = 4, particles = 100, mean = mean, cov = cov)
+x, y= generate_sequence(frames = 60, sigma_r = 4, particles = 100, mean = mean, cov = cov)
 
 
 #mean = np.array([10, 5])
