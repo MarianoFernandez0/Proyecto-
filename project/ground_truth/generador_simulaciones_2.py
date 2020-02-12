@@ -1,9 +1,12 @@
 #!/usr/bin/python
 # coding: latin-1
 
+
 from matplotlib import pyplot as plt
 from skimage.io import imread, imsave
 from skimage.filters import gaussian
+from skimage.draw import ellipse
+from skimage.external.tifffile import TiffWriter
 import numpy as np
 import math
 
@@ -34,10 +37,11 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 	'''
 
-	I = np.zeros([M,N], dtype = "uint8")
+	I = np.zeros([M,N], dtype = "uint16")
 	x = np.zeros([particles, frames])
 	y = np.zeros([particles, frames])
-	intensity = np.random.normal(150, 80, particles)
+	intensity = np.random.normal(150, 50, particles)
+	final_sequence = np.zeros((M, N, frames))
 
 	x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
 	y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
@@ -53,25 +57,35 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 	    if f > 0:
 	        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
 	        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
-	    name = 'Simulated\imagen' + str(f) + '.png'
+	    name = 'output/imagen' + str(f) + '.png'
 	    if add_to_sequence:
 	        Iaux = imread(name)
 	    else:
 	        Iaux = I.copy()
 
 	    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-	        Iaux = cv2.ellipse(transparency, ellipse_outer, 255, -1, cv2.LINE_AA)
 	        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], I.shape,np.radians(theta[p]) - math.pi / 2)
-	        Iaux[rr,cc] = intensity[p]
+	        intensity[p] = intensity[p] + np.random.normal(0,10)
+	        Iaux[rr,cc] = intensity[p] 
 	                
 	    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
-	    Iaux = gaussian(Iaux, 5)
+	    Iblur = gaussian(Iaux, 5, mode='reflect')
 
-	    Inoise = Iaux + np.random.normal(0,sigma_r,Iaux.shape) 			# Se agrega ruido a las imágenes
-
-	    imsave(name, np.uint8(np.round(((Inoise - np.min(Inoise)) / (np.max(Inoise) - np.min(Inoise)) * 255 ))))
+	    Inoise = Iblur #+ np.random.normal(0,sigma_r,Iblur.shape) 			# Se agrega ruido a las imágenes
+	    Inormalized = np.uint16(np.round(((Inoise-np.min(Inoise))/(np.max(Inoise)-np.min(Inoise))*255))) 
+	    #imsave(name, np.uint8(np.round(((Inoise - np.min(Inoise)) / (np.max(Inoise) - np.min(Inoise)) * 255 ))))
+	    imsave(name, Inormalized)
+	    final_sequence[:, :, f] = Inormalized
 	    v = np.abs(np.random.normal(v, sigma_v,particles))     #Próximo paso  
-	    theta = np.random.normal(theta, sigma_theta, particles)      
+	    theta = np.random.normal(theta, sigma_theta, particles)
+
+	    #Guardo como tiff
+	    #imwrite('output/salida.tif', np.uint8(final_sequence), photometric='minisblack')
+	with TiffWriter('output/salida.tif', bigtiff=True) as tif:
+		for frame in range(frames):
+			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
+
+
 	return x, y
 
 
@@ -156,7 +170,7 @@ def mean_velocity(vel):
 mean = np.array([20.7247332, 9.61818939])
 cov = np.array([[103.80124818, 21.61793687],
 				 [ 21.61793687, 14.59060681]])
-x, y= generate_sequence(frames = 40, sigma_r = 10, particles = 100, mean = mean, cov = cov)
+x, y= generate_sequence(frames = 100, sigma_r = 4, particles = 100, mean = mean, cov = cov)
 
 
 #mean = np.array([10, 5])

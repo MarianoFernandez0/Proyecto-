@@ -52,7 +52,7 @@ def generate_sequence(M=512, N=512, frames=250, mean=[10, 5],
 	    if f > 0:
 	        x[:, f] = x[:,f-1]+v*np.cos(np.radians(theta))
 	        y[:, f] = y[:,f-1]+v*np.sin(np.radians(theta))
-	    #name = 'Simulated\imagen' + str(f) + '.png'
+	    name = 'Simulated\imagen' + str(f) + '.png'
 	    if add_to_sequence:
 	        Iaux = imread(name)
 	    else:
