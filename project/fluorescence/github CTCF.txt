@@ -1,0 +1,6 @@
+GitHub Corrected-Total-Cell-Fluorescence
+https://github.com/d-tear/Corrected-Total-Cell-Fluorescence
+------------------------------------------------------------
+ideas:
+- The pipeline implements an adaption and automation of a commonly used method called Corrected-Total-Cell-Fluorescence (CTCF), which determines the level of cellular fluorescence from fluorescence microscopy images. 
+-  Simply put, CTCF normalizes the integrated density of your regions of interest (ROIs) by subtracting the background fluorescence in your image. 

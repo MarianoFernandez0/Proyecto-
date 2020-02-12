@@ -1,6 +1,7 @@
 
 from matplotlib import pyplot as plt
-from skimage.io import imread, imsave
+from skimage.io import imread
+from skimage.external.tifffile import imsave
 import numpy as np
 from skimage.draw import ellipse
 import math
@@ -9,9 +10,10 @@ plt.rcParams['figure.figsize'] = (20.0, 15.0)
 plt.rcParams['image.cmap'] = 'gray'
 
 
-def genetate_sequence(M=512, N=512, frames=250, mean=[10, 5],
+def generate_sequence(M=512, N=512, frames=250, mean=[10, 5],
 	cov =[[103, 21], [21, 14]], vm=3, sigma_v=3, sigma_theta=10,
 	particles=500, sigma_r=1, add_to_sequence=False):
+	
 	'''
 	Genera una secuencia simulada con las características dadas y la guarda en la carpeta "Simulated".
 	Parametros:
@@ -30,7 +32,6 @@ def genetate_sequence(M=512, N=512, frames=250, mean=[10, 5],
 	Retotorna:
 		x (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
-
 	'''
 
 	I = np.zeros([M,N], dtype = "uint8")
@@ -48,9 +49,9 @@ def genetate_sequence(M=512, N=512, frames=250, mean=[10, 5],
 	v = np.random.normal(vm,10,particles)            # Velocidad inicial
 
 	for f in range(frames):                          # Se crean los cuadros de a uno 
-	    if f>0:
-	        x[:,f] = x[:,f-1]+v*np.cos(np.radians(theta))
-	        y[:,f] = y[:,f-1]+v*np.sin(np.radians(theta))
+	    if f > 0:
+	        x[:, f] = x[:,f-1]+v*np.cos(np.radians(theta))
+	        y[:, f] = y[:,f-1]+v*np.sin(np.radians(theta))
 	    name = 'Simulated\imagen' + str(f) + '.png'
 	    if add_to_sequence:
 	        Iaux = imread(name)
@@ -81,7 +82,6 @@ def velocity(M,N,x,y):
 
 	Retotorna:
 		vel (array(particles,frames)): velocidad intantánea para cada partícula y cada cuadro de la secuencia.
-
 	"""
 	vel = np.zeros(x.shape)
 	for p in range(x.shape[0]):
@@ -137,7 +137,7 @@ def mean_velocity(vel):
 mean = np.array([20.7247332,9.61818939])
 cov = np.array([[103.80124818,21.61793687],
 				 [ 21.61793687,14.59060681]])
-x,y= genetate_sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov)
+x,y= generate_sequence(frames=40,sigma_r=10,particles=100,mean=mean,cov=cov)
 
 
 #mean = np.array([10,5])

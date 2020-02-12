@@ -3,6 +3,6 @@ from skimage.io import imread
 from skimage.io import imsave
 from segmentation import segmentation
 
-image = imread('IMAGENES/sample.jpg')
+image = imread('images/sample.jpg')
 mask = segmentation(image)
-imsave('IMAGENES/sample_segmenetd.jpg', mask)
+imsave('images/sample_segmeneted.jpg', mask)

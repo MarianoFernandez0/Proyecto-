@@ -13,11 +13,13 @@ for m in range(img.shape[0]):
 		else:
 			seg_img[m,n]=1
 
-
-cv2.imwrite('out.png',seg_img) 
-#plt.savefig('seg_img.png')
+cv2.imwrite('img.png',img)
+cv2.imwrite('inv_seg_img.png',seg_img)
 
 particles = detect_particles(img, seg_img)
 mascara=particles[0].mask
-
 cv2.imwrite('mascara.png',mascara)
+
+#extraccion de los espermatozoides a la imagen de entrada
+background_img=img*seg_img
+cv2.imwrite('background_img.png',background_img)
