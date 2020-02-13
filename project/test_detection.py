@@ -2,10 +2,10 @@ from skimage.io import imread, imsave
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from SEGMENTATION.segmentation import segmentation
-from detection.deteccion import Particle, detect_particles, size_filter
+from detection.deteccion import detect_particles, size_filter
 import tifffile
 
-sample_files = ['9.tif', '10.tif', '11.tif', '1 026.tif']
+sample_files = ['9.tif']#, '10.tif', '11.tif', '1 026.tif']
 for sample in sample_files:
 	tif = tifffile.TiffFile('Images_in/'+sample)
 	x_res = tif.pages[0].tags['XResolution']
@@ -20,18 +20,22 @@ for sample in sample_files:
 		imsave('Images_out/sample '+str(i)+'_('+sample+').png', img)
 
 		seg_img = segmentation(img)
-		particles = detect_particles(img, seg_img)
+		particles = detect_particles(seg_img)
 
 		print('Total de partículas detectadas antes de filtrar:'+str(i),len(particles))
 
 		fig, ax = plt.subplots(1)
 		ax.imshow(seg_img,cmap='gray')
-		for particle in particles:
-			patch = Circle((particle.coord[1],particle.coord[0]), radius=1, color='red')
+		print('particles.shape[0]', particles.shape[0])
+		for p in range(particles.shape[0]-1):
+			c = (particles.at[p, 'y'],particles.at[p, 'x'])
+			print(p)
+			print(c)
+			patch = Circle((particles.at[p, 'y'],particles.at[p, 'x']), radius=1, color='red')
 			ax.add_patch(patch)
 		plt.axis('off')
 		plt.savefig('Images_out/coords '+str(i)+'_('+sample+').png', bbox_inches='tight')
-
+		'''
 		particles = size_filter(particles,pixel_size)
 
 		print('Total de partículas detectadas luego de filtrar:'+str(i),len(particles))
@@ -43,4 +47,4 @@ for sample in sample_files:
 			ax.add_patch(patch)
 		plt.axis('off')
 		plt.savefig('Images_out/coords_filtered '+str(i)+'_('+sample+').png', bbox_inches='tight')
-
+'''
