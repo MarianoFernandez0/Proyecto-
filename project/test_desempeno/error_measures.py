@@ -1,6 +1,7 @@
 from scipy.optimize import linear_sum_assignment
 import numpy as np
-
+import pandas as panda
+	
 def fix_particles_oustide(X,M,N):
 	
 	X_fix = []								#Se guarda en esta lista las partículas que están dentro del rango posible
@@ -61,11 +62,13 @@ def error_measures(X, Y, M, N, max_dist):
 
 	return TP, FN, FP, JSCb
 
-N = 50
-F = 20
+N = 2#50
+F = 2#20
 
 X = np.zeros((N,F))
 
 for n in range(N):
-	for f in arange(F):
-		X[n,f] = 250*np.random.normal(0, 1, 2)
+	for f in range(F):
+		x[n,f] = [250, 250] + np.random.normal(0, 20)
+		x[n,f] = [250, 250] + np.random.normal(0, 20)
+		print(X[n,f])
