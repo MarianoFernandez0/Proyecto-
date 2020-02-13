@@ -41,10 +41,8 @@ def detect_particles(seg_img):
 				particles.loc[labeled_img[m,n]-1,['total_pixels']] += 1
 
 	#se divide la suma de las coordenadas sobre el total de pixeles para hayar el promedio
-	print(particles.head())
 	particles['x'] = particles['x']/particles['total_pixels']
 	particles['y'] = particles['y']/particles['total_pixels']
-	print(particles.head())
 	return particles
 
 def size_filter(particles,pixel_size):
@@ -59,6 +57,6 @@ def size_filter(particles,pixel_size):
 		particles (df(id, coord_x, coord_y, total_pixels, mask)): DataFrame de partículas filtradas.
 	'''
 
-	particles_out = particles[particles.loc['total_pixels']*(pixel_size[0]*pixel_size[1]) > 10]
+	particles_out = particles[particles['total_pixels']*(pixel_size[0]*pixel_size[1]) > 10]
 	return particles_out
 
