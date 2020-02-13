@@ -14,9 +14,7 @@ plt.rcParams['figure.figsize'] = (20.0, 15.0)
 plt.rcParams['image.cmap'] = 'gray'
 
 
-def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
-	cov = [[103, 21], [21, 14]], vm = 3, sigma_v = 3, sigma_theta = 10,
-	particles = 500, sigma_r = 1, add_to_sequence = False):
+def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = []):
 	'''
 	Genera una secuencia simulada con las características dadas y la guarda en la carpeta "Simulated".
 	Parametros:
@@ -37,45 +35,58 @@ def generate_sequence(M = 512, N = 512, frames = 250, mean = [10, 5],
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 	'''
 
-	image = np.zeros([M,N], dtype = "uint16")
-	x = np.zeros([particles, frames])
-	y = np.zeros([particles, frames])
-	intensity = np.random.normal(150, 50, particles)
-	final_sequence = np.zeros((M, N, frames))
+	image = np.zeros([M,N], dtype = "uint8")
 
-	x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
-	y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
+	for poblacion in poblaciones:
 
-	d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
-	a = d[:, 0]
-	l = d[:, 1]
+		particles = poblacion['particles']
+		mean = poblacion['mean']
+		cov = poblacion['cov']
+		vm = poblacion['mean_velocity']
+		sigma_v = poblacion['sigma_v']
+		sigma_theta = poblacion['sigma_theta']
 
-	theta = np.random.uniform(0, 360, particles)       # Ángulo inicial 
-	v = np.random.normal(vm, 10, particles)            # Velocidad inicial
+		x = np.zeros([particles, frames])
+		y = np.zeros([particles, frames])
+		intensity = np.random.normal(150, 60, particles)
+		final_sequence = np.zeros((M, N, frames))
 
-	for f in range(frames):                          # Se crean los cuadros de a uno 
-	    if f > 0:
-	        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
-	        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
-	    if add_to_sequence:
-	        image_aux = imread(name)
-	    else:
-	        image_aux = image.copy()
+		x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
+		y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
 
-	    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-	        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape,np.radians(theta[p]) - math.pi / 2)
-	        intensity[p] = intensity[p] + np.random.normal(0,10)
-	        image_aux[rr,cc] = intensity[p] if intensity[p] > 0 else 0
-	                
-	    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
-	    blured = gaussian(image_aux, 6, mode='reflect')
+		d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
+		a = d[:, 0]
+		l = d[:, 1]
 
-	    image_noise = blured #+ np.random.normal(0,sigma_r,Iblur.shape) 			# Se agrega ruido a las imágenes
-	    image_normalized = np.uint8(np.round(((image_noise - np.min(image_noise)) / (np.max(image_noise) - np.min(image_noise)) * 255))) 
+		theta = np.random.uniform(0, 360, particles)       # Ángulo inicial 
+		v = np.random.normal(vm, 10, particles)            # Velocidad inicial
 
-	    final_sequence[:, :, f] = np.uint8(image_normalized)
-	    v = np.abs(np.random.normal(v, sigma_v,particles))     #Próximo paso  
-	    theta = np.random.normal(theta, sigma_theta, particles)
+		for f in range(frames):                          # Se crean los cuadros de a uno 
+		    if f > 0:
+		        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
+		        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
+		    
+
+		    image_aux = image.copy()
+
+		    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
+		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape,np.radians(theta[p]) - math.pi / 2)
+		        intensity[p] = intensity[p] + np.random.normal(0,10)
+		        if intensity[p] > 0 and intensity[p] <= 255:
+		        	image_aux[rr,cc] = intensity[p]
+		        elif intensity[p] < 0:
+		        	image_aux[rr,cc] = 0
+		        elif intensity[p] > 255:
+		        	image_aux[rr,cc] = 255
+        
+		    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
+		    blured = gaussian(image_aux, 6, mode='reflect')
+		    image_normalized = np.uint8(np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255))) 
+		    final_sequence[:, :, f] = np.uint8(image_normalized)
+		    
+		    #Próximo paso
+		    v = np.abs(np.random.normal(v, sigma_v,particles))       
+		    theta = np.random.normal(theta, sigma_theta, particles)
 
 	#Guardo como tiff
 	with TiffWriter('output/salida.tif', bigtiff=True) as tif:
@@ -162,10 +173,43 @@ def mean_velocity(vel):
 	    vel_m[p] = vel_m[p] / count
 	return vel_m
 
+
+###############################################################################
+#    Creo imagen simulada
+poblaciones = []
+
+
 mean = np.array([20.7247332, 9.61818939])
 cov = np.array([[103.80124818, 21.61793687],
 				 [ 21.61793687, 14.59060681]])
-x, y= generate_sequence(frames = 60, sigma_r = 4, particles = 100, mean = mean, cov = cov)
+vm = 3
+poblacion = {
+	'particles' : 100,
+	'mean' : mean,
+	'cov' : cov,
+	'mean_velocity' : vm,
+	'sigma_v' : vm * 0.1,
+	'sigma_theta' : 10
+}
+poblaciones.append(poblacion)
+
+mean = np.array([10, 5])
+cov = np.array([[103.80124818, 21.61793687],
+[ 21.61793687, 14.59060681]])
+vm = 5
+
+poblacion = {
+	'particles' : 150,
+	'mean' : mean,
+	'cov' : cov,
+	'mean_velocity' : vm,
+	'sigma_v' : vm * 0.1,
+	'sigma_theta' : 10
+}
+
+poblaciones.append(poblacion)
+
+x, y= generate_sequence(frames = 60, sigma_r = 4, poblaciones = poblaciones)
 
 
 #mean = np.array([10, 5])
