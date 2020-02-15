@@ -1,20 +1,41 @@
 #!/usr/bin/python
 # coding: latin-1
 
-
-from matplotlib import pyplot as plt
-from skimage.io import imread, imsave
 from skimage.filters import gaussian
 from skimage.draw import ellipse
 from skimage.external.tifffile import TiffWriter
 import numpy as np
+import pandas as pd
 import math
 
-plt.rcParams['figure.figsize'] = (20.0, 15.0)
-plt.rcParams['image.cmap'] = 'gray'
 
-
+###############################################################################
+#			Función principal del generador de secuencias
+###############################################################################
 def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = []):
+	'''
+	Función principal del módulo que guarda en el directorio "ouput" la secuencia generada como
+	un tipo de archivo tff.
+	INPUT:
+
+
+	OUTPUT:
+		traks: DataFrame de pandas que contiene el id de particula, posición en x, posición en y
+			   y la velocidad instantánea
+		traks_info: DataFrame que contiene el id de la particula, la distancia total y la velocidad media.
+	'''
+	x, y = _make_sequence(M, N, frames, sigma_r, poblaciones)
+
+	return x, y
+
+##############################################################################################
+##############################################################################################
+
+
+##############################################################################################
+#				GENERADOR DE SECUENCIAS
+##############################################################################################
+def _make_sequence(M, N, frames, sigma_r, poblaciones):
 	'''
 	Genera una secuencia simulada con las características dadas y la guarda en la carpeta "Simulated".
 	Parametros:
@@ -38,14 +59,8 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 	image = np.zeros([M,N], dtype = "uint8")
 
 	for poblacion in poblaciones:
-
-		particles = poblacion['particles']
-		mean = poblacion['mean']
-		cov = poblacion['cov']
-		vm = poblacion['mean_velocity']
-		sigma_v = poblacion['sigma_v']
-		sigma_theta = poblacion['sigma_theta']
-
+		particles, mean, cov = poblacion['particles'], poblacion['mean'], poblacion['cov'] 
+		vm, sigma_v, sigma_theta = poblacion['mean_velocity'], poblacion['sigma_v'], poblacion['sigma_theta']
 		x = np.zeros([particles, frames])
 		y = np.zeros([particles, frames])
 		intensity = np.random.normal(150, 60, particles)
@@ -65,10 +80,8 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 		    if f > 0:
 		        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
 		        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
-		    
 
 		    image_aux = image.copy()
-
 		    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
 		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape,np.radians(theta[p]) - math.pi / 2)
 		        intensity[p] = intensity[p] + np.random.normal(0,10)
@@ -87,29 +100,55 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 		    #Próximo paso
 		    v = np.abs(np.random.normal(v, sigma_v,particles))       
 		    theta = np.random.normal(theta, sigma_theta, particles)
-
 	#Guardo como tiff
 	with TiffWriter('output/salida.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
 
 	return x, y
-
-#Hago el gradiente para que quede con un brillo parecido al de las imágenes de fmed
-def make_gradient_v(width, height, h, k, a, b, theta):
-    # Precalculate constants
-    st, ct =  math.sin(theta), math.cos(theta)
-    aa, bb = a**2, b**2
-
-    # Generate (x,y) coordinate arrays
-    y,x = np.mgrid[-k:height-k,-h:width-h]
-    # Calculate the weight for each pixel
-    weights = (((x * ct + y * st) ** 2) / aa) + (((x * st - y * ct) ** 2) / bb)
-
-    return np.clip(1.0 - weights, 0, 1)
+##############################################################################################
+##############################################################################################
 
 
-def velocity(M, N, x, y):
+###############################################################################
+#				Corregir tracks
+###############################################################################
+def _make_coordinate_structure(x,y):
+	total_frames = check_matrix.shape(1)
+	total_particles = check_matrix.shape(0)
+
+	dataframe = pd.DataFrame(columns = str(range(total_frames)))
+	#Verifico que en x e y estén adentro
+	check_matrix = (x > 0) and (y > 0)
+	id = 1
+	for p in range(total_particles):
+		for f in range(total_frames):
+			if check_matrix[p, f] == 1: 
+
+		frames = np.nonzero(check_matrix[p, :])[0]
+		if frames.shape(0) > 0:
+			for pos in frames.shape[0] - 1:
+				if (frames[pos] - frames[pos + 1]) == 1:
+
+
+
+
+
+
+	return
+
+
+###############################################################################
+###############################################################################
+
+
+
+
+###############################################################################
+#				Velocidad
+###############################################################################
+
+def _velocity(M, N, x, y):
 	"""
 	Calcula la velocidad intantánea para cada partícula y cada cuadro de la secuencia.
 
@@ -130,8 +169,15 @@ def velocity(M, N, x, y):
 	        else: 
 	            vel[p, f] = None
 	return vel
+###############################################################################
+###############################################################################
 
-def total_distance(M, N, x, y):
+
+
+###############################################################################
+#				Distancia total
+###############################################################################
+def _total_distance(M, N, x, y):
 	"""
 	Calcula la distancia recorrida en toda la secuencia por cada particula (solo toma en cuenta cuando la partícula está en la imágen).
 
@@ -151,30 +197,13 @@ def total_distance(M, N, x, y):
 	        if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
 	            dis[p] = dis[p] + np.sqrt((x[p, f - 1] - x[p, f])**2 + (y[p, f - 1] - y[p, f])**2)
 	return dis
-
-def mean_velocity(vel):
-	"""
-	Calcula la velocidad media de cada partícula a partir de sus velocidades instantáneas.
-
-	Parametros:
-		vel (array(particles,frames)): velocidad intantánea para cada partícula y cada cuadro de la secuencia.
-
-	Retotorna:
-		vel_m (array(particles)): Velocidad media de cada particula.
-
-	"""
-	vel_m = np.zeros(vel.shape[0])
-	for p in range(vel.shape[0]):
-	    count = 0
-	    for f in range(vel.shape[1]):
-	        if vel[p, f] != None and (math.isnan(vel[p, f]) == False):
-	            vel_m[p] = vel_m[p] + vel[p, f]
-	            count = count + 1
-	    vel_m[p] = vel_m[p] / count
-	return vel_m
-
-
 ###############################################################################
+###############################################################################
+
+
+
+
+
 #    Creo imagen simulada
 poblaciones = []
 
@@ -209,7 +238,8 @@ poblacion = {
 
 poblaciones.append(poblacion)
 
-x, y= generate_sequence(frames = 60, sigma_r = 4, poblaciones = poblaciones)
+print(np.nonzero(np.array([0,0,0]))[0].shape)
+x, y = generate_sequence(512, 512, frames = 60, sigma_r = 4, poblaciones = poblaciones)
 
 
 #mean = np.array([10, 5])
