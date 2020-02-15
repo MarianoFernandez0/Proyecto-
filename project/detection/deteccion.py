@@ -12,7 +12,7 @@ def detect_particles(seg_img):
 		seg_img (array(M,N)): imágen segmentada.
 
 	Returns:
-		particles (df(id, coord_x, coord_y, total_pixels, mask)): Dataframe con todas las partículas.
+		particles (df(id, x, y, total_pixels, mask)): Dataframe con todas las partículas.
 	'''
 
 	M = seg_img.shape[0]
@@ -30,8 +30,8 @@ def detect_particles(seg_img):
 				pass
 			elif pd.isna(particles.loc[labeled_img[m,n]-1,['id']]).to_numpy():
 				particles.loc[labeled_img[m,n]-1,['id']] = labeled_img[m,n]
-				particles.loc[labeled_img[m,n]-1,['x']]= m
-				particles.loc[labeled_img[m,n]-1,['y']]= n
+				particles.loc[labeled_img[m,n]-1,['x']] = m
+				particles.loc[labeled_img[m,n]-1,['y']] = n
 				masks[m,n,labeled_img[m,n]-1] = 255
 				particles.loc[labeled_img[m,n]-1,['total_pixels']] = 1
 			else:
