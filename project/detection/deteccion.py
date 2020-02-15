@@ -40,6 +40,9 @@ def detect_particles(seg_img):
 				masks[m,n,labeled_img[m,n]-1] = 255
 				particles.loc[labeled_img[m,n]-1,['total_pixels']] += 1
 
+	for i in range(total_particles):
+		particles.loc[i,['mask']] = [masks[:,:,i]]
+		
 	#se divide la suma de las coordenadas sobre el total de pixeles para hayar el promedio
 	particles['x'] = particles['x']/particles['total_pixels']
 	particles['y'] = particles['y']/particles['total_pixels']

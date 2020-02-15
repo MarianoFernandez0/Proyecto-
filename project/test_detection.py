@@ -5,7 +5,7 @@ from SEGMENTATION.segmentation import segmentation
 from detection.deteccion import detect_particles, size_filter
 import tifffile
 
-sample_files = ['9.tif', '10.tif', '11.tif', '1 026.tif']
+sample_files = ['9.tif']#, '10.tif', '11.tif', '1 026.tif']
 for sample in sample_files:
 	tif = tifffile.TiffFile('Images_in/'+sample)
 	x_res = tif.pages[0].tags['XResolution']
