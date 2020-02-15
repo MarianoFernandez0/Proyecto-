@@ -62,6 +62,7 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 
 	for f in range(total_frames):
 <<<<<<< HEAD
+<<<<<<< HEAD
 		X_f = X[:, f]
 		Y_f = Y[:, f]
 		Y_aux = np.concatenate(Y_f, max_dist * np.ones(len(X_f)))
@@ -70,6 +71,13 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 		TP += len(Y_opt[Y_opt < max_dist]) 
 		FN += len(Y_opt[Y_opt == max_dist])
 		FP += len(Y_opt) - len(Y_opt[Y_opt != max_dist])
+=======
+		X_f = X[X.frames.astype(int)==f].to_numpy()
+		Y_f = Y[Y.frames.astype(int)==f].to_numpy()
+
+		Y_aux = np.concatenate((Y_f, (-1)*np.ones(X_f.shape)), axis=0)
+		Y_opt = get_optimal_assignment(X_f, Y_aux, max_dist)
+>>>>>>> 1f55badca4bdd4b3d9cdc3afa8509b3d3e915ef0
 =======
 		X_f = X[X.frames.astype(int)==f].to_numpy()
 		Y_f = Y[Y.frames.astype(int)==f].to_numpy()
