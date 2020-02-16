@@ -64,15 +64,15 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		vm, sigma_v, sigma_theta = poblacion['mean_velocity'], poblacion['sigma_v'], poblacion['sigma_theta']
 		x = np.zeros([particles, frames])
 		y = np.zeros([particles, frames])
-		intensity = np.random.normal(150, 60, particles)
+		intensity = np.random.normal(180, 40, particles)
 		final_sequence = np.zeros((M, N, frames))
 
 		x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
 		y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
 
 		d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
-		a = d[:, 0]
-		l = d[:, 1]
+		a = np.max(d, axis = 1)
+		l = np.min(d, axis = 1)
 
 		theta = np.random.uniform(0, 360, particles)       # Ángulo inicial 
 		v = np.random.normal(vm, 10, particles)            # Velocidad inicial
@@ -84,11 +84,11 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 
 		    image_aux = image.copy()
 		    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape,np.radians(theta[p]) - math.pi / 2)
-		        intensity[p] = intensity[p] + np.random.normal(0,10)
+		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape, np.radians(theta[p]) - math.pi / 2)
+		        intensity[p] = intensity[p] + np.random.normal(0,12)
 		        if intensity[p] > 0 and intensity[p] <= 255:
 		        	image_aux[rr,cc] = intensity[p]
-		        elif intensity[p] < 0:
+		        elif intensity[p] < 10:
 		        	image_aux[rr,cc] = 0
 		        elif intensity[p] > 255:
 		        	image_aux[rr,cc] = 255
@@ -246,5 +246,5 @@ poblacion = {
 
 poblaciones.append(poblacion)
 
-df = generate_sequence(512, 512, frames = 60, sigma_r = 4, poblaciones = poblaciones)
+df = generate_sequence(512, 512, frames = 70, sigma_r = 4, poblaciones = poblaciones)
 print(df)
