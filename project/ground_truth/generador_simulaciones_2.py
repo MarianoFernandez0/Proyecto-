@@ -20,13 +20,14 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 
 
 	OUTPUT:
-		traks: DataFrame de pandas que contiene el id de particula, posición en x, posición en y
+		traks: df de pandas que contiene el id de particula, posición en x, posición en y
 			   y la velocidad instantánea
-		traks_info: DataFrame que contiene el id de la particula, la distancia total y la velocidad media.
+		traks_info: df que contiene el id de la particula, la distancia total y la velocidad media.
 	'''
 	x, y = _make_sequence(M, N, frames, sigma_r, poblaciones)
+	df = _make_coordinate_structure(x, y)
 
-	return x, y
+	return df
 
 ##############################################################################################
 ##############################################################################################
@@ -114,28 +115,35 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 #				Corregir tracks
 ###############################################################################
 def _make_coordinate_structure(x,y):
-	total_frames = check_matrix.shape(1)
-	total_particles = check_matrix.shape(0)
+	check_matrix = (x > 0) * (y > 0)
+	total_frames = check_matrix.shape[1]
+	total_particles = check_matrix.shape[0]
 
-	dataframe = pd.DataFrame(columns = str(range(total_frames)))
-	#Verifico que en x e y estén adentro
-	check_matrix = (x > 0) and (y > 0)
-	id = 1
+	df = pd.DataFrame(columns = ['id_particle', 'x', 'y'])
+
+	id_par = 1
+	seguido = True
 	for p in range(total_particles):
-		for f in range(total_frames):
-			if check_matrix[p, f] == 1: 
+		for f in range(total_frames - 1):
+			last = total_frames - 1 == f + 1
+			if (not seguido) and check_matrix[p, f]:
+				id_par += 1
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f]}, ignore_index = True)
+				if check_matrix[p, f + 1]:
+					seguido = True
+			elif seguido and check_matrix[p, f]:
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f]}, ignore_index = True)
+				if not check_matrix[p, f + 1]:
+					seguido = False
+			if last and seguido:
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1]}, ignore_index = True)
+			elif last and check_matrix[p, f + 1]:
+				id_par += 1
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1]}, ignore_index = True)
+		id_par += 1	
+		seguido = False
 
-		frames = np.nonzero(check_matrix[p, :])[0]
-		if frames.shape(0) > 0:
-			for pos in frames.shape[0] - 1:
-				if (frames[pos] - frames[pos + 1]) == 1:
-
-
-
-
-
-
-	return
+	return df
 
 
 ###############################################################################
@@ -238,16 +246,5 @@ poblacion = {
 
 poblaciones.append(poblacion)
 
-print(np.nonzero(np.array([0,0,0]))[0].shape)
-x, y = generate_sequence(512, 512, frames = 60, sigma_r = 4, poblaciones = poblaciones)
-
-
-#mean = np.array([10, 5])
-#cov = np.array([[103.80124818, 21.61793687],
-#[ 21.61793687, 14.59060681]])
-#x, y= genetate_sequence(frames = 40, sigma_r = 10, particles = 100, mean = mean, cov = cov, add_to_sequence = True, vm = 7, sigma1 = 1, sigma2 = 2)
-
-#vel = velocity(x, y, 512, 512)
-#vel_m = mean_velocity(vel)
-#dis = total_distance(x, y, 512, 512)
-
+df = generate_sequence(512, 512, frames = 60, sigma_r = 4, poblaciones = poblaciones)
+print(df)
