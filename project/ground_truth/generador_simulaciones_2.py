@@ -43,22 +43,22 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		M (int): Largo de las imágenes (pixeles).
 		N (int): Ancho de las imágenes (pixeles).
 		frames (int): Cantidad de cuadros de la secuencia.
-		mean (array(2)): Media del largo y ancho de las partículas (pixeles).
-		cov (array(2,2)): Matriz de covarianza del largo y ancho de las partículas.	
-		vm (int): Velocidad media de las partículas (pixeles por cuadro).
-		sigma_v (int): Desviación estándar del cambio en velocidad de las particulas.
-		sigma_theta (int): Desviación estándar del cambio en el ángulo de las partículas.
-		particles (int): Cantidad de partículas a generar.
 		sigma_r (int): Desviación estándar del ruido a agregar en la imagen.
-		add_to_sequence (Boolean): Si es verdadero se agrega el grupo de partículas a una secuencia existente, en lugar de generar una nueva.
-
+		poblaciones: lista que contiene diccionarios con la información de cada población que se desea agregar
+		a la simulación.
+		El diccionario tiene la siguiente estructura:
+			mean (array(2)): Media del largo y ancho de las partículas (pixeles).
+			cov (array(2,2)): Matriz de covarianza del largo y ancho de las partículas.	
+			vm (int): Velocidad media de las partículas (pixeles por cuadro).
+			sigma_v (int): Desviación estándar del cambio en velocidad de las particulas.
+			sigma_theta (int): Desviación estándar del cambio en el ángulo de las partículas.
+			particles (int): Cantidad de partículas a generar.
 	Retotorna:
 		x (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 	'''
 
 	image = np.zeros([M,N], dtype = "uint8")
-
 	for poblacion in poblaciones:
 		particles, mean, cov = poblacion['particles'], poblacion['mean'], poblacion['cov'] 
 		vm, sigma_v, sigma_theta = poblacion['mean_velocity'], poblacion['sigma_v'], poblacion['sigma_theta']
@@ -115,6 +115,17 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 #				Corregir tracks
 ###############################################################################
 def _make_coordinate_structure(x,y):
+	'''
+	Toma como entrada una lista de coordenadas y devuelve en un DataFrame de pandas la información pasada.
+
+	INPUT:
+		x: x[particula, frames]. Matriz que contiene las coordenadas del eje horizontal.
+		y: y[particula, frames]. Matriz que contiene las coordenadas del eje vertical.
+	
+	OUTPUT:
+		DataFrame de la forma id_particula|x|y
+
+	'''
 	check_matrix = (x > 0) * (y > 0)
 	total_frames = check_matrix.shape[1]
 	total_particles = check_matrix.shape[0]
