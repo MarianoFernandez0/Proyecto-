@@ -102,7 +102,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		    v = np.abs(np.random.normal(v, sigma_v,particles))       
 		    theta = np.random.normal(theta, sigma_theta, particles)
 	#Guardo como tiff
-	with TiffWriter('output/salida.tif', bigtiff=True) as tif:
+	with TiffWriter('ground_truth/output/salida.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
 
@@ -221,11 +221,9 @@ def _total_distance(M, N, x, y):
 
 
 
-
-
+'''
 #    Creo imagen simulada
 poblaciones = []
-
 
 mean = np.array([20.7247332, 9.61818939])
 cov = np.array([[103.80124818, 21.61793687],
@@ -259,3 +257,4 @@ poblaciones.append(poblacion)
 
 df = generate_sequence(M = 512, N = 512, frames = 70, sigma_r = 4, poblaciones = poblaciones)
 print(df)
+'''
