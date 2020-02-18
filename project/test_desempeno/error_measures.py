@@ -37,8 +37,8 @@ def get_optimal_assignment(X, Y, max_dist):
 def error_measures(df_X, df_Y, M, N, max_dist):
 	'''
 	Parametros:
-		df_X (df(id, x, y, total_pixels, mask, frames)): Coordenadas ground truth de las partículas.
-		df_Y (df(id, x, y, total_pixels, mask, frames)): Coordenadas medidas de las partículas.
+		df_X (df(id, x, y, total_pixels, mask, frame)): Coordenadas ground truth de las partículas.
+		df_Y (df(id, x, y, total_pixels, mask, frame)): Coordenadas medidas de las partículas.
 		M (int): Ancho de la imagen.
 		N (int): Largo de la imagen.
 		max_dist (int): Máxima distancia entre dos partículas para considerar que no son la misma.
@@ -49,8 +49,8 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 		FP (int): Falsos Positivos
 		JSC (int): Índice de Jaccard
 	'''
-	X = df_X[['x','y','frames']]
-	Y = df_Y[['x','y','frames']]
+	X = df_X[['x','y','frame']]
+	Y = df_Y[['x','y','frame']]
 
 	X_fix = fix_particles_oustide(X,M,N)
 	
@@ -58,24 +58,16 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 	FN = 0
 	FP = 0
 
-	total_frames = int(X['frames'].max())
-
-	for f in range(total_frames):
-		X_f = X[:, f]
-		Y_f = Y[:, f]
-		Y_aux = np.concatenate(Y_f, max_dist * np.ones(len(X_f)))
-		Y_opt = get_optimal_assignment(X_f, Y_aux)
-
-		TP += len(Y_opt[Y_opt < max_dist]) 
-		FN += len(Y_opt[Y_opt == max_dist])
-		FP += len(Y_opt) - len(Y_opt[Y_opt != max_dist])
-		X_f = X[X.frames.astype(int)==f].to_numpy()
-		Y_f = Y[Y.frames.astype(int)==f].to_numpy()
+	total_frames = int(X['frame'].max())
+	
+	for f in range(total_frames+1):
+		X_f = X[X.frame.astype(int)==f].to_numpy()
+		Y_f = Y[Y.frame.astype(int)==f].to_numpy()
 
 		Y_aux = np.concatenate((Y_f, (-1)*np.ones(X_f.shape)), axis=0)
 		Y_opt = get_optimal_assignment(X_f, Y_aux, max_dist)
-		X_f = X[X.frames.astype(int)==f].to_numpy()
-		Y_f = Y[Y.frames.astype(int)==f].to_numpy()
+		X_f = X[X.frame.astype(int)==f].to_numpy()
+		Y_f = Y[Y.frame.astype(int)==f].to_numpy()
 
 		Y_aux = np.concatenate((Y_f, (-1)*np.ones(X_f.shape)), axis=0)
 		Y_opt = get_optimal_assignment(X_f, Y_aux, max_dist)
@@ -83,10 +75,7 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 		TP += len(Y_opt[Y_opt[:,0] != -1])
 		FN += len(Y_opt[Y_opt[:,0] == -1])
 		FP += len(Y_opt[:,0]) - len(Y_opt[Y_opt[:,0] != -1])
-		print(Y_opt)
-		print('TP, FN, FP', TP, FN, FP)
 	
-	print(TP, FN, FP)
 	JSC = TP/(TP + FN + FP)
 
 	return TP, FN, FP, JSC
@@ -109,8 +98,8 @@ for n in range(N):
 
 for i in range(30):
 	Y[i,:] = X[i,:]
-df_X = pd.DataFrame(X,columns = ['x','y','frames'])
-df_Y = pd.DataFrame(Y,columns = ['x','y','frames'])
+df_X = pd.DataFrame(X,columns = ['x','y','frame'])
+df_Y = pd.DataFrame(Y,columns = ['x','y','frame'])
 
 #print(df_X)
 #print(df_Y)

@@ -11,7 +11,7 @@ cov = np.array([[103.80124818, 21.61793687],
 				 [ 21.61793687, 14.59060681]])
 vm = 3
 poblacion = {
-	'particles' : 75,
+	'particles' : 25,
 	'mean' : mean,
 	'cov' : cov,
 	'mean_velocity' : vm,
@@ -26,7 +26,7 @@ cov = np.array([[103.80124818, 21.61793687],
 vm = 5
 
 poblacion = {
-	'particles' : 150,
+	'particles' : 50,
 	'mean' : mean,
 	'cov' : cov,
 	'mean_velocity' : vm,
@@ -39,8 +39,9 @@ poblaciones.append(poblacion)
 print('Now generating ground truth sequence')
 t0 = time.time()
 
-df_ground_truth = generate_sequence(M = 512, N = 512, frames = 5, sigma_r = 4, poblaciones = poblaciones)
+df_ground_truth = generate_sequence(M = 512, N = 512, frames = 2, sigma_r = 4, poblaciones = poblaciones)
 
+df_ground_truth_filtered = df_ground_truth[df_ground_truth.intensity > 50] 
 t1 = time.time()
 print('Finished running df_ground_truth in:', t1-t0)	
 
@@ -60,4 +61,12 @@ TP, FN, FP, JSC = error_measures(df_X=df_ground_truth, df_Y=df_detected, M=512, 
 t1 = time.time()
 print('Finished running error_measures in:', t1-t0)	
 
-print(df.head())
+print('True Positives =' ,TP)
+print('False Negatives = ', FN)
+print('False Positives = ', FP)
+print('JSC =', JSC)
+
+print('df_ground_truth:')
+print(df_ground_truth)
+print('df_detected:')
+print(df_detected)

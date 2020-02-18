@@ -147,10 +147,10 @@ def _make_coordinate_structure(x,y):
 				if not check_matrix[p, f + 1]:
 					seguido = False
 			if last and seguido:
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f+1}, ignore_index = True)
 			elif last and check_matrix[p, f + 1]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f+1}, ignore_index = True)
 		id_par += 1	
 		seguido = False
 
