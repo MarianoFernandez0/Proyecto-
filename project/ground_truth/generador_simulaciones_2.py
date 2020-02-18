@@ -24,8 +24,8 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 			   y la velocidad instantánea
 		traks_info: df que contiene el id de la particula, la distancia total y la velocidad media.
 	'''
-	x, y = _make_sequence(M, N, frames, sigma_r, poblaciones)
-	df = _make_coordinate_structure(x, y)
+	x, y, intensity = _make_sequence(M, N, frames, sigma_r, poblaciones)
+	df = _make_coordinate_structure(x, y, intensity)
 
 	return df
 
@@ -64,7 +64,8 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		vm, sigma_v, sigma_theta = poblacion['mean_velocity'], poblacion['sigma_v'], poblacion['sigma_theta']
 		x = np.zeros([particles, frames])
 		y = np.zeros([particles, frames])
-		intensity = np.random.normal(180, 40, particles)
+		intensity = np.zeros([particles, frames])
+		intensity[:, 0] = np.random.normal(200, 40, particles)
 		final_sequence = np.zeros((M, N, frames))
 
 		x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
@@ -85,16 +86,17 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		    image_aux = image.copy()
 		    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
 		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape, np.radians(theta[p]) - math.pi / 2)
-		        intensity[p] = intensity[p] + np.random.normal(0,12)
-		        if intensity[p] > 0 and intensity[p] <= 255:
-		        	image_aux[rr,cc] = intensity[p]
-		        elif intensity[p] < 10:
+		        intensity[p, f] = intensity[p, f] + np.random.normal(0,12)
+		        if intensity[p, f] > 0 and intensity[p, f] <= 255:
+		        	image_aux[rr,cc] = intensity[p, f]
+		        elif intensity[p, f] < 0:
 		        	image_aux[rr,cc] = 0
-		        elif intensity[p] > 255:
+		        elif intensity[p, f] > 255:
 		        	image_aux[rr,cc] = 255
         
 		    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
 		    blured = gaussian(image_aux, 6, mode='reflect')
+		    np.seterr(divide='ignore', invalid='ignore')
 		    image_normalized = np.uint8(np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255))) 
 		    final_sequence[:, :, f] = np.uint8(image_normalized)
 		    
@@ -106,7 +108,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
 
-	return x, y
+	return x, y, np.uint8(intensity)
 ##############################################################################################
 ##############################################################################################
 
@@ -114,7 +116,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 ###############################################################################
 #				Corregir tracks
 ###############################################################################
-def _make_coordinate_structure(x,y):
+def _make_coordinate_structure(x,y, intensity):
 	'''
 	Toma como entrada una lista de coordenadas y devuelve en un DataFrame de pandas la información pasada.
 
@@ -130,7 +132,7 @@ def _make_coordinate_structure(x,y):
 	total_frames = check_matrix.shape[1]
 	total_particles = check_matrix.shape[0]
 
-	df = pd.DataFrame(columns = ['id_particle', 'x', 'y', 'frame'])
+	df = pd.DataFrame(columns = ['id_particle', 'x', 'y', 'frame', 'intensity'])
 
 	id_par = 1
 	seguido = True
@@ -139,18 +141,18 @@ def _make_coordinate_structure(x,y):
 			last = total_frames - 1 == f + 1
 			if (not seguido) and check_matrix[p, f]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f, 'intensity': intensity[p, f]}, ignore_index = True)
 				if check_matrix[p, f + 1]:
 					seguido = True
 			elif seguido and check_matrix[p, f]:
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f, 'intensity': intensity[p, f]}, ignore_index = True)
 				if not check_matrix[p, f + 1]:
 					seguido = False
 			if last and seguido:
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f + 1, 'intensity': intensity[p, f + 1]}, ignore_index = True)
 			elif last and check_matrix[p, f + 1]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f + 1, 'intensity': intensity[p, f + 1]}, ignore_index = True)
 		id_par += 1	
 		seguido = False
 
