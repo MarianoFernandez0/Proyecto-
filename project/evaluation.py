@@ -7,8 +7,7 @@ import numpy as np
 import skimage.color as color
 
 def evaluation (tif):
-
-'''
+	'''
 	Entrada: .tif 
 	Salida: dataframe
 
@@ -17,13 +16,13 @@ def evaluation (tif):
 	En las columnas x, y se guardan las posiciones de las particulas y en frame el valor correspondiente del frame en el cual
 	 aparecen la particula, luego de aplicar la función segmentation y detect_particles.
 	En las columnas ctcf y mean_gray_value se guardan los valores correspondientes devueltos por la función fluorescence.
-'''
+	'''
 
 	sequence = tif.asarray()
 
 	data = pd.DataFrame(columns = ['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
 
-	for nro_frame in range (2):
+	for nro_frame in range (sequence.shape[0]):
 		image = sequence[nro_frame,:,:]
 		seg_img = segmentation(image)
 		particles = detect_particles(seg_img)
