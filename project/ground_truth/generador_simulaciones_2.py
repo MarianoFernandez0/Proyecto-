@@ -130,7 +130,7 @@ def _make_coordinate_structure(x,y):
 	total_frames = check_matrix.shape[1]
 	total_particles = check_matrix.shape[0]
 
-	df = pd.DataFrame(columns = ['id_particle', 'x', 'y'])
+	df = pd.DataFrame(columns = ['id_particle', 'x', 'y', 'frame'])
 
 	id_par = 1
 	seguido = True
@@ -139,18 +139,18 @@ def _make_coordinate_structure(x,y):
 			last = total_frames - 1 == f + 1
 			if (not seguido) and check_matrix[p, f]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f]}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f}, ignore_index = True)
 				if check_matrix[p, f + 1]:
 					seguido = True
 			elif seguido and check_matrix[p, f]:
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f]}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f}, ignore_index = True)
 				if not check_matrix[p, f + 1]:
 					seguido = False
 			if last and seguido:
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1]}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
 			elif last and check_matrix[p, f + 1]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1]}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f}, ignore_index = True)
 		id_par += 1	
 		seguido = False
 
