@@ -10,4 +10,4 @@ y = np.array([
 	[-2, 2, 4, 6, -5, 1]
 	])
 
-print(_make_coordinate_structure(x, y))
+print(_make_coordinate_structure(x, y, np.zeros(x.shape)))

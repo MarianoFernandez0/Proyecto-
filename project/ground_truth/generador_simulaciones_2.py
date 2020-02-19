@@ -136,7 +136,7 @@ def _make_coordinate_structure(x,y, intensity):
 	df = pd.DataFrame(columns = ['id_particle', 'x', 'y', 'frame', 'intensity'])
 
 	id_par = 1
-	seguido = True
+	seguido = False
 	for p in range(total_particles):
 		for f in range(total_frames - 1):
 			last = total_frames - 1 == f + 1
@@ -260,5 +260,5 @@ poblacion = {
 
 poblaciones.append(poblacion)
 
-df = generate_sequence(M = 512, N = 512, frames = 70, sigma_r = 4, poblaciones = poblaciones)
+df = generate_sequence(M = 512, N = 512, frames = 10, sigma_r = 4, poblaciones = poblaciones)
 print(df)
