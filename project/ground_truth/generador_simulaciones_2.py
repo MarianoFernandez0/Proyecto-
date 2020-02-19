@@ -25,7 +25,7 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 		traks_info: df que contiene el id de la particula, la distancia total y la velocidad media.
 	'''
 	x, y, intensity = _make_sequence(M, N, frames, sigma_r, poblaciones)
-	df = _make_coordinate_structure(x, y, intensity)
+	df = _make_coordinate_structure(x, y, intensity, M, N)
 
 	return df
 
@@ -68,8 +68,8 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		intensity[:, 0] = np.random.normal(200, 40, particles)
 		final_sequence = np.zeros((M, N, frames))
 
-		x[:, 0] = np.random.uniform(-M, 2 * M, particles)                # Posición inicial de las partículas
-		y[:, 0] = np.random.uniform(-N, 2 * N, particles)    
+		x[:, 0] = np.random.uniform(-N, 2 * N, particles)                # Posición inicial de las partículas
+		y[:, 0] = np.random.uniform(-M, 2 * M, particles)    
 
 		d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
 		a = np.max(d, axis = 1)
@@ -117,7 +117,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 ###############################################################################
 #				Corregir tracks
 ###############################################################################
-def _make_coordinate_structure(x,y, intensity):
+def _make_coordinate_structure(x, y, intensity, M, N):
 	'''
 	Toma como entrada una lista de coordenadas y devuelve en un DataFrame de pandas la información pasada.
 
@@ -129,7 +129,7 @@ def _make_coordinate_structure(x,y, intensity):
 		DataFrame de la forma id_particula|x|y
 
 	'''
-	check_matrix = (x > 0) * (y > 0)
+	check_matrix = (x > 0) * (y > 0) * (x < N) * (y < M) 
 	total_frames = check_matrix.shape[1]
 	total_particles = check_matrix.shape[0]
 
@@ -261,4 +261,3 @@ poblacion = {
 poblaciones.append(poblacion)
 
 df = generate_sequence(M = 512, N = 512, frames = 10, sigma_r = 4, poblaciones = poblaciones)
-print(df)
