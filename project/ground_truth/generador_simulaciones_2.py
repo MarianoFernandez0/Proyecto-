@@ -98,6 +98,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		    blured = gaussian(image_aux, 6, mode='reflect')
 		    np.seterr(divide='ignore', invalid='ignore')
 		    image_normalized = np.uint8(np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255))) 
+		    intensity = np.uint8(np.round(((intensity - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
 		    final_sequence[:, :, f] = np.uint8(image_normalized)
 		    
 		    #Próximo paso
@@ -108,7 +109,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
 
-	return x, y, np.uint8(intensity)
+	return x, y, intensity
 ##############################################################################################
 ##############################################################################################
 
