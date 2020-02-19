@@ -49,32 +49,28 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 		FP (int): Falsos Positivos
 		JSC (int): Índice de Jaccard
 	'''
-	X = df_X[['x','y','frame']]
-	Y = df_Y[['x','y','frame']]
 
-	X_fix = fix_particles_oustide(X,M,N)
-	
+	#X_fix = fix_particles_oustide(df_X,M,N)
+	#df_X = X_fix
 	TP = 0
 	FN = 0
 	FP = 0
 
-	total_frames = int(X['frame'].max())
+	total_frames = int(df_X['frame'].max())
 	
 	for f in range(total_frames+1):
-		X_f = X[X.frame.astype(int)==f].to_numpy()
-		Y_f = Y[Y.frame.astype(int)==f].to_numpy()
+		X_f = df_X[df_X.frame.astype(int)==f]
+		Y_f = df_Y[df_Y.frame.astype(int)==f]
 
-		Y_aux = np.concatenate((Y_f, (-1)*np.ones(X_f.shape)), axis=0)
-		Y_opt = get_optimal_assignment(X_f, Y_aux, max_dist)
-		X_f = X[X.frame.astype(int)==f].to_numpy()
-		Y_f = Y[Y.frame.astype(int)==f].to_numpy()
+		X_np = df_X[['x', 'y', 'frame']].to_numpy()
+		Y_np = df_Y[['x', 'y', 'frame']].to_numpy()
 
-		Y_aux = np.concatenate((Y_f, (-1)*np.ones(X_f.shape)), axis=0)
-		Y_opt = get_optimal_assignment(X_f, Y_aux, max_dist)
+		Y_aux = np.concatenate((Y_np, (-1)*np.ones(X_np.shape)), axis=0)
+		Y_opt = get_optimal_assignment(X_np, Y_aux, max_dist)
 
 		TP += len(Y_opt[Y_opt[:,0] != -1])
 		FN += len(Y_opt[Y_opt[:,0] == -1])
-		FP += len(Y_opt[:,0]) - len(Y_opt[Y_opt[:,0] != -1])
+		FP += len(Y_np[:,0]) - len(Y_opt[Y_opt[:,0] != -1])
 	
 	JSC = TP/(TP + FN + FP)
 
