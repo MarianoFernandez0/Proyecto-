@@ -34,10 +34,10 @@ def get_optimal_assignment(X, Y, max_dist):
 	return Y_opt
 
 
-def error_measures(df_X, df_Y, M, N, max_dist):
+def error_measures(ground_truth_df, detected_df, M, N, max_dist):
 	'''
 	Parametros:
-		df_X (df(id, x, y, total_pixels, mask, frame)): Coordenadas ground truth de las partículas.
+		ground_truth_df (df(id, x, y, total_pixels, mask, frame)): Coordenadas ground truth de las partículas.
 		df_Y (df(id, x, y, total_pixels, mask, frame)): Coordenadas medidas de las partículas.
 		M (int): Ancho de la imagen.
 		N (int): Largo de la imagen.
@@ -50,27 +50,25 @@ def error_measures(df_X, df_Y, M, N, max_dist):
 		JSC (int): Índice de Jaccard
 	'''
 
-	#X_fix = fix_particles_oustide(df_X,M,N)
-	#df_X = X_fix
 	TP = 0
 	FN = 0
 	FP = 0
 
-	total_frames = int(df_X['frame'].max())
+	total_frames = int(ground_truth_df['frame'].max())
 	
 	for f in range(total_frames+1):
-		X_f = df_X[df_X.frame.astype(int)==f]
-		Y_f = df_Y[df_Y.frame.astype(int)==f]
+		ground_truth_f_df = ground_truth_df[ground_truth_df.frame.astype(int)==f]
+		detected_f_df = detected_df[detected_df.frame.astype(int)==f]
+		
+		ground_truth_np = ground_truth_f_df[['x', 'y', 'frame']].to_numpy()
+		detected_np = detected_f_df[['x', 'y', 'frame']].to_numpy()
 
-		X_np = df_X[['x', 'y', 'frame']].to_numpy()
-		Y_np = df_Y[['x', 'y', 'frame']].to_numpy()
+		detected_extended_np = np.concatenate((detected_np, (-1)*np.ones(ground_truth_np.shape)), axis=0)
+		detected_opt_np = get_optimal_assignment(ground_truth_np, detected_extended_np, max_dist)
 
-		Y_aux = np.concatenate((Y_np, (-1)*np.ones(X_np.shape)), axis=0)
-		Y_opt = get_optimal_assignment(X_np, Y_aux, max_dist)
-
-		TP += len(Y_opt[Y_opt[:,0] != -1])
-		FN += len(Y_opt[Y_opt[:,0] == -1])
-		FP += len(Y_np[:,0]) - len(Y_opt[Y_opt[:,0] != -1])
+		TP += len(detected_opt_np[detected_opt_np[:,0] != -1])
+		FN += len(detected_opt_np[detected_opt_np[:,0] == -1])
+		FP += len(detected_np[:,0]) - len(detected_opt_np[detected_opt_np[:,0] != -1])
 	
 	JSC = TP/(TP + FN + FP)
 
