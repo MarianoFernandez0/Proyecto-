@@ -67,6 +67,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		intensity = np.zeros([particles, frames])
 		intensity[:, 0] = np.random.normal(200, 40, particles)
 		final_sequence = np.zeros((M, N, frames))
+		final_sequence_segmented = np.zeros((M, N, frames))
 
 		x[:, 0] = np.random.uniform(-N, 2 * N, particles)                # Posición inicial de las partículas
 		y[:, 0] = np.random.uniform(-M, 2 * M, particles)    
@@ -99,15 +100,20 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		    np.seterr(divide='ignore', invalid='ignore')
 		    image_normalized = np.uint8(np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255))) 
 		    intensity = np.uint8(np.round(((intensity - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
+		    final_sequence_segmented[:, :, f] = np.uint8(image_aux) 
 		    final_sequence[:, :, f] = np.uint8(image_normalized)
 		    
 		    #Próximo paso
 		    v = np.abs(np.random.normal(v, sigma_v,particles))       
 		    theta = np.random.normal(theta, sigma_theta, particles)
 	#Guardo como tiff
-	with TiffWriter('ground_truth/output/salida.tif', bigtiff=True) as tif:
+	with TiffWriter('./output/salida.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
+
+	with TiffWriter('./output/salida_segmentada.tif', bigtiff=True) as tif:
+		for frame in range(frames):
+			tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M,N))
 
 	return x, y, intensity
 ##############################################################################################
@@ -224,7 +230,7 @@ def _total_distance(M, N, x, y):
 
 
 
-'''
+
 #    Creo imagen simulada
 poblaciones = []
 
@@ -261,4 +267,4 @@ poblaciones.append(poblacion)
 df = generate_sequence(M = 512, N = 512, frames = 10, sigma_r = 4, poblaciones = poblaciones)
 
 print(df)
-'''
+

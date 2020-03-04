@@ -12,7 +12,7 @@ import math
 ###############################################################################
 #			Función principal del generador de secuencias
 ###############################################################################
-def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = []):
+def generate_sequence(M=512, N=512, frames=40, sigma_r=1, poblaciones=[]):
 	'''
 	Función principal del módulo que guarda en el directorio "ouput" la secuencia generada como
 	un tipo de archivo tff.
@@ -28,6 +28,7 @@ def generate_sequence(M = 512, N = 512, frames = 40, sigma_r = 1, poblaciones = 
 	df = _make_coordinate_structure(x, y, intensity, M, N)
 
 	return df
+
 
 ##############################################################################################
 ##############################################################################################
@@ -48,7 +49,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		a la simulación.
 		El diccionario tiene la siguiente estructura:
 			mean (array(2)): Media del largo y ancho de las partículas (pixeles).
-			cov (array(2,2)): Matriz de covarianza del largo y ancho de las partículas.	
+			cov (array(2,2)): Matriz de covarianza del largo y ancho de las partículas.
 			vm (int): Velocidad media de las partículas (pixeles por cuadro).
 			sigma_v (int): Desviación estándar del cambio en velocidad de las particulas.
 			sigma_theta (int): Desviación estándar del cambio en el ángulo de las partículas.
@@ -58,58 +59,74 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
 	'''
 
-	image = np.zeros([M,N], dtype = "uint8")
+	image = np.zeros([M, N], dtype="uint8")
 	for poblacion in poblaciones:
-		particles, mean, cov = poblacion['particles'], poblacion['mean'], poblacion['cov'] 
+		particles, mean, cov = poblacion['particles'], poblacion['mean'], poblacion['cov']
 		vm, sigma_v, sigma_theta = poblacion['mean_velocity'], poblacion['sigma_v'], poblacion['sigma_theta']
 		x = np.zeros([particles, frames])
 		y = np.zeros([particles, frames])
 		intensity = np.zeros([particles, frames])
-		intensity[:, 0] = np.random.normal(200, 40, particles)
+		intensity[:, 0] = np.random.normal(150, 50, particles)
+		for f in range(1,frames):
+			intensity[:,f] = intensity[:,0]
 		final_sequence = np.zeros((M, N, frames))
+		final_sequence_segmented = np.zeros((M, N, frames))
 
-		x[:, 0] = np.random.uniform(-N, 2 * N, particles)                # Posición inicial de las partículas
-		y[:, 0] = np.random.uniform(-M, 2 * M, particles)    
+		x[:, 0] = np.random.uniform(-N, 2 * N, particles)  # Posición inicial de las partículas
+		y[:, 0] = np.random.uniform(-M, 2 * M, particles)
 
-		d = np.random.multivariate_normal(mean, cov, particles)       # Se inicializa el tamaño de las partículas
-		a = np.max(d, axis = 1)
-		l = np.min(d, axis = 1)
+		d = np.random.multivariate_normal(mean, cov, particles)  # Se inicializa el tamaño de las partículas
+		a = np.max(d, axis=1)
+		l = np.min(d, axis=1)
 
-		theta = np.random.uniform(0, 360, particles)       # Ángulo inicial 
-		v = np.random.normal(vm, 10, particles)            # Velocidad inicial
+		theta = np.random.uniform(0, 360, particles)  # Ángulo inicial
+		v = np.random.normal(vm, 10, particles)  # Velocidad inicial
 
-		for f in range(frames):                          # Se crean los cuadros de a uno 
-		    if f > 0:
-		        x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
-		        y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
+		for f in range(frames):  # Se crean los cuadros de a uno
+			if f > 0:
+				x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
+				y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
 
-		    image_aux = image.copy()
-		    for p in range(particles):                  					# Se agregan las partículas a la imágen de a una
-		        rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape, np.radians(theta[p]) - math.pi / 2)
-		        intensity[p, f] = intensity[p, f] + np.random.normal(0,12)
-		        if intensity[p, f] > 0 and intensity[p, f] <= 255:
-		        	image_aux[rr,cc] = intensity[p, f]
-		        elif intensity[p, f] < 0:
-		        	image_aux[rr,cc] = 0
-		        elif intensity[p, f] > 255:
-		        	image_aux[rr,cc] = 255
-        
-		    #Agrego blur al frame para que no sean drásticos los cambios de intesidad
-		    blured = gaussian(image_aux, 6, mode='reflect')
-		    np.seterr(divide='ignore', invalid='ignore')
-		    image_normalized = np.uint8(np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255))) 
-		    intensity = np.uint8(np.round(((intensity - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
-		    final_sequence[:, :, f] = np.uint8(image_normalized)
-		    
-		    #Próximo paso
-		    v = np.abs(np.random.normal(v, sigma_v,particles))       
-		    theta = np.random.normal(theta, sigma_theta, particles)
-	#Guardo como tiff
-	with TiffWriter('ground_truth/output/salida.tif', bigtiff=True) as tif:
+			image_aux = image.copy()
+			image_segmented = image.copy()
+			for p in range(particles):  # Se agregan las partículas a la imágen de a una
+				rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape, np.radians(theta[p]) - math.pi / 2)
+				intensity[p, f] = np.uint8(intensity[p, f] + np.random.normal(0, 7))
+				if intensity[p, f] > 0 and intensity[p, f] <= 255:
+					image_aux[rr, cc] = intensity[p, f]
+					image_segmented[rr, cc] = 255
+				if intensity[p, f] <= 0:
+					image_aux[rr, cc] = 0
+					intensity[p, f] = 0
+				if intensity[p, f] > 255:
+					image_aux[rr, cc] = 255
+					intensity[p, f] = 255
+
+			# Agrego blur al frame para que no sean drásticos los cambios de intesidad
+			blured = gaussian(image_aux, 6, mode='reflect')
+			# np.seterr(divide='ignore', invalid='ignore')
+			image_normalized = np.uint16(
+				np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
+			intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
+			final_sequence_segmented[:, :, f] = np.uint8(image_segmented)
+			final_sequence[:, :, f] = np.uint8(image_normalized)
+
+			# Próximo paso
+			v = np.abs(np.random.normal(v, sigma_v, particles))
+			theta = np.random.normal(theta, sigma_theta, particles)
+	
+	# Guardo como tiff
+	with TiffWriter('./output/sal.tif', bigtiff=True) as tif:
 		for frame in range(frames):
-			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M,N))
+			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
 
-	return x, y, intensity
+	with TiffWriter('./output/salida_segmentada.tif', bigtiff=True) as tif:
+		for frame in range(frames):
+			tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
+
+	return np.uint32(x), np.uint32(y), intensity
+
+
 ##############################################################################################
 ##############################################################################################
 
@@ -118,22 +135,22 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 #				Corregir tracks
 ###############################################################################
 def _make_coordinate_structure(x, y, intensity, M, N):
-	'''
+	"""
 	Toma como entrada una lista de coordenadas y devuelve en un DataFrame de pandas la información pasada.
 
 	INPUT:
 		x: x[particula, frames]. Matriz que contiene las coordenadas del eje horizontal.
 		y: y[particula, frames]. Matriz que contiene las coordenadas del eje vertical.
-	
+
 	OUTPUT:
 		DataFrame de la forma id_particula|x|y
 
-	'''
-	check_matrix = (x > 0) * (y > 0) * (x < N) * (y < M) 
+	"""
+	check_matrix = (x > 0) * (y > 0) * (x < N) * (y < M)
 	total_frames = check_matrix.shape[1]
 	total_particles = check_matrix.shape[0]
 
-	df = pd.DataFrame(columns = ['id_particle', 'x', 'y', 'frame', 'intensity'])
+	df = pd.DataFrame(columns=['id_particle', 'x', 'y', 'frame', 'intensity'])
 
 	id_par = 1
 	seguido = False
@@ -142,19 +159,25 @@ def _make_coordinate_structure(x, y, intensity, M, N):
 			last = total_frames - 1 == f + 1
 			if (not seguido) and check_matrix[p, f]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f, 'intensity': intensity[p, f]}, ignore_index = True)
+				df = df.append(
+					{'id_particle': id_par, 'x': x[p, f], 'y': y[p, f], 'frame': f, 'intensity': intensity[p, f]},
+					ignore_index=True)
 				if check_matrix[p, f + 1]:
 					seguido = True
 			elif seguido and check_matrix[p, f]:
-				df = df.append({'id_particle': id_par, 'x': x[p, f], 'y': y[p,f], 'frame': f, 'intensity': intensity[p, f]}, ignore_index = True)
+				df = df.append(
+					{'id_particle': id_par, 'x': x[p, f], 'y': y[p, f], 'frame': f, 'intensity': intensity[p, f]},
+					ignore_index=True)
 				if not check_matrix[p, f + 1]:
 					seguido = False
 			if last and seguido:
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f + 1, 'intensity': intensity[p, f + 1]}, ignore_index = True)
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p, f + 1], 'frame': f + 1,
+								'intensity': intensity[p, f + 1]}, ignore_index=True)
 			elif last and check_matrix[p, f + 1]:
 				id_par += 1
-				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p,f + 1], 'frame': f + 1, 'intensity': intensity[p, f + 1]}, ignore_index = True)
-		id_par += 1	
+				df = df.append({'id_particle': id_par, 'x': x[p, f + 1], 'y': y[p, f + 1], 'frame': f + 1,
+								'intensity': intensity[p, f + 1]}, ignore_index=True)
+		id_par += 1
 		seguido = False
 
 	return df
@@ -162,8 +185,6 @@ def _make_coordinate_structure(x, y, intensity, M, N):
 
 ###############################################################################
 ###############################################################################
-
-
 
 
 ###############################################################################
@@ -185,15 +206,16 @@ def _velocity(M, N, x, y):
 	"""
 	vel = np.zeros(x.shape)
 	for p in range(x.shape[0]):
-	    for f in range(1,x.shape[1]):
-	        if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
-	            vel[p, f] = np.sqrt((x[p, f - 1] - x[p, f])**2 + (y[p, f - 1] - y[p, f])**2)
-	        else: 
-	            vel[p, f] = None
+		for f in range(1, x.shape[1]):
+			if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
+				vel[p, f] = np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
+			else:
+				vel[p, f] = None
 	return vel
-###############################################################################
-###############################################################################
 
+
+###############################################################################
+###############################################################################
 
 
 ###############################################################################
@@ -215,50 +237,49 @@ def _total_distance(M, N, x, y):
 	"""
 	dis = np.zeros(x.shape[0])
 	for p in range(x.shape[0]):
-	    for f in range(1, x.shape[1]):
-	        if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
-	            dis[p] = dis[p] + np.sqrt((x[p, f - 1] - x[p, f])**2 + (y[p, f - 1] - y[p, f])**2)
+		for f in range(1, x.shape[1]):
+			if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
+				dis[p] = dis[p] + np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
 	return dis
+
+
 ###############################################################################
 ###############################################################################
 
 
-
-'''
-#    Creo imagen simulada
-poblaciones = []
+#	Creo imagen simulada
+populations = []
 
 mean = np.array([20.7247332, 9.61818939])
 cov = np.array([[103.80124818, 21.61793687],
-				 [ 21.61793687, 14.59060681]])
+				[21.61793687, 14.59060681]])
 vm = 3
-poblacion = {
-	'particles' : 75,
-	'mean' : mean,
-	'cov' : cov,
-	'mean_velocity' : vm,
-	'sigma_v' : vm * 0.1,
-	'sigma_theta' : 10
+population = {
+	'particles': 75,
+	'mean': mean,
+	'cov': cov,
+	'mean_velocity': vm,
+	'sigma_v': vm * 0.1,
+	'sigma_theta': 10
 }
-poblaciones.append(poblacion)
+populations.append(population)
 
 mean = np.array([15, 6])
 cov = np.array([[103.80124818, 21.61793687],
-[ 21.61793687, 14.59060681]])
+				[21.61793687, 14.59060681]])
 vm = 5
 
-poblacion = {
-	'particles' : 150,
-	'mean' : mean,
-	'cov' : cov,
-	'mean_velocity' : vm,
-	'sigma_v' : vm * 0.2,
-	'sigma_theta' : 15
+population = {
+	'particles': 150,
+	'mean': mean,
+	'cov': cov,
+	'mean_velocity': vm,
+	'sigma_v': vm * 0.2,
+	'sigma_theta': 15
 }
 
-poblaciones.append(poblacion)
+populations.append(population)
 
-df = generate_sequence(M = 512, N = 512, frames = 10, sigma_r = 4, poblaciones = poblaciones)
+df = generate_sequence(M=512, N=512, frames=30, sigma_r=4, poblaciones=populations)
 
 print(df)
-'''
