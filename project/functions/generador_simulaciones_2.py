@@ -7,7 +7,7 @@ from skimage.external.tifffile import TiffWriter
 import numpy as np
 import pandas as pd
 import math
-
+import cv2
 
 ###############################################################################
 #			Función principal del generador de secuencias
@@ -67,8 +67,6 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 		y = np.zeros([particles, frames])
 		intensity = np.zeros([particles, frames])
 		intensity[:, 0] = np.random.normal(150, 50, particles)
-		for f in range(1,frames):
-			intensity[:,f] = intensity[:,0]
 		final_sequence = np.zeros((M, N, frames))
 		final_sequence_segmented = np.zeros((M, N, frames))
 
@@ -91,30 +89,33 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 			image_segmented = image.copy()
 			for p in range(particles):  # Se agregan las partículas a la imágen de a una
 				rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image.shape, np.radians(theta[p]) - math.pi / 2)
-				intensity[p, f] = np.uint8(intensity[p, f] + np.random.normal(0, 7))
+				if f > 0:
+					intensity[p, f] = np.uint8(intensity[p, f - 1] + np.random.normal(0, 5))
 				if intensity[p, f] > 0 and intensity[p, f] <= 255:
-					image_aux[rr, cc] = intensity[p, f]
+				#	image_aux[rr, cc] = np.where(image_aux[rr, cc]<intensity[p, f],intensity[p, f], image_aux[rr, cc])
 					image_segmented[rr, cc] = 255
 				if intensity[p, f] <= 0:
 					image_aux[rr, cc] = 0
 					intensity[p, f] = 0
+				#	image_aux[rr, cc] = np.where(image_aux[rr, cc]<intensity[p, f],intensity[p, f], image_aux[rr, cc])
 				if intensity[p, f] > 255:
-					image_aux[rr, cc] = 255
 					intensity[p, f] = 255
+				image_aux[rr, cc] = np.where(image_aux[rr, cc]<intensity[p, f],intensity[p, f], image_aux[rr, cc])
+
 
 			# Agrego blur al frame para que no sean drásticos los cambios de intesidad
 			blured = gaussian(image_aux, 6, mode='reflect')
+			#blured = cv2.blur(image_aux, (10,10))
 			# np.seterr(divide='ignore', invalid='ignore')
-			image_normalized = np.uint16(
+			image_normalized = np.uint8(
 				np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
-			intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
+			intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(intensity[:, f])) / (np.max(intensity[:, f]) - np.min(intensity[:, f])) * 255)))
 			final_sequence_segmented[:, :, f] = np.uint8(image_segmented)
 			final_sequence[:, :, f] = np.uint8(image_normalized)
-
 			# Próximo paso
 			v = np.abs(np.random.normal(v, sigma_v, particles))
 			theta = np.random.normal(theta, sigma_theta, particles)
-	
+	print(intensity[0,:10])
 	# Guardo como tiff
 	with TiffWriter('./output/sal.tif', bigtiff=True) as tif:
 		for frame in range(frames):
