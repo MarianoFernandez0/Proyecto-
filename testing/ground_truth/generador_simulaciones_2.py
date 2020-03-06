@@ -117,7 +117,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 			theta = np.random.normal(theta, sigma_theta, particles)
 	print(intensity[0,:10])
 	# Guardo como tiff
-	with TiffWriter('./output/sal.tif', bigtiff=True) as tif:
+	with TiffWriter('output/sal.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
 
