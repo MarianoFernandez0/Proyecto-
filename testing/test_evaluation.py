@@ -42,7 +42,7 @@ print('Now generating ground truth sequence')
 t0 = time.time()
 
 ground_truth = generate_sequence(M = 512, N = 512, frames = 2, sigma_r = 4, poblaciones = poblaciones)
-ground_truth_filtered = ground_truth[ground_truth.intensity > 50] 
+ground_truth_filtered = ground_truth[ground_truth.intensity > 150]
 
 t1 = time.time()
 print('Finished running df_ground_truth in:', t1-t0)	
@@ -71,7 +71,9 @@ print('Particles in ground_truth:', ground_truth_filtered.shape[0])
 print('Particles in detected:', detected.shape[0])
 
 print('ground_truth_filtered:')
-print(ground_truth_filtered)
+print(ground_truth_filtered[ground_truth_filtered['frame']==0])
+print(ground_truth_filtered[ground_truth_filtered['frame']==1])
+
 print('detected:')
 print(detected)
 

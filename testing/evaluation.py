@@ -1,4 +1,4 @@
-from SEGMENTATION.segmentation import segmentation
+from segmentation.segmentation import segmentation
 from detection.deteccion import detect_particles, size_filter
 from fluorescence.fluorescence import fluorescence
 

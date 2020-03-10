@@ -1,7 +1,7 @@
 from skimage.io import imread, imsave
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
-from SEGMENTATION.segmentation import segmentation
+from segmentation.segmentation import segmentation
 from detection.deteccion import detect_particles, size_filter
 import tifffile
 
