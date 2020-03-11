@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 import skimage.color as color
 
+import time
+
 def evaluation (tif):
 	'''
 	Entrada: .tif 
@@ -20,22 +22,19 @@ def evaluation (tif):
 
 	sequence = tif.asarray()
 
-	data = pd.DataFrame(columns = ['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
+	data = pd.DataFrame(columns=['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
 
-	for nro_frame in range (sequence.shape[0]):
+	for nro_frame in range(sequence.shape[0]):
 		image = sequence[nro_frame,:,:]
 		seg_img = segmentation(image)
 		particles = detect_particles(seg_img)
-
 		image_bw = color.rgb2gray(image)
 		grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
-
 		for index, row in particles.iterrows():
-			#fluorescencia
+			# fluorescencia
 			mask = row['mask']
 			ctcf , mean_gray_value = fluorescence (grayscale, mask, seg_img/255)
-			#rellenar dataframe
+			# rellenar dataframe
 			data = data.append({'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf, 'mean_gray_value': mean_gray_value}, ignore_index = True)
-
 	return data
 
