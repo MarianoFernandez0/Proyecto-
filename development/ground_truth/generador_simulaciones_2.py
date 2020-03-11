@@ -59,7 +59,11 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
         x (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
         y (array(particles,frames)): Posición en el eje x de las partículas en cada cuadro.
     '''
-
+    tot_particles = sum([pob['particles'] for pob in poblaciones])
+    tot_x_coord = np.zeros([tot_particles, frames])
+    tot_y_coord = np.zeros([tot_particles, frames])
+    tot_intensity = np.zeros([tot_particles, frames])
+    particle_id = 0
     image = np.zeros([M, N], dtype="uint8")
     for poblacion in poblaciones:
         particles, mean, cov = poblacion['particles'], poblacion['mean'], poblacion['cov']
@@ -67,7 +71,7 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
         x = np.zeros([particles, frames])
         y = np.zeros([particles, frames])
         intensity = np.zeros([particles, frames])
-        intensity[:, 0] = np.random.normal(150, 50, particles)
+        intensity[:, 0] = np.random.normal(130, 30, particles)
         final_sequence = np.zeros((M, N, frames))
         final_sequence_segmented = np.zeros((M, N, frames))
 
@@ -93,40 +97,42 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
                 if f > 0:
                     intensity[p, f] = np.uint8(intensity[p, f - 1] + np.random.normal(0, 5))
                 if intensity[p, f] > 0 and intensity[p, f] <= 255:
-                    #	image_aux[rr, cc] = np.where(image_aux[rr, cc]<intensity[p, f],intensity[p, f], image_aux[rr, cc])
                     image_segmented[rr, cc] = 255
                 if intensity[p, f] <= 0:
                     image_aux[rr, cc] = 0
                     intensity[p, f] = 0
-                #	image_aux[rr, cc] = np.where(image_aux[rr, cc]<intensity[p, f],intensity[p, f], image_aux[rr, cc])
                 if intensity[p, f] > 255:
                     intensity[p, f] = 255
                 image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f], image_aux[rr, cc])
 
             # Agrego blur al frame para que no sean drásticos los cambios de intesidad
-            blured = gaussian(image_aux, 6, mode='reflect')
-            # blured = cv2.blur(image_aux, (10,10))
-            # np.seterr(divide='ignore', invalid='ignore')
+            blured = gaussian(image_aux, 6, mode='reflect') + + np.random.normal(0, sigma_r, size = image_aux.shape)
             image_normalized = np.uint8(
                 np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
             intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(intensity[:, f])) / (
                         np.max(intensity[:, f]) - np.min(intensity[:, f])) * 255)))
-            final_sequence_segmented[:, :, f] = np.uint8(image_segmented)
+            final_sequence_segmented[:, :, f] = np.uint8(image_segmented) 
             final_sequence[:, :, f] = np.uint8(image_normalized)
-            # Próximo paso
+            # Proximo paso
             v = np.abs(np.random.normal(v, sigma_v, particles))
             theta = np.random.normal(theta, sigma_theta, particles)
-    print(intensity[0, :10])
-    # Guardo como tiff
-    with TiffWriter('output/sal.tif', bigtiff=True) as tif:
-        for frame in range(frames):
-            tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
 
-    with TiffWriter('output/salida_segmentada.tif', bigtiff=True) as tif:
-        for frame in range(frames):
-            tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
+        tot_intensity[particle_id:particle_id+particles, :] = intensity
+        tot_x_coord[particle_id:particle_id+particles, :] = x
+        tot_y_coord[particle_id:particle_id+particles, :] = y
+        particle_id += particles
 
-    return np.uint32(x), np.uint32(y), intensity
+
+        # Guardo como tiff
+        with TiffWriter('output/sal.tif', bigtiff=True) as tif:
+            for frame in range(frames):
+                tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
+
+        with TiffWriter('output/salida_segmentada.tif', bigtiff=True) as tif:
+            for frame in range(frames):
+                tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
+
+    return np.uint32(tot_x_coord), np.uint32(tot_y_coord), tot_intensity
 
 
 ##############################################################################################
@@ -252,9 +258,9 @@ def _total_distance(M, N, x, y):
 #	Creo imagen simulada
 populations = []
 
-mean = np.array([20.7247332, 9.61818939])
-cov = np.array([[103.80124818, 21.61793687],
-                [21.61793687, 14.59060681]])
+mean = np.array([21, 10])
+cov = np.array([[4, 0],
+                [0, 4]])
 vm = 3
 population = {
     'particles': 75,
@@ -266,10 +272,8 @@ population = {
 }
 populations.append(population)
 
-mean = np.array([20.7247332, 9.61818939])
-cov = np.array([[103.80124818, 21.61793687],
-                [21.61793687, 14.59060681]])
-vm = 10
+
+vm = 15
 
 population = {
     'particles': 150,
@@ -277,11 +281,11 @@ population = {
     'cov': cov,
     'mean_velocity': vm,
     'sigma_v': vm * 0.2,
-    'sigma_theta': 20
+    'sigma_theta': 15
 }
 
 populations.append(population)
 
-df = generate_sequence(M=512, N=512, frames=30, sigma_r=4, poblaciones=populations)
+df = generate_sequence(M=512, N=512, frames=30, sigma_r=0.01, poblaciones=populations)
 
 print(df)
