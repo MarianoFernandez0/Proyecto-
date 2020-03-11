@@ -115,13 +115,13 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones):
 			# Próximo paso
 			v = np.abs(np.random.normal(v, sigma_v, particles))
 			theta = np.random.normal(theta, sigma_theta, particles)
-	print(intensity[0,:10])
+	#print(intensity[0,:10])
 	# Guardo como tiff
 	with TiffWriter('output/sal.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
 
-	with TiffWriter('./output/salida_segmentada.tif', bigtiff=True) as tif:
+	with TiffWriter('output/salida_segmentada.tif', bigtiff=True) as tif:
 		for frame in range(frames):
 			tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
 
@@ -279,8 +279,10 @@ population = {
 	'sigma_theta': 15
 }
 
+'''
 populations.append(population)
 
 df = generate_sequence(M=512, N=512, frames=30, sigma_r=4, poblaciones=populations)
 
 print(df)
+'''
