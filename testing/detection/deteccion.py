@@ -51,5 +51,5 @@ def size_filter(particles,pixel_size):
 		particles (df(id, coord_x, coord_y, total_pixels, mask)): DataFrame de partículas filtradas.
 	"""
 
-	particles_out = particles[particles['total_pixels']*(pixel_size[0]*pixel_size[1]) > 10]
+	particles_out = particles[particles['total_pixels'] * (pixel_size[0] * pixel_size[1]) > 10]
 	return particles_out
