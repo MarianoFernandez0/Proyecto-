@@ -37,7 +37,7 @@ poblaciones.append(poblacion)
 
 print('Now generating ground truth sequence')
 t0 = time.time()
-ground_truth = generate_sequence(M=512, N=512, frames=100, sigma_r=4, poblaciones=poblaciones)
+ground_truth = generate_sequence(M=512, N=512, frames=40, sigma_r=4, poblaciones=poblaciones)
 ground_truth_filtered = ground_truth[ground_truth.intensity > 50]
 t1 = time.time()
 print('Finished running df_ground_truth in:', t1 - t0, 's\n')
