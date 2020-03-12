@@ -145,11 +145,11 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
         # Guardo como tiff
         with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
             for frame in range(frames):
-                tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
+                tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
         with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
             for frame in range(frames):
-                tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
+                tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
     return np.uint32(tot_x_coord), np.uint32(tot_y_coord), tot_intensity
 
@@ -268,6 +268,33 @@ def _total_distance(M, N, x, y):
 ###############################################################################
 ###############################################################################
 
+###############################################################################
+#				Print progress
+###############################################################################
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '>', printEnd = "\r"):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+    return
+###############################################################################
+###############################################################################
 
 ###############################################################################
 #				Datos de poblacion
@@ -328,6 +355,9 @@ if not seq_data == "-":
 fetch_output()
 
 sigmas_r = np.arange(0, 0.2, 0.01)
-
+total_it = sigmas_r.shape[0]
+it = 0
 for sigma_r in sigmas_r:
     generate_sequence(M, N, frames, sigma_r, poblaciones=populations, output_file_name = "salida" + "_sigma_" + str(sigma_r), seed = 2)
+    printProgressBar(it, total_it-1, prefix='Progress:', suffix='Complete', length=50)
+    it += 1
