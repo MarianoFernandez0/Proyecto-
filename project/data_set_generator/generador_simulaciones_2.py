@@ -45,7 +45,7 @@ def generate_sequence(M=512, N=512, frames=40, sigma_r=1, poblaciones=[], output
     '''
     x, y, intensity = _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed)
     df = _make_coordinate_structure(x, y, intensity, M, N)
-    df.to_csv(HOUSING_PATH_SEQ_DATA + "/" + output_file_name + "_data")
+    df.to_csv(HOUSING_PATH_SEQ_DATA + "/" + output_file_name + "_data.csv")
     return
 
 
@@ -142,14 +142,14 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
         tot_y_coord[particle_id:particle_id + particles, :] = y
         particle_id += particles
 
-        # Guardo como tiff
-        with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
-            for frame in range(frames):
-                tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
+    # Guardo como tiff
+    with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
+        for frame in range(frames):
+            tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
-        with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
-            for frame in range(frames):
-                tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N))
+    with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
+        for frame in range(frames):
+            tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
     return np.uint32(tot_x_coord), np.uint32(tot_y_coord), tot_intensity
 
@@ -212,62 +212,32 @@ def _make_coordinate_structure(x, y, intensity, M, N):
 
 
 ###############################################################################
-#				Velocidad
+#				Print progress
 ###############################################################################
-
-def _velocity(M, N, x, y):
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = '>', printEnd = "\r"):
     """
-    Calcula la velocidad intantánea para cada partícula y cada cuadro de la secuencia.
-
-    Parametros:
-        M (int): Largo de las imágenes (pixeles).
-        N (int): Ancho de las imágenes (pixeles).
-         x (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-        y (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-    Retotorna:
-        vel (array(particles,frames)): velocidad intantánea para cada partícula y cada cuadro de la secuencia.
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
     """
-    vel = np.zeros(x.shape)
-    for p in range(x.shape[0]):
-        for f in range(1, x.shape[1]):
-            if (0 < x[p, f] < M) and (0 < y[p, f] < N):
-                vel[p, f] = np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
-            else:
-                vel[p, f] = None
-    return vel
-
-
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end = printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+    return
 ###############################################################################
 ###############################################################################
-
-
-###############################################################################
-#				Distancia total
-###############################################################################
-def _total_distance(M, N, x, y):
-    """
-    Calcula la distancia recorrida en toda la secuencia por cada particula (solo toma en cuenta cuando la partícula está en la imágen).
-
-    Parametros:
-        M (int): Largo de las imágenes (pixeles).
-        N (int): Ancho de las imágenes (pixeles).
-         x (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-        y (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-
-    Retotorna:
-        dis (array(particles)): Distancia recorrida en toda la secuencia por cada particula.
-    """
-    dis = np.zeros(x.shape[0])
-    for p in range(x.shape[0]):
-        for f in range(1, x.shape[1]):
-            if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
-                dis[p] = dis[p] + np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
-    return dis
-
-
-###############################################################################
-###############################################################################
-
 
 ###############################################################################
 #				Datos de poblacion
@@ -325,9 +295,12 @@ if not seq_out == "-":
     HOUSING_PATH_SEQ_OUT = seq_out
 if not seq_data == "-":
     HOUSING_PATH_SEQ_DATA = seq_data
-fetch_output()
+fetch_output(HOUSING_PATH_SEQ_OUT, HOUSING_PATH_SEQ_DATA)
 
 sigmas_r = np.arange(0, 0.2, 0.01)
-
+total_it = sigmas_r.shape[0]
+it = 0
 for sigma_r in sigmas_r:
     generate_sequence(M, N, frames, sigma_r, poblaciones=populations, output_file_name = "salida" + "_sigma_" + str(sigma_r), seed = 2)
+    printProgressBar(it, total_it-1, prefix='Progress:', suffix='Complete', length=50)
+    it += 1
