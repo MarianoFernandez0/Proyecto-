@@ -212,63 +212,6 @@ def _make_coordinate_structure(x, y, intensity, M, N):
 
 
 ###############################################################################
-#				Velocidad
-###############################################################################
-
-def _velocity(M, N, x, y):
-    """
-    Calcula la velocidad intantánea para cada partícula y cada cuadro de la secuencia.
-
-    Parametros:
-        M (int): Largo de las imágenes (pixeles).
-        N (int): Ancho de las imágenes (pixeles).
-         x (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-        y (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-    Retotorna:
-        vel (array(particles,frames)): velocidad intantánea para cada partícula y cada cuadro de la secuencia.
-    """
-    vel = np.zeros(x.shape)
-    for p in range(x.shape[0]):
-        for f in range(1, x.shape[1]):
-            if (0 < x[p, f] < M) and (0 < y[p, f] < N):
-                vel[p, f] = np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
-            else:
-                vel[p, f] = None
-    return vel
-
-
-###############################################################################
-###############################################################################
-
-
-###############################################################################
-#				Distancia total
-###############################################################################
-def _total_distance(M, N, x, y):
-    """
-    Calcula la distancia recorrida en toda la secuencia por cada particula (solo toma en cuenta cuando la partícula está en la imágen).
-
-    Parametros:
-        M (int): Largo de las imágenes (pixeles).
-        N (int): Ancho de las imágenes (pixeles).
-         x (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-        y (array(particles,frames)): Posicion en el eje x de las partículas en cada cuadro.
-
-    Retotorna:
-        dis (array(particles)): Distancia recorrida en toda la secuencia por cada particula.
-    """
-    dis = np.zeros(x.shape[0])
-    for p in range(x.shape[0]):
-        for f in range(1, x.shape[1]):
-            if (x[p, f] > 0 and x[p, f] < M) and (y[p, f] > 0 and y[p, f] < N):
-                dis[p] = dis[p] + np.sqrt((x[p, f - 1] - x[p, f]) ** 2 + (y[p, f - 1] - y[p, f]) ** 2)
-    return dis
-
-
-###############################################################################
-###############################################################################
-
-###############################################################################
 #				Print progress
 ###############################################################################
 # Print iterations progress
@@ -352,7 +295,7 @@ if not seq_out == "-":
     HOUSING_PATH_SEQ_OUT = seq_out
 if not seq_data == "-":
     HOUSING_PATH_SEQ_DATA = seq_data
-fetch_output()
+fetch_output(HOUSING_PATH_SEQ_OUT, HOUSING_PATH_SEQ_DATA)
 
 sigmas_r = np.arange(0, 0.2, 0.01)
 total_it = sigmas_r.shape[0]
