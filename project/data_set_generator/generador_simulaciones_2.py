@@ -142,14 +142,14 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
         tot_y_coord[particle_id:particle_id + particles, :] = y
         particle_id += particles
 
-        # Guardo como tiff
-        with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
-            for frame in range(frames):
-                tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
+    # Guardo como tiff
+    with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
+        for frame in range(frames):
+            tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
-        with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
-            for frame in range(frames):
-                tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
+    with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
+        for frame in range(frames):
+            tif.save(final_sequence_segmented[:, :, frame], photometric='minisblack', resolution=(M, N), compress = 5)
 
     return np.uint32(tot_x_coord), np.uint32(tot_y_coord), tot_intensity
 
