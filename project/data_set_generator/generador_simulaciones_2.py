@@ -45,7 +45,7 @@ def generate_sequence(M=512, N=512, frames=40, sigma_r=1, poblaciones=[], output
     '''
     x, y, intensity = _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed)
     df = _make_coordinate_structure(x, y, intensity, M, N)
-    df.to_csv(HOUSING_PATH_SEQ_DATA + "/" + output_file_name + "_data")
+    df.to_csv(HOUSING_PATH_SEQ_DATA + "/" + output_file_name + "_data.csv")
     return
 
 
