@@ -1,0 +1,82 @@
+\chapter{Introducción}
+
+Actualmente existe un conjunto de programas conocidos como \textit{Computer-Assited Sperm Analizer} (CASA), que permiten a partir de secuencias, cuantificar el movimiento de los espermatozoides en base a magnitudes definidas por la Organización Mundial de la Salud (OMS). Este conjunto de programas en su mayoría son comerciales, pero se dispone de una vasta bibliografía donde se explica como se desarrollaron. De todas maneras, estos programas están diseñados para trabajar con imágenes de campo claro y no se conoce aún, alguno que mida también la fluorescencia.
+
+\section{Investigación}
+Para desarrollar la herramienta requerida, se divide el proyecto en distintas etapas que permiten organizar pequeños objetivos que dan forma al objetivo final. De esta manera, la primer línea de trabajo es la investigación. Para lograr el objetivo final, se deben implementar y/o integrar diversas soluciones que implican seguimiento, medida de fluorescencia, clasificación de trayectorias, entre otros. 
+
+\subsection{General}
+
+Se comienza estudiando el artículo \cite{survery}, donde se realiza una puesta en común de algoritmos de \textit{tracking} para el problema en concreto donde las partículas a seguir son espermatozoides. Dado que se mencionan diversas maneras de llevar a cabo el \textit{tracking}, estas se analizan y comparan, citando las referencias obtenidas del artículo en cuestión. 
+
+En el trabajo \cite{sorensen} la detección se realiza utilizando LoG (Lapcian of Gaussian) y umbralización. Para estimar la posición del espermatozoide se utilizó \textit{particle filter} y filtros de Kalman. Para etiquetar se utilizó el algoritmo Húngaro y algoritmos HMM (Hidden Markov Models Algorithms). 
+
+En \cite{Tomlinson}, para la detección se convirtió la imagen a binaria y luego se realizaron operaciones de dilatación y erosión, descartando los elementos de tamaño menor que la cabeza de un espermatozoide. Para el \textit{tracking} se utiliza \textit{markov chain monte carlo method}. En dicho trabajo, para que los resultados fueran buenos es necesario intervención manual. 
+
+La referencia \cite{Nurhadiyatna} utiliza \textit {gaussian mixture model with hole filling algorithm} para la detección y filtro de Kalman para el \textit{tracking}. 
+
+En el trabajo \cite{imani} realizan substracción del fondo junto con operaciones morfológicas para la detección, y luego para las correspondencias se utiliza el algoritmo Húngaro. 
+
+En \cite{Hidayatullah}, también se utiliza el algoritmo Húngaro, pero la detección se realiza con umbralización local adaptativa, y detección según forma elíptica. 
+
+En la referencia \cite{jati} realizan substracción de fondo, filtro gaussiano para reducir el ruido, y umbralización de Otsu como pre-procesamiento para luego aplicar LoG para la detección. Para el \textit{tracking} se utiliza filtro de Kalman en combinación con el algoritmo Húngaro. 
+
+Por último, en la referencia \cite{urbano} se realiza un pre-procesamiento con filtro gaussiano para reducir el ruido y luego se aplica LoG y umbralización de Otsu para la detección. Para el \textit{tracking} se implementa una modificación del algoritmo JPDAF (Joint Probabilistic data-association filter) y para medir el desempeño se utiliza la medida OSPA (Optimal Subpattern Assignment). 
+
+En esta puesta en común se concluye que, cuanto mejor sea el algoritmo de \textit{tracking} y más fidedignos sean los caminos hallados, más precisos resultan las medidas de motilidad de los espermatozoides (las cuales se extraen de las trayectorias halladas). El mayor desafío es lograr un algoritmo de \textit{tracking} que permita tener una alta precisión en cuanto a los caminos hallados para muestras de semen de alta densidad, ya que la mayoría de las referencias mencionadas fracasan en este aspecto, siendo exitosas solamente en muestras diluidas donde la densidad de espermatozoides es baja. 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%           TRACKING                                                    
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Seguimiento}
+
+Seguimiento refiere a la salida de un conjunto de algoritmos que permite obtener a partir de una secuencia de imágenes, el recorrido realizado por las partículas. A su vez, como resultado de esta aplicación, se debe poder obtener los valores de las magnitudes definidas por la \textit{Organización Mundial de la Salud} (OMS) \cite{WHOmanual}.
+
+A partir de esta definición, y en base a la investigación realizada, se establecen distintas etapas en este desarrollo de tracking. En estas etapas, se mencionan algunas soluciones que pueden ser de utilidad para la aplicación deseada en el presente caso. 
+
+\subsubsection{Segmentación y  de espermatozoides}
+
+Es necesario detectar en cada cuadro todos los  espermatozoides. Para esto, se segmenta cada cuadro para luego ubicar cada espermatozoide en cada cuadro. A continuación se mencionan algunos algoritmos populares utilizados en la segmentación:
+
+
+\textbf{LoG}: \textit{Laplacian off Gaussian} consiste en realizar el Laplaciano a la convolución de la imagen con una campana Gaussiana. En la referencia \cite{LoG} se explica en detalle el marco teórico de dicho método. Lo importante de este método, es que permite detectar distintos tamaños de espermatozoides con gran efectividad, simplemente aplicando una convolución con un Kernel Gaussiano para suavizar la imagen, aplicando el Laplaciano a este resultado para obtener los cambios rápidos de intensidad y encontrando los máximos locales del resultado.
+
+
+
+\textbf{DoG}: \textit{Difference of Gaussians} es en esencia muy similar al LoG. Se puede considerar como una aproximación de LoG. La principal ventaja de este método está en su eficiencia computacional en comparación con LoG.
+
+
+
+Asimismo, se tiene una gran cantidad de alternativas a las mencionadas como lo son \textbf{DoH} \cite{DoH}, \textbf{gLoG} \cite{LoG}, entre otros.
+
+
+
+\subsubsection{Enlace}
+Una vez realizada la etapa de detección, se procede a realizar el enlazado. El enlazado consiste en buscar cual es el correspondiente en un cuadro y el siguiente a cada espermatozoide detectado en cada cuadro. Este proceso se repite a lo largo de la secuencia, obteniendo finalmente la trayectoria completa. 
+
+Para esto, en la bibliografía se referencia una gran variedad métodos. El más mencionado es la utilización de filtros de Kalman para determinar el siguiente paso de un espermatozoide detectado, más la aplicación del algoritmo Húngaro para determinar cual es la mejor designación en base a una matriz de costos. El costo varía también dependiendo de elección subjetiva. Esto puede ser la distancia euclídea, distancia cuadrática, entre otros.
+
+
+\subsection{Medida de fluorescencia}
+
+El paper \cite{Waters} trata el tema de la medición de fluorescencia en microscopia de forma exhaustiva, algunos de los puntos que se consideran más relevantes para este proyecto son los siguientes.
+
+El valor de intensidad de un píxel está relacionado con el número de fluoróforos en esa área y el brillo de éstos está determinado por su coeficiente de extinción y su rendimiento cuántico, propiedades que dependen del entorno de los fluoróforos. Por lo tanto, según el caso, podría ser necesario tomar en cuenta el efecto dado por el coeficiente de extinción para dar una medida certera. Este punto fue consultado a los expertos en la materia con los que se realiza el presente proyecto, y se informó que este factor de extinción no es relevante para las muestras con las que se trabajan.
+
+Por otro lado, el número de fotones que son recogidos por el detector depende de la eficiencia cuántica (QE) y el tiempo de exposición. Además la capacidad de mantener electrones del detector es limitada, y si se supera el píxel se satura, lo cual genera una medida de intensidad errónea.
+
+En microscopía de fluorescencia, la luz que ilumina está enfocada al plano focal de forma tal que la máxima excitación de los fluoróforos ocurre en ese plano focal. A pesar de esto, algo de luz ilumina planos por debajo y por arriba del plano focal, y excita los fluoróforos. Esto se traduce en fondo fuera de foco en la imagen obtenida.
+Los microscopios confocales iluminan al espécimen con una fuente de luz enfocada, mientras uno o más \textit{pinholes} en el plano de la imagen bloquean la fluorescencia fuera de foco que llegue al detector.
+
+Para tener una medida correcta de la intensidad es necesario substraer el fondo a la medida de intensidad, y para evitar errores debidos a fondo no homogéneo es mejor hacer la medida del fondo con píxeles inmediatamente adyacentes o en el entorno del área de interés. El paper\cite{Waters} define la siguiente ecuación para hacer esta medición:
+$$F_{obj} = \sum_{i-1}^{N_{obj}}F_{obj_i} -N_{obj}\frac{\sum_{j=1}^{N_{bkg}}F_{bkg_j}}{N_{bkg}}$$
+
+Siendo:
+
+\begin{itemize}
+    \item $F_{obj}$: Instensidad del objeto.
+    \item $F_{obj_i}$: Instensidad del pixel $i$ del objeto.
+    \item $N_{obj}$: Cantidad de pixeles del objeto.
+    \item $F_{bkg}$: Instensidad del pixel $i$ del fondo.
+    \item $N_{bkg}$: Cantidad de pixeles del fondo.
+\end{itemize}

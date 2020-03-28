@@ -1,0 +1,142 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% $Id: definitions.tex 973 2012-03-14 18:15:22Z fefo $
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Definitions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% \newcommand{\TO}[0]{\textbf{to}\xspace}
+\newcommand{\Fourier}[1]{\ensuremath{{\mathcal{F}_{#1}}}\xspace}
+\newcommand{\Micrograph}[1]{\ensuremath{\mathcal{M}_{#1}}\xspace}
+% \newcommand{\PartProj}[2]{\ensuremath{\mathrm{PP}^{#1}_{#2}}\xspace}
+\newcommand{\Particle}[1]{\ensuremath{\mathcal{P}_{#1}}\xspace}
+\newcommand{\PhaseResidual}[0]{\text{PR}\xspace}
+\newcommand{\angstroms}[0]{\text{\AA}\xspace}
+\newcommand{\CSP}{\text{CSP}\xspace} %
+\newcommand{\CSPNM}[2]{\ensuremath{\CSP_{\text{#1}:\text{#2}}}\xspace} %
+\newcommand{\SP}{\text{SP}\xspace} %
+\newcommand{\ET}{\text{ET}\xspace} %
+\newcommand{\EM}{\text{EM}\xspace} %
+\newcommand{\GT}{\text{GT}\xspace} %
+\newcommand{\map}[2]{\ensuremath{\mathcal{P}_{#1}^{#2}}\xspace}
+%\newcommand{\micrograph}[2]{\ensuremath{\mathcal{M}_{#1}^{#2}}\xspace}
+\newcommand{\micrograph}[2]{\ensuremath{M_{#1}^{#2}}\xspace}
+\newcommand{\NM}[0]{\ensuremath{{N_\text{M}}}\xspace}
+\newcommand{\NP}[0]{\ensuremath{{N_\text{P}}}\xspace}
+\newcommand{\parameters}[2]{\ensuremath{\boldsymbol{\Theta}_{#1}^{#2}}\xspace}
+% \PP{particle index}{micrograph index}
+\newcommand{\PP}[2]{\ensuremath{I^{#2}_{#1}}\xspace}
+% \newcommand{\particle}[2]{\ensuremath{\mathcal{P}_{#1}^{#2}}\xspace}
+\newcommand{\particle}[2]{\ensuremath{P_{#1}^{#2}}\xspace}
+\newcommand{\projection}[3]{\ensuremath{\text{Proj}_{#2}^{#3}({#1})}\xspace}
+\newcommand{\reals}[0]{\ensuremath{{\mathcal{R}}}\xspace}
+\newcommand{\SNR}{\text{SNR}\xspace}
+\newcommand{\stack}[1]{\ensuremath{{\mathcal{S}(#1)}}\xspace}
+\newcommand{\tiltangle}[1]{\ensuremath{\alpha_{#1}}\xspace}%{\ensuremath{\alpha_\textsc{ta}^{#1}}\xspace}%
+\newcommand{\tiltaxisangle}[1]{\ensuremath{\beta_{#1}}\xspace}%{\ensuremath{\alpha_\textsc{tx}^{#1}}\xspace}
+\newcommand{\tiltseries}[1]{\ensuremath{{T}_{#1}}\xspace}
+\newcommand{\USP}{\text{USP}\xspace}
+\newcommand{\CC}{\text{CC}\xspace}
+\newcommand{\cost}[1]{\ensuremath{\nu\left(#1\right)}\xspace}
+\newcommand{\Cost}[2][]{
+  \ifthenelse{\isempty{#1}}%
+    {\ensuremath{\bar\nu_{#2}}\xspace}% if #1 is empty
+    {\ensuremath{\bar\nu_{#2}\left(#1\right)}\xspace}% if #1 is not empty
+}
+\newcommand{\weight}[1]{\ensuremath{w_{#1}}\xspace}
+\newcommand{\degrees}[0]{\ensuremath{^{\circ}}\xspace}
+\newcommand{\etal}[0]{\text{et al.}\xspace}
+\newcommand{\average}[1]{\langle{#1}\rangle\xspace}
+\newcommand{\unit}[1]{\text{#1}} 
+\newcommand{\fdef}[1]{\emph{#1}} 
+\newcommand{\fnote}[1]{{{\color{blue} \S#1\S}}} 
+\newcommand{\snote}[1]{\marginpar{\raggedright
+    {\hspace{0pt}\textsf{\color{Maroon}\small #1}}}}
+\newcommand{\inlinefrac}[2]{\ensuremath{^{#1}\!/\!_{#2}}} 
+\newcommand{\fpref}[2]{\ref{#1}\subref*{#2}}
+
+%% \newcommand{\unappendix}{\par
+%%   % \setcounter{chapter}{0}%
+%%   % \setcounter{section}{0}%
+%%   \gdef\@chapapp{\chaptername}%
+%%   \gdef\thechapter{\@arabic\c@chapter} 
+%% }
+
+\newcommand{\confidential}[1]{ %
+  \ifthenelse{\boolean{isConfidential}}{#1}{ %
+    {\color{Blue}El texto correspondiente, ha sido suprimido por
+      razones de confidencialidad solicitada por una de las
+      partes. Una vez hecha la publicaci\'on de este trabajo, el
+      contenido se har\'a p\'ublico.%
+    }%
+  }%
+}
+% Put the marginpar in the correct (outer) side of the page; this
+% should be temporary, just for the revisions.
+\let\oldmarginpar\marginpar
+\renewcommand\marginpar[1]{\-\oldmarginpar[\raggedleft $\RHD$]%
+  {\raggedright $\LHD$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Revisions mode
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \newcommand{\new}[1]{{\marginpar{}\color{Blue}{#1}}}
+\newcommand{\new}[1]{#1}
+\newcommand{\answer}[2]{%<--Important for the blank spaces
+  \ifthenelse{\equal{#1}{1}}{{\color{ForestGreen}{#2}}}{}%<--
+  \ifthenelse{\equal{#1}{2}}{{\color{BurntOrange}{#2}}}{} }
+
+
+\def\DOT{.}
+\def\model#1#2{\ensuremath{\mathcal{M}_{#1}^{#2}}\xspace}
+\def\norm#1{\ensuremath{\left\|#1\right\|}}
+\def\projection#1#2#3{\ensuremath{\mathcal{P}_{#2}^{#3}{#1}}}
+\def\refeq#1{(\ref{#1})}
+\def\etal{\textit{et al.}}
+\def\curve{\ensuremath{\mathcal{C}}}
+\def\image{\ensuremath{\mathcal{I}}}
+\def\dif{\ensuremath{\mathrm{d}}}
+\def\reals{\ensuremath{\mathbb{R}}}
+\def\FigExt{png} % Bigger files, slower compilation, best resolution.
+\def\FigExt{jpg} % Smaller files, faster compilation, lower resolution.
+% \def\FigExt{eps} % Postscript 
+
+
+% %%% Originales de tesina.cls
+\newcommand{\sigla}[1]{{\uppercase{#1}}\xspace}
+% \newcommand{\puntos}[1]{\textsf{[#1 pts.]}}
+% \newcommand{\esperanza}[1]{I\!\!E\left\{#1\right\}}
+% \newcommand{\fourier}[1]{I\!\!F\left\{#1\right\}}
+% \newcommand{\invfourier}[1]{I\!\!F^{-1}\left\{#1\right\}}
+% \newcommand{\conv}[2]{#1\ast #2}
+% \newcommand{\ddd}[0]{tridimensional}%{\small 3}\textsc{d}}
+% \newcommand{\dd}[0]{bidimensional}%{\small 2}\textsc{d}}
+% \newcommand{\figcaption}[1]{\textsl{#1}}
+% \newcommand{\figtitle}[1]{\textbf{#1}}
+% \newcommand{\dsi}{\sigla{dsi}}
+% \newcommand{\gcp}{\sigla{gcp}}
+% \newcommand{\ddt}{\mbox{$\frac{\rd{}}{\rd{t}}$}}
+% \newcommand{\dpdpt}[1]{\frac{\partial{#1}}{\partial{t}}}
+% \newcommand{\traspuesta}[1]{#1^\top}
+% \newcommand{\sfgap}{\hspace{0.05\figurewidth}} % espacio entre subfigures
+\newcommand{\tesina}[0]{tesis}
+% \newcommand{\nmbr}[1]{\oldstylenums{#1}}
+% \newcommand{\extraparsep}[0]{\hspace{.45cm}}
+% \newcommand{\figurewidth}{\textwidth} % ancho de las figuras
+% \newcommand{\decision}{
+%     \begin{array}{c}
+%     \scriptstyle{\mathcal{X}^m\rightarrow O}\vspace{-0.14cm}\\%
+%     \gtrless\vspace{-0.1cm}\\%
+%     \scriptstyle{\mathcal{X}^m\rightarrow B}
+%     \end{array}
+% }
+% \newcommand{\ecuacionref}[1]{(\ref{#1})}
+% \newcommand{\gracias}[2]{\textsf{#1} #2\\}
+% \newcommand{\ingles}[1]{\textsl{#1}}
+% \newcommand{\modelo}[1]{\textsl{#1}}
+% \newcommand{\textfig}[1]{\textsf{#1}}
+% \newcommand{\sustituirsf}[1]{\psfrag{#1}[][][1]{\textsf{#1}}}
+% \newcommand{\sustituir}[1]{\psfrag{#1}[][][1]{#1}}
+% \newcommand{\reales}{\mbox{$I\!\!R$}}
+% \newcommand{\rd}[1]{\mbox{$\,\,\mathrm{d}{#1}$}}
+% \renewcommand{\chaptermark}[1]{\markboth{\thechapter.\ #1}{}}

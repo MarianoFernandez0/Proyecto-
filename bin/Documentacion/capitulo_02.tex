@@ -1,0 +1,73 @@
+\chapter{Implementación}
+
+Una vez realizada la etapa de investigación, se procede a realizar la implementación de la herramienta. Se comienza dividiendo el desarrollo en cuatro grandes etapas. La primera consiste en implementar el \textbf{seguimiento}. Si bien existen una gran cantidad de soluciones, se pretende implementar una solución que se adapte a las imágenes tomadas con el microscopio confocal. 
+Una vez desarrollada la etapa de seguimiento, le sigue implementar una \textbf{medida de fluorescencia}. 
+Con las dos etapas mencionadas anteriormente, se tienen las medidas necesarias que la OMS recomienda para la clasificación de las trayectorias. Asimismo, se pretende clasificar de manera automática las trayectorias, aplicando algoritmos de machine learning y/o deep learning para desarrollar otro punto de investigación. 
+Como objetivo final, se busca estudiar la \texbf{correlación entre la fluorescencia y la motilidad} medida en la etapa anterior de clasificación
+
+
+Se divide el desarrollo en pequeños problemas, por lo que el desarrollo de este capítulo se separa en las secciones correspondientes a esta división.
+
+
+%---------------------------------------------------------------------
+%               GROUND TRUTH
+%---------------------------------------------------------------------
+\section{Ground truth}
+Para poder simular secuencias que sirvan de \textit{ground truth} se investigó la existencia de bibliografía al respecto. Debido que no se encontró alguna investigación de lo buscado, se analizaron las imágenes cedidas por el laboratorio de histología. De éstas imágenes se extrae la distribución de las medidas de los ejes principales del elipse por el cual se aproximaron los espermatozoides, obteniendo así una media y una matriz de correlación para estos ejes. Dado que no se tiene mayor información acerca de la función de probabilidad con la cual se distribuyen estas medidas, en la generación de las secuencias se aproxima que la generación de los distintas valores es con distribución Gaussiana. 
+
+Con la premisa antes mencionada, se desarrolla un algoritmo del cual a partir de características como cantidad de partículas, velocidad media, desviación estándar de la velocidad, y medidas de los ejes de simetría, se obtiene una secuencia de imágenes que contienen las distintas poblaciones caracterizadas por lo parámetros antes mencionados. A su vez, dado que es de interés contar con la información de las trayectorias, como salida de la función además de la secuencia en sí, se obtiene una estructura de datos con la información de las coordenadas en el ancho (eje x) y el largo (eje y) de cada imagen que conforma la secuencia de salida. Adicionalmente a las características antes mencionadas, se obtiene también la imagen segmentada. 
+
+A partir de esta base generada por el programa, es posible medir el desempeño de los algoritmos utilizados en la segmentación, detección y otros algoritmos que conforman el seguimiento en general.
+
+
+%---------------------------------------------------------------------
+%               SEGMENTACION
+%---------------------------------------------------------------------
+\section{Segmentación}
+
+Para realizar la segmentación de las secuencias de imágenes primero se filtraron las mismas con un filtro Gaussiano y luego se utilizó el método de OTSU \cite{libroTimag}. 
+
+
+Se filtraron las imágenes para evitar que al segmentar hayan cambios bruscos en el brillo y así evitar separar segmentos que pertenecen a un mismo espermatozoide. 
+
+Luego de suavizada la imagen se segmenta. Para esto, se utiliza un método de umbralización global en toda la imagen, dado que los espermatozoides y el fondo son bien distinguibles. El método elegido es OTSU. Este método le da una perspectiva probabilística al problema de segmentación, en el que se busca minimizar el error medio al asignar píxeles a uno o más grupos. La solución cerrada del problema probabilísito antes mencionado es la regla de desición de Bayes, la cual se basa en dos parámetros:
+\begin{itemize}
+    \item PDF de los niveles de intensidad de cada grupo
+    \item Probabilidad de que cada clase aparezca en una aplicación dada 
+\end{itemize}
+
+
+Dado que es de mucha dificultad saber la PDF de los niveles de intensidad, se utiliza otro método para resolver el problema. 
+
+
+El método OTSU es óptimo en el sentido que maximiza la varianza entre clases. Se basa en la idea de que distintas clases deben tener una diferencia notable en los niveles de intensidad de los píxeles que la conforman, y por lo tanto, un método que de la mejor separación entre clases en términos de intensidad va a ser el mejor umbral. 
+
+\subsection{Testing}
+
+%---------------------------------------------------------------------
+%               DETECCION
+%---------------------------------------------------------------------
+\section{Detección}
+A partir del resultado de la segmentación, que será una imagen binaria indicando donde se encuentran los espermatozoides, la etapa de detección se ocupa de determinar las coordenadas de cada espermatozoide en la imagen; es decir, que se define un punto el cual representa la posición de cada uno. Para esto, se etiquetan las regiones en la imagen segmentada y se calcula el centro geométrico de cada una.
+
+El siguiente paso es un filtro para eliminar las regiones menores a un parámetro $\alpha$ (con $[\alpha]=\mu m ^2$). Estas regiones son consideradas ruido, espermatozoides de otro plano focal que no se detectan suficientemente bien, o regiones que son parte de una más grande ya detectadas, pero se separaron en la segmentación.
+
+\subsection{Testeo}
+
+
+
+%---------------------------------------------------------------------
+%               MEDIDA DE FLUORESCENCIA
+%---------------------------------------------------------------------
+\section{Medida de fluorescencia}
+En paralelo se implementa la medida de fluorescencia. En esta etapa el objetivo es encontrar e implementar una manera de indicar la intensidad que se visualiza en las partículas detectadas (regiones de interés - ROI's).
+
+
+Se resuelve implementar las siguiente medidas: \textit{Mean Gray Value} (MGV)  y \textit{Correlated Total Cell Fluorescence} (CTCF). 
+
+
+El MGV indica el valor medio de intensidad en una partícula y por lo tanto se calcula sumando la intensidad de cada píxel que pertenece a ella dividido entre el área en píxeles. Por otro lado, CTCF es un método comúnmente utilizado en imágenes de fluorescencia en el cual se normaliza el valor de \textit{Integrated Density} (ID - "densidad integrada") substrayendo la fluorescencia presente en el fondo de la imagen. La ID suma la intensidad de los píxeles de todos los que pertenecen a las ROIs indicando el valor total (en caso de que las imágenes no presenten calibración, de lo contrario se debe multiplicar dicha suma por el área de un píxel). Más precisamente, CTCF se calcula como: ID menos el área de la ROI (en píxeles) por el valor medio del fondo.
+
+
+En la implementación se creó una función que a partir de la imagen original, la imagen segmentada y una mascara dada (para una sola partícula) devuelve el valor de MGV y CTCF. El valor promedio del fondo utilizado para computar CTCF, se calcula realizando un promedio de los píxeles de toda la imagen menos los de las partículas.
+

@@ -1,0 +1,45 @@
+\chapter{Análisis de desempeño}
+Una vez implementadas las distintas etapas, se realizaron se realizan pruebas sobre los algoritmos implementados para así tener una idea del desempeño esperado. Se investiga acerca de los parámetros que puedan incidir en el desempeño y luego se desarrollan pruebas para estudiar como inciden en el caso de lo implementado. Asimismo, se estudian otros algoritmos de seguimiento, con el objetivo de tener un punto de comparación. Para esto, se utiliza el ground truth como entrada de estos algoritmos.
+
+\section{Frecuencia de muestreo}
+Una característica de la naturaleza de las imágenes con la que se trabaja es su bajo \textit{frame-rate}. Por lo tanto, es necesario saber como varían la medida de las características obtenidas de los algoritmos para determinar cual será la salida esperada.
+
+
+Se desarrolló una investigación acerca de la incidencia del \textit{frame-rate} sobre un algoritmo para obtener la medida de los parámetros establecidos por la OMS en secuencia de imágenes de espermatozoides \cite{frecAn}. 
+
+Se investigó primariamente la incidencia de esta magnitud física en herramientas de similares características a las que se busca desarrollar. Como resultado de dicha investigación, se tienen las siguientes observaciones\footnote{En el ``\autoref{chap:definiciones}'' se adjunta las definiciones de las siglas mencionadas}:
+\begin{itemize}
+    \item La medida de VCL está fuertemente ligada con la tasa de muestreo. Una tasa mayor, implica una medida de VCL mayor, mientras que una tasa menor de muestreo, implica una medida de VCL menor. En el estudio realizado, se observó que a una tasa de 50Hz, se obtuvo una medida del VCL un 46,5\% menor a la medida a una tasa de 200Hz. 
+    \item La velocidad VSL se mantuvo constante para todas las frecuencias de muestreo estudiadas. Esto se debe particularmente que para medir esta magnitud solo es necesario un punto inicial y final, además que el tiempo en que realizó el recorrido. 
+    \item La medida de BCF se ve afectada a frecuencias bajas.
+    \item Utilizar frecuencias menores a 5Hz no provee ninguna medida acertada de las magnitudes medidas, salvo las medidas de VSL y VAP. 
+\end{itemize}{}
+En conclusión, tomando en cuenta las restricciones mencionadas, las muestras tomadas desde 25Hz a 50Hz de promedio, darán resultados útiles de las características del movimiento. 
+
+
+
+\section{Algoritmos de seguimiento}
+Uno de los objetivos ya mencionados es estudiar el desempeño no solo de la implementación propia, sino que además estudiar el desempeño de otros algoritmos similares para tener un punto de comparación. A continuación se mencionan programas (o librerías) que se van a testear. 
+\subsection{Trackpy}
+
+\textit{Trackpy} \cite{trackpy} es una librería de Python orientada al \textit{tracking} de formas tipo \textit{blob}. En su página se encuentra la extensa documentación de las herramientas que lo componen. A continuación, se resumen los puntos considerados más importantes sobre los métodos que se utilizan para realizar el \textit{tracking}.
+
+El algoritmo básico se basa en el algoritmo de \textit{Crocker-Grier} \cite{CrockerGrier}, pero además se agregan variantes al momento de realizar la predicción de la próxima posición de las partículas.
+
+El primer paso es detectar las partículas, el cual se basa en el algoritmo para buscar centroides de \textit{Crocker-Grier} \cite{CrockerGrier}. Se toman los máximos locales como candidatos a ser partículas, para un píxel, si no hay otro más brillante a menor de una distancia \textit{w}, este se toma como candidato. Luego se toman los candidatos que tienen un un brillo mayor al percentil 30. El algoritmo requiere una aproximación del tamaño de las partículas.
+
+Luego para el \textit{tracking}, el algoritmo original simplemente compara las posiciones de las partículas en el cuadro anterior; y si están cerca de este, las asocia a la misma trayectoria. Se puede aceptar que una partícula se pierda por un número determinado de cuadros, guardando la última posición conocida. En este caso, si se detecta una partícula lo suficientemente cerca a esta posición se considera que es la misma. Este algoritmo está dirigido a partículas con movimiento Browniano, donde la velocidad no está correlacionada en el tiempo. Formalmente el mejor predictor para el movimiento Browniano es $P(t_1, t_0, x(t_0)) = x(t_0)$. Además se limita el rango de búsqueda a una distancia máxima.
+
+Si las partículas presentan otro tipo de movimiento, se pueden aplicar diferentes predictores. Hay tres predictores ya implementados en \textit{trackpy}:
+
+\begin{itemize}
+    \item El primero asume que la velocidad de la partícula sigue siendo la velocidad conocida más reciente. Para partículas nuevas se toman las velocidades de sus partículas más cercanas. En el cuadro cero, que no se tiene información de las velocidades anteriores, se toma como que $v = 0$.
+    \item Otro es el de \textit{Channel Flow}, para cuando las velocidades son relativamente uniformes en una dirección.
+    \item Y por último, predicción de \textit{drift}, las predicciones se hacen en función de la velocidad media de todas las partículas.
+\end{itemize}
+
+
+\section{Desempeño}
+Una vez investigada las distintas características que inciden en los algoritmos, se desarrolla un conjunto de secuencias donde se varían estas características, obteniendo los siguientes resultados. 
+
+.............
