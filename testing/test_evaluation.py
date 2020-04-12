@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 import pandas as pd
 
-tif = tifffile.TiffFile('data_set_generator/datasets/video_sequence/salida_sigma_0.tif')      		# se carga la salida del generador de secuencias
-ground_truth = pd.read_csv('data_set_generator/datasets/data_sequence/salida_sigma_0_data.csv')
+tif = tifffile.TiffFile('data_set_generator/datasets/video_sequence/salida_sigma_0.0.tif')      		# se carga la salida del generador de secuencias
+ground_truth = pd.read_csv('data_set_generator/datasets/data_sequence/salida_sigma_0.0_data.csv')
 print(ground_truth.head())
 ground_truth_filtered = ground_truth[ground_truth.intensity > 50]
 
