@@ -18,7 +18,6 @@ def evaluation(tif):
     En las columnas ctcf y mean_gray_value se guardan los valores correspondientes devueltos por la función fluorescence.
     '''
     sequence = tif.asarray()
-    print(sequence.shape)
     data = pd.DataFrame(columns=['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
 
     for nro_frame in range(sequence.shape[0]):
