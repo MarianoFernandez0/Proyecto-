@@ -1,0 +1,7 @@
+El script corre los tests para las etapas de detección y segmentación.
+Los tests se corren sobre el dataset que se encuentra en la carpeta data_set_generator/datasets.
+Se calculan guardan los resultados de los tests para cada secuencia por separado y también los resultados generales.
+Los resultados se guardan como csv's en la carpeta Test_results. 
+
+Los tests de la detección se hacen filtrando el ground truth con un rango de umbrales, se guardan los resultados para los diferentes umbrales
+y además se grafican estos resultados. Las gráficas se guardan en la carpeta Test_results/Plots
