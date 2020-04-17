@@ -6,6 +6,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 
+# Test sobre el desempño del código implementado hasta el punto de la detección, sobre el dataset simulado.
+
+
 # se carga la secuencia generada artificialmente y el csv con su información
 for sigma in range(10):
 	if sigma == 0:
@@ -37,7 +40,7 @@ for sigma in range(10):
 
 		# print('Now computing the error measures\n')
 		# t0 = time.time()
-		TP, FN, FP, JSC = error_measures(ground_truth_df=ground_truth_filtered, detected_df=detected, M=512, N=512,
+		TP, FN, FP, JSC = error_measures(ground_truth_df=ground_truth_filtered, detected_df=detected,
 										 max_dist=60)
 		# t1 = time.time()
 		# print('Finished running error_measures in:', t1-t0, 's\n')

@@ -35,7 +35,7 @@ def get_optimal_assignment(X, Y, max_dist):
     return Y_opt
 
 
-def error_measures(ground_truth_df, detected_df, M, N, max_dist):
+def error_measures(ground_truth_df, detected_df, max_dist):
     '''
     Parametros:
         ground_truth_df (df(id, x, y, total_pixels, mask, frame)): Coordenadas ground truth de las partículas.
@@ -74,6 +74,9 @@ def error_measures(ground_truth_df, detected_df, M, N, max_dist):
     JSC = TP / (TP + FN + FP)
 
     return TP, FN, FP, JSC
+
+
+
 
 
 '''

@@ -5,10 +5,12 @@ from segmentation.segmentation import segmentation
 from detection.deteccion import detect_particles, size_filter
 import tifffile
 
+# Test corto para probar la detección de partículas para las muestras que se tienen.
+
 
 sample_files = ['9.tif']  # , '10.tif', '11.tif', '1 026.tif']
 for sample in sample_files:
-    tif = tifffile.TiffFile('Images_in/' + sample)
+    tif = tifffile.TiffFile('Samples/' + sample)
     x_res = tif.pages[0].tags['XResolution']
     y_res = tif.pages[0].tags['YResolution']
     pixel_size = [x_res.value[1] / x_res.value[0], y_res.value[1] / y_res.value[0]]
@@ -18,7 +20,7 @@ for sample in sample_files:
 
     for i in range(3):
         img = samples[i]
-        imsave('Images_out/sample ' + str(i) + '_(' + sample + ').png', img)
+        imsave('Figures_out/sample ' + str(i) + '_(' + sample + ').png', img)
 
         seg_img = segmentation(img)
         particles = detect_particles(seg_img)
@@ -31,7 +33,7 @@ for sample in sample_files:
             patch = Circle((particles.at[p, 'y'], particles.at[p, 'x']), radius=1, color='red')
             ax.add_patch(patch)
         plt.axis('off')
-        plt.savefig('Images_out/coords ' + str(i) + '_(' + sample + ').png', bbox_inches='tight')
+        plt.savefig('Figures_out/coords ' + str(i) + '_(' + sample + ').png', bbox_inches='tight')
 
         particles = size_filter(particles, pixel_size)
 
@@ -43,4 +45,4 @@ for sample in sample_files:
             patch = Circle((particles.at[p, 'y'], particles.at[p, 'x']), radius=1, color='red')
             ax.add_patch(patch)
         plt.axis('off')
-        plt.savefig('Images_out/coords_filtered ' + str(i) + '_(' + sample + ').png', bbox_inches='tight')
+        plt.savefig('Figures_out/coords_filtered ' + str(i) + '_(' + sample + ').png', bbox_inches='tight')
