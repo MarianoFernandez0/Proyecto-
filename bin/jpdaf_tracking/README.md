@@ -7,7 +7,10 @@ JPDAFTracker is a tracker based on joint probabilistic data association filterin
 <br>
 
 ## Requirements
+Esto hay que instalarlo a parte. Yo usé la linea de comandos ("brew install opencv" que es el análogo a "sudo install opencv")
+Revisen que sea el opencv 4, para que les ande este código que cambié.
 * OpenCV
+Eigen es el mismo procedimiento que opencv 
 * Eigen
 
 ## How to build
@@ -18,6 +21,7 @@ JPDAFTracker works under Linux environments. I recommend a so-called out of sour
 * cd build
 * cmake ../
 * make -j<number-of-cores+1>
+(La últmia línea es "make -j 4" por ejemplo)
 
 ## Params
 ```bash
@@ -61,7 +65,7 @@ JPDAFTracker works under Linux environments. I recommend a so-called out of sour
 
 ## How to use
 
-Go to the bin diretory and launch the program with the following command:
+En la línea de comandos
 ```bash
-./jpdaf_tracker ../config/kalman_param.txt /path/to/the/detection_file.txt /path/to/the/image_folder 
+./jpdaf_tracker ../config/params.txt /path/to/the/detection_file.txt /path/to/the/image_folder 
 ```
