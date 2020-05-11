@@ -9,7 +9,10 @@ JPDAFTracker is a tracker based on joint probabilistic data association filterin
 ## Requirements
 Esto hay que instalarlo a parte. Yo usé la linea de comandos ("brew install opencv" que es el análogo a "sudo install opencv")
 Revisen que sea el opencv 4, para que les ande este código que cambié.
-* OpenCV
+
+Es necesario que instalen cmake antes de opencv. Les dejo el link, para que puedan una vez que descargaron el cmake, agregarlo al PATH de windows. <a href="https://docs.alfresco.com/4.2/tasks/fot-addpath.html" > link </a >
+
+* <a href="https://docs.opencv.org/master/d3/d52/tutorial_windows_install.html"> OpenCV </a>
 Eigen es el mismo procedimiento que opencv 
 * Eigen
 
