@@ -144,7 +144,7 @@ cv::VideoWriter output_cap("output.avi",
       Detection d(rect.x + (rect.width >> 1), rect.y + (rect.height >> 1), rect.width, rect.height);
       dets.push_back(d);
       
-      cv::rectangle(image, rect, cv::Scalar(0, 0, 255), 3 );
+      cv::rectangle(image, rect, cv::Scalar(255, 255, 255), 3 );
       
       ss.str("");
       ss << j;

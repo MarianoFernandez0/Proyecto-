@@ -8,7 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import sys
-
+import skimage.external
 
 # Test sobre el desempeño del código implementado hasta el punto de la detección, sobre el dataset simulado.
 
