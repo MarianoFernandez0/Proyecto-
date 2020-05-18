@@ -1,14 +1,15 @@
 #include <iostream>
+#include <fstream>
 #include "tracker.h"
 #include "global_tracker.h"
 #include "imagemanager.h"
 #include "detection.h"
+#include <cstdio>
 
 using namespace JPDAFTracker;
 
 std::map<int, std::vector< std::vector< std::string > > > petsReading(const std::string& _gt)
 {
-    std::cout << "ENTREE";
     std::ifstream file(_gt);
     if(!file.is_open())
     {
@@ -110,14 +111,35 @@ int main(int argc, char** argv)
   std::vector<cv::Rect> rects;
   std::vector<cv::Point2f> points;
   
-  const double& milliseconds = 1000 / 7;
+  //const double& milliseconds = 1000 / 7;
+  const double& milliseconds = 250 / 7;
   
   // Setup output video
 cv::VideoWriter output_cap("output.avi", 
                cv::VideoWriter::fourcc('D','I','V','X'),
 		7,
                cv::Size(1536, 576));
-  
+  //----------------------------------------
+  // NOTE: Pico código acá
+  //----------------------------------------
+
+  std::string filename = "tracks.csv";
+  const int result = std::__fs::filesystem::remove(filename);
+
+  std::ofstream csvFile;
+  csvFile.open(filename, std::fstream::app);
+  std::vector<std::string> cols = {"track_id", "x", "y", "frame"};
+
+  for(int i=0; i<cols.size(); i++)
+  {
+      csvFile << cols.at(i);
+      if(i != cols.size() - 1) csvFile << ",";
+  }
+  csvFile << "\n";
+  csvFile.close();
+  //----------------------------------------
+  //----------------------------------------
+
   for(uint i = 0; i < detections.size(); ++i)
   {
     
@@ -144,7 +166,7 @@ cv::VideoWriter output_cap("output.avi",
       Detection d(rect.x + (rect.width >> 1), rect.y + (rect.height >> 1), rect.width, rect.height);
       dets.push_back(d);
       
-      cv::rectangle(image, rect, cv::Scalar(0, 0, 255), 3 );
+      cv::rectangle(image, rect, cv::Scalar(255, 255, 255), 3 );
       
       ss.str("");
       ss << j;
@@ -156,7 +178,7 @@ cv::VideoWriter output_cap("output.avi",
     }
     
     tracker->track(dets);
-    tracker->drawTracks(trackingImg);
+    tracker->drawTracks(trackingImg, i);
     const cv::Mat& m = mosaic(image, trackingImg);
     cv::imshow("JPDAFTracker", m);
     output_cap << m;

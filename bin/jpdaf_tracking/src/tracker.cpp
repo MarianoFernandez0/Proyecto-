@@ -1,8 +1,9 @@
 #include "tracker.h"
 
+
 using namespace JPDAFTracker;
 
-void Tracker::drawTracks(cv::Mat &_img) const
+void Tracker::drawTracks(cv::Mat &_img, int frame) const
 {
   std::stringstream ss;
   for(const auto& track : tracks_)
@@ -15,6 +16,31 @@ void Tracker::drawTracks(cv::Mat &_img) const
       const cv::Point& p = track->getLastPrediction();
       cv::circle(_img, p, 8, track->getColor(), -1);
       //cv::ellipse(img, p, cv::Size(25, 50), 0, 0, 360, track->getColor(), 3);
+
+      //----------------------------------------
+      // NOTE: Pico código acá
+      //----------------------------------------
+      std::string filename = "tracks.csv";
+
+      std::ofstream csvFile;
+
+      csvFile.open(filename, std::fstream::app);
+
+      //Add the data
+      csvFile << ss.str();
+      csvFile << ",";
+      csvFile << std::to_string(p.x);
+      csvFile << ",";
+      csvFile << std::to_string(p.y);
+      csvFile << ",";
+      csvFile << std::to_string(frame);
+      csvFile << "\n";
+      
+      // Close the file
+      csvFile.close();
+      //---------------------------------------------------------------------
+      
+
       cv::putText(_img, ss.str(), p, cv::FONT_HERSHEY_SIMPLEX,
 		0.50, cv::Scalar(0, 255, 0), 2, cv::LINE_AA);
     }

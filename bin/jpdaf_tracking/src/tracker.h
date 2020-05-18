@@ -37,6 +37,13 @@
 #include <opencv2/core/eigen.hpp>
 #include <numeric>
 
+#include <string>
+#include <fstream>
+#include <vector>
+#include <utility> // std::pair
+#include <stdexcept> // std::runtime_error
+#include <sstream> // std::stringstream
+#include <stdio.h>
 
 #include "track.h"
 #include "tracker_param.h"
@@ -57,7 +64,7 @@ namespace JPDAFTracker
       typedef std::vector<Eigen::Vector2f> Vec2f;
     public:
       Tracker(const TrackerParam& _param) : param_(_param) { ; }
-      void drawTracks(cv::Mat &_img) const;
+      void drawTracks(cv::Mat &_img, int frame) const;
     public:
       virtual void track(const Detections& _detections) { ; }
       virtual void track(const Detections& _detections, VecBool& _isAssoc, uint& _trackID) { ; }
