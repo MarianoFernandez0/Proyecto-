@@ -6,9 +6,11 @@ import pandas as pd
 import numpy as np
 import skimage.color as color
 
-def evaluation(tif):
+
+def evaluation(tif, include_mask=False):
     '''
     Entrada: .tif
+            include_mask (boolean): Deterina si el dataframe de salida incluye a la máscara de cada partícula detectada.
     Salida: dataframe
 
     Funcion que dado un .tif devuelve un dataframe con los campos {x, y, frame, ctcf, mean_gray_value}.
@@ -24,17 +26,20 @@ def evaluation(tif):
         image = sequence[nro_frame, :, :]
         seg_img = segmentation(image)
         particles = detect_particles(seg_img)
-
         image_bw = color.rgb2gray(image)
         grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
-
         for index, row in particles.iterrows():
             # fluorescencia
             mask = row['mask']
             ctcf, mean_gray_value = fluorescence(grayscale, mask, seg_img / 255)
             # rellenar dataframe
-            data = data.append(
-                {'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf, 'mean_gray_value': mean_gray_value},
-                ignore_index=True)
+            if include_mask:
+                data = data.append(
+                    {'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf,
+                     'mean_gray_value': mean_gray_value, 'mask': row['mask']}, ignore_index=True)
+            else:
+                data = data.append(
+                    {'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf,
+                     'mean_gray_value': mean_gray_value}, ignore_index=True)
 
     return data
