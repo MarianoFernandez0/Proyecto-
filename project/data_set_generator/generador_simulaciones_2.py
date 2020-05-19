@@ -93,17 +93,17 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
         x = np.zeros([particles, frames])
         y = np.zeros([particles, frames])
         intensity = np.zeros([particles, frames])
-        intensity[:, 0] = np.random.normal(180, 30, particles)
+        intensity[:, 0] = np.random.uniform(100, 250, particles)
         id_particles = np.arange(next_id, next_id + particles)
-        x[:, 0] = np.random.uniform(-2 * N, 4 * N, particles)  # Posicion inicial de las partículas
-        y[:, 0] = np.random.uniform(-2 * M, 4 * M, particles)
+        x[:, 0] = np.random.uniform(- N, 2 * N, particles)  # Posicion inicial de las partículas
+        y[:, 0] = np.random.uniform(- M, 2 * M, particles)
 
         d = np.random.multivariate_normal(mean, cov, particles)  # Se inicializa el tamaño de las partículas
         a = np.max(d, axis=1)
         l = np.min(d, axis=1)
 
         theta = np.random.uniform(0, 360, particles)  # Angulo inicial
-        v = np.random.normal(vm, 10, particles)  # Velocidad inicial
+        v = np.random.normal(vm, sigma_v, particles)  # Velocidad inicial
 
         for f in range(frames):  # Se crean los cuadros de a uno
             if f > 0:
@@ -113,9 +113,11 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
             image_aux = final_sequence[:, :, f].copy()
             image_segmented = final_sequence_segmented[:, :, f].copy()
             for p in range(particles):  # Se agregan las partículas a la imágen de a una
-                rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image_aux.shape, np.radians(theta[p]) - math.pi / 2)
+                head_displ = np.radians(np.random.uniform(-30, 30))
+                rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image_aux.shape, np.radians(theta[p]) - math.pi / 2 + head_displ)
                 if f > 0:
-                    intensity[p, f] = np.uint8(intensity[p, f - 1] + np.random.normal(0, 2))
+                    ran = np.random.normal(0, 20)
+                    intensity[p, f] = intensity[p, f - 1] + ran
                 if low_limit < intensity[p, f] <= 255:
                     image_segmented[rr, cc] = 255
                 if intensity[p, f] <= low_limit:
@@ -135,11 +137,13 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
                     id_particles[p] = np.max(id_particles) + 1
 
             # Agrego blur al frame para que no sean drásticos los cambios de intesidad
-            blured = gaussian(image_aux, 6, mode='reflect') + + np.random.normal(0, sigma_r, size=image_aux.shape)
-            image_normalized = np.uint8(
-                np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
-            intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(intensity[:, f])) / (
-                    np.max(intensity[:, f]) - np.min(intensity[:, f])) * 255)))
+            #blured = gaussian(image_aux, 6, mode='reflect', preserve_range=True) + np.random.normal(0, sigma_r, size=image_aux.shape)
+            #image_normalized = image_aux
+            image_normalized = gaussian(image_aux, 6, mode='reflect', preserve_range=True) + np.random.normal(0, sigma_r, size=image_aux.shape)
+            #image_normalized = np.uint8(
+            #    np.round(((blured - np.min(blured)) / (np.max(blured) - np.min(blured)) * 255)))
+            #intensity[:, f] = np.uint8(np.round(((intensity[:, f] - np.min(intensity[:, f])) / (
+            #        np.max(intensity[:, f]) - np.min(intensity[:, f])) * 255)))
             final_sequence_segmented[:, :, f] = np.uint8(image_segmented)
             final_sequence[:, :, f] = np.uint8(image_normalized)
             # Proximo paso
@@ -148,9 +152,12 @@ def _make_sequence(M, N, frames, sigma_r, poblaciones, output_file_name, seed):
 
         next_id = np.max(id_particles)
     # Guardo como tiff
+
     with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '.tif', bigtiff=True) as tif:
         for frame in range(frames):
-            tif.save(final_sequence[:, :, frame], photometric='minisblack', resolution=(M, N))
+            final_squence_rgb = np.zeros((3, final_sequence.shape[0], final_sequence.shape[1]))
+            final_squence_rgb[0, :] = final_sequence[:, :, frame]
+            tif.save(np.uint8(final_squence_rgb))
 
     with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + output_file_name + '_segmented.tif', bigtiff=True) as tif:
         for frame in range(frames):
@@ -201,7 +208,7 @@ populations = []
 mean = np.array([18, 7])
 cov = np.array([[4, 0],
                 [0, 4]])
-vm = 3
+vm = 10
 population = {
     'particles': 75,
     'mean': mean,
@@ -251,11 +258,11 @@ if not seq_data == "-":
     HOUSING_PATH_SEQ_DATA = seq_data
 fetch_output(HOUSING_PATH_SEQ_OUT, HOUSING_PATH_SEQ_DATA)
 
-sigmas_r = np.arange(0, 0.1, 0.01)
+sigmas_r = np.arange(0, 0.1, 0.04)
 total_it = sigmas_r.shape[0]
 it = 0
 for sigma_r in sigmas_r:
     generate_sequence(M, N, frames, sigma_r, poblaciones=populations,
-                      output_file_name="salida" + "_sigma_" + str(sigma_r).replace(".", "_"), seed=2)
+                      output_file_name="salida" + "_sigma_" + str(sigma_r).replace(".", "_"), seed=50)
     printProgressBar(it, total_it - 1, prefix='Progress:', suffix='Complete', length=50)
     it += 1
