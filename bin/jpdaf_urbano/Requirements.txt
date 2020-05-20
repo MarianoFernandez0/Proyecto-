@@ -5,3 +5,5 @@ statistics: https://octave.sourceforge.io/statistics/index.html
 
 Para buscar las funciones que hay implementadas en octave:
 https://octave.sourceforge.io/list_functions.php?sort=alphabetic#V 
+pgk install io.....tar.gz
+pkg load io
