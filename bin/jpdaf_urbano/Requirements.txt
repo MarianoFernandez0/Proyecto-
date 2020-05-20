@@ -1,0 +1,7 @@
+image: https://octave.sourceforge.io/image/index.html
+video: https://octave.sourceforge.io/video/index.html
+io: https://octave.sourceforge.io/io/index.html
+statistics: https://octave.sourceforge.io/statistics/index.html
+
+Para buscar las funciones que hay implementadas en octave:
+https://octave.sourceforge.io/list_functions.php?sort=alphabetic#V 
