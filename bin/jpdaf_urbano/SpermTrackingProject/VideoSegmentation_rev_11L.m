@@ -17,7 +17,7 @@ clear all; close all; font_size = 12;
 pkg load video
 pkg load image
 
-videoFile = '/home/mariano/Projects/TDE/jpdaf_urbano/SpermTrackingProject/output.mp4';
+videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4';
 
 
 tic

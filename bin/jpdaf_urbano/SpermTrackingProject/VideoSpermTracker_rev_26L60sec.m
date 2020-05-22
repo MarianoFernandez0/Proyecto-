@@ -11,16 +11,16 @@
 clear all; close all; tic; %addpath common/;
 pkg load statistics
 
-%%%%comento esto para probar
-%s = RandStream('mt19937ar','Seed',1);
-%RandStream.setGlobalStream(s)
+%Comento esto para probar                      --------MODIFICADO
+%s = RandStream('mt19937ar','Seed',1);        %--------MODIFICADO
+%RandStream.setGlobalStream(s)                %--------MODIFICADO
 
 % dbstop if warning
 % dbstop if error
 
 % Video A
-dataFile = '/home/mariano/Projects/TDE/jpdaf_urbano/SpermTrackingProject/output.mp4_MergedMeasurementDataFile.dat';
-videoFile = '/home/mariano/Projects/TDE/jpdaf_urbano/SpermTrackingProject/output.mp4';
+dataFile = '//home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4_MergedMeasurementDataFile.dat';
+videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4';
 
 % Load Data File
 zTotal = csvread(dataFile);
