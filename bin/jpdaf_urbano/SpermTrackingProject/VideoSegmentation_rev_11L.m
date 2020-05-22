@@ -14,7 +14,8 @@ clear all; close all; font_size = 12;
 % videoFile = fullfile(pathName, fileName);
 
 
-
+pkg load video
+pkg load image
 
 videoFile = '/home/mariano/Projects/TDE/jpdaf_urbano/SpermTrackingProject/output.mp4';
 

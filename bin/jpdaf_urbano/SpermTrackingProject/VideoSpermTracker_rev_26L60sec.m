@@ -9,6 +9,7 @@
 %
 % /////////////////////////////////////////////////////////////////////// %
 clear all; close all; tic; %addpath common/;
+pkg load statistics
 
 %%%%comento esto para probar
 %s = RandStream('mt19937ar','Seed',1);
