@@ -11,6 +11,11 @@ PATH_OUTPUT_DATA_SEQ :
 	#Standard deviation for blurring and smooth
 	#the edges of the blobs
 	std_blur : 6
+	std_noise_added : 0 0.001 0.01 0.1 10
+	#Limit from its consider that the particle is not visible
+	low_limit : 0
+	file_format = tiff mp4 jpg
+	file_name = test1
 
 #Parameters for each population
 [Population1]
@@ -19,13 +24,13 @@ PATH_OUTPUT_DATA_SEQ :
 	#Two values (long, width)
 	mean : 18 7 
 	#Four values multivariate pdf
-	std_mean : 4 0 4 0
+	cov_mean : 4 0 0 4
 	#movement
 	mean_velocity : 10
 	std_velocity : 1
-	std_direction : 10  #grads
-	std_head_displ : 30 #grads. Limits of the values
-	std_depth : 20  #std of the z movements
+	std_direction : 10
+	head_displ_limits : 30
+	std_depth : 10
 
 
 [Population2]
@@ -33,23 +38,23 @@ PATH_OUTPUT_DATA_SEQ :
 	tot_particles : 50
 	#dimensions
 	mean : 18 7 
-	std_mean : 4 0 4 0
+	cov_mean : 4 0 0 4
 	#movement
 	mean_velocity : 20
 	std_velocity : 1.5
-	std_direction : 10 	#grads
-	std_head_displ : 30	#grads. Limits of the values
-	std_depth : 20  		#std of the z movements
+	std_direction : 10
+	head_displ_limits : 30
+	std_depth : 20
 
 
 [Population3]
 	tot_particles : 75
 	#dimensions
 	mean : 20 9 
-	std_mean : 4 0 4 0
+	cov_mean : 4 0 0 4
 	#movement
 	mean_velocity : 5
 	std_velocity : 3
-	std_direction : 10 	#grads
-	std_head_displ : 30	#grads. Limits of the values
-	std_depth : 20 		#std of the z movements
+	std_direction : 10
+	head_displ_limits : 30
+	std_depth : 20
