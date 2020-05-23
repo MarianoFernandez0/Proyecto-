@@ -9,7 +9,11 @@
 %
 % /////////////////////////////////////////////////////////////////////// %
 clear all; close all; tic; %addpath common/;
+
 pkg load statistics
+pkg load video
+pkg load image
+pkg load io
 
 %Comento esto para probar                      --------MODIFICADO
 %s = RandStream('mt19937ar','Seed',1);        %--------MODIFICADO
@@ -19,15 +23,17 @@ pkg load statistics
 % dbstop if error
 
 % Video A
-dataFile = '//home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4_MergedMeasurementDataFile.dat';
-videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4';
+dataFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/_noise_added_0_1.mp4_MergedMeasurementDataFile.dat';
+videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/_noise_added_0_1.mp4';
+
+csv_tracks = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/csv_tracks.csv'; %MODIFICADO - agragar la ruta al csv de salida
 
 % Load Data File
 zTotal = csvread(dataFile);
 
 % Number of frames to analyze (60 sec x 15 fps = 900)
 % numFrames = 10 * 15; % length(unique(zTotal(3,:)));
-numFrames = 20;
+numFrames = 50;
 
 % Load Video File
 video = VideoReader(videoFile);
@@ -48,8 +54,15 @@ plotResults = 0;
 % SaveMovie
 saveMovie = 1;
 
+snapShot = 0;
+
+plotTrackResults = 1;
+
+analyzeMotility = 0;
+
 % Scale Factor (px2micron)
-px2um = (12/28) * 2;
+%px2um = (12/28) * 2;
+px2um = (0.05) * 2;            %MODIFICADO
 um2px = 1/px2um;
 
 % ROI Size Parameters
@@ -57,7 +70,7 @@ ROIx = 512;
 ROIy = 512;
 
 % Initalize Filter
-T = 1/15;   % (sec) sample period
+T = 1/10;   % (sec) sample period
 
 % Dynamical System & Measurement Equation
 F = [1 0 T 0; 0 1 0 T; 0 0 1 0; 0 0 0 1];
@@ -69,9 +82,10 @@ N = 2^2 * eye(2,2);
 
 % CWNA Process Noise
 qMat = [T^3/3 0 T^2/2 0; 0 T^3/3 0 T^2/2; T^2/2 0 T 0; 0 T^2/2 0 T];
-%deltaV = 20;
-deltaV = 80;  %cambié estoo
-qIntensity = deltaV^2/T;
+%deltaV = 20;                             %--------MODIFICADO
+deltaV = 80;                              %--------MODIFICADO
+qIntensity = deltaV^2/T;                  %--------MODIFICADO
+qIntensity = 20;                  %--------MODIFICADO
 Q0 = qMat * qIntensity;
 
 % Initial covariance matrix
@@ -83,20 +97,20 @@ S0 = H * P0 * H' + N;
 
 % Statistical Parameters
 PG = 0.997;      %   Prob. that a detected target falls in validation gate
-PD = 0.95;       %   Prob. of detection
+PD = 0.99;       %   Prob. of detection
 
 % Expected number of measurements due to clutter per unit area of the
 % surveillance space per scan of data
-lam_f = 1e-6;
+lam_f = 1e-8;
 
 % Expected number of measurements from new targets per unit area of the
 % surveillance space per scan of data
-lam_n = 1e-5;
+lam_n = 1e-3;
 
 % Track Management Thresholds
 initialScore = log(lam_n/lam_f);
 Pdelete = 1e-6;
-Pconfirm = 1e-5;
+Pconfirm = 1e-4;
 threshDelete = log(Pdelete / (1 - Pconfirm));
 threshConfirm = log((1-Pdelete)/Pconfirm) + initialScore;
 
@@ -104,7 +118,7 @@ threshConfirm = log((1-Pdelete)/Pconfirm) + initialScore;
 gx = chi2inv(PG, 2);
 
 % Velocity Gate (um/s)
-gv = 300;
+gv = 800;
 
 
 % /////////////////////////////////////////////////////////////////////// %
@@ -499,7 +513,8 @@ for k = 1:numFrames
             pHandles = [];
             
             % Display the video frame
-            currFrame = rgb2gray(read(video, k));
+            %currFrame = rgb2gray(read(video, k));             %MODIFICADO(matlab->octave)
+            currFrame = rgb2gray(readFrame(video, k));         %MODIFICADO(matlab->octave)            ˙
             pHandles(end+1) = imshow(currFrame); hold on;
             
             % Plot the Measurements at Frame k
@@ -513,19 +528,20 @@ for k = 1:numFrames
             for t = 1:length(ct_idx)
                 
                 trk = ct_idx(t);
-                pHandles(end+1) = plotEllipse(Zp(:,t)' .* um2px, gx * Sp(:,:,t) .* um2px^2);
+                %pHandles(end+1) = plotEllipse(Zp(:,t)' .* um2px, gx * Sp(:,:,t) .* um2px^2);    %MODIFICADO
+                pHandles(end+1) = plot_gaussian_ellipsoid(Zp(:,t)' .* um2px, gx * Sp(:,:,t) .* um2px^2);    %MODIFICADO
                 set(pHandles(end), 'Color', 'r');
                 
                 pHandles(end+1) = text(Zp(1,t) .* um2px + 0.025 * ROIx, Zp(2,t) .* um2px + 0.025 * ROIy, ...
                     num2str(t_idx(t)), 'FontSize', 12, 'FontWeight', 'bold', ...
-                    'FontName', 'Arial', 'Color', 'k');
+                    'FontName', 'Arial', 'Color', 'g');         %MODIFICADO k->g
             end
             
             
             pHandles(end+1) = plot(Z(1,:).* um2px, Z(2,:).* um2px, 'r+');
             
-            
-            pause(0.001);
+            pause(2);                                       %MODIFICADO
+            %pause(0.001);                                  %MODIFICADO
             
             if (k < numFrames)
                 delete(pHandles(:));
@@ -536,7 +552,7 @@ for k = 1:numFrames
         
     end
     
-    
+
     
     
     % /////////////////////////////////////////////////////////////////// %
@@ -631,7 +647,6 @@ for k = 1:numFrames
     % /////////////////////////////////////////////////////////////////// %
     if ~isempty(Z)
         for j = find(Z(3,:) == 0)
-            
             TrackFile(end+1,1) = 1;             % Track Rank
             % 1 = Tentative
             % 2 = Confirmed
@@ -671,8 +686,6 @@ for k = 1:numFrames
             TrackFile(end,33) = Q0(3,3);  % Initial Q
             TrackFile(end,34) = Q0(3,4);  % Initial Q
             TrackFile(end,35) = Q0(4,4);  % Initial Q
-            
-            
         end
     end
         
@@ -689,12 +702,27 @@ for k = 1:numFrames
     
     % Update the waitbar
     waitbar(k/numFrames, hWaitbar);
-    
 end % // Main Loop
 
+
+%------------------------------------------------------------------------------
+% guardo los resultados en un csv
+tracks_csv = [];
+
+%tracks_csv(:,1) = TrackRecord(:,1); 
+%tracks_csv(:,2) = TrackRecord(:,5);
+%tracks_csv(:,3) = TrackRecord(:,6);
+%tracks_csv(:,2) = TrackRecord(:,19);
+%tracks_csv(:,3) = TrackRecord(:,20);
+%tracks_csv(:,1) = TrackRecord(:,4);
+
+
+%1 19 20 4 = id_trk, x, y, frame
+csvwrite(csv_tracks, TrackRecord(:,[1 19 20 4]))
+
+%------------------------------------------------------------------------------
 % Close the waitbar
 close(hWaitbar);
-
 
 
 
@@ -709,20 +737,22 @@ close(hWaitbar);
 % /////////////////////////////////////////////////////////////////////// %
 
 %saveMovie = 1;
-saveMovie = 0;
 
 if (saveMovie)
-    
+
     figure; set(gca, 'Box', 'On');
-    iptsetpref('ImshowBorder', 'tight')
+    %iptsetpref('ImshowBorder', 'tight')           %MODIFICADO (no existe en octave)
     
     % Open the Movie File
-    movieFile = fullfile([videoFile, '_Aug23PaperMovie10sec_', num2str(mttAlgorithm)])
-    vidObj = VideoWriter(movieFile);
-    set(vidObj, 'Quality', 100);
-    set(vidObj, 'FrameRate', 1/T);
-    open(vidObj)
     
+    movieFile = fullfile([videoFile, '_Aug23PaperMovie10sec_', num2str(mttAlgorithm), '.avi'])     %MODIFICADO
+    
+    vidObj = VideoWriter(movieFile);
+    %set(vidObj, 'Quality', 100);			%MODIFICADO
+    %set(vidObj, 'FrameRate', 1/T);			%MODIFICADO 
+    %open(vidObj)					%MODIFICADO 
+
+
     % Length of Trail History (in frames)
     trailLength = (1 * 15);
     
@@ -730,7 +760,8 @@ if (saveMovie)
     for k = 1:numFrames
         
         % Display the video frame
-        imshow(imcomplement(rgb2gray(read(video, k))));
+        %imshow(imcomplement(rgb2gray(read(video, k))));          %MODIFICADO (matlab->octave)
+        imshow(imcomplement(rgb2gray(readFrame(video, k))));      %MODIFICADO (matlab->octave)
         % imshow(rgb2gray(read(video, k)));
         hold on;
         set(gcf, 'Position', [255 90 955 715]);
@@ -748,6 +779,8 @@ if (saveMovie)
         
         % Find the tracks at time k
         trackIdx = unique(TrackRecord(timeIdx,1));
+        
+
         
         % Plot each track up to time k
         for trk = trackIdx'
@@ -783,13 +816,13 @@ if (saveMovie)
             
             % Plot the Tracks and Measurements up to time k
             plot(posX , posY, 'b');
-            % plot(posX(end) , posY(end), 'cs', 'MarkerSize', 20);
+            plot(posX(end) , posY(end), 'cs', 'MarkerSize', 20);
             plot(measX, measY, 'g')
             plot(measX, measY, 'g.', 'MarkerSize', 5);
             plot(measX(end), measY(end), 'y+');
             
             % Plot the track gate
-            ellipHand = plotEllipse([posX(end); posY(end)], gx * SpMat .* um2px^2);
+            ellipHand = plot_gaussian_ellipsoid([posX(end); posY(end)], gx * SpMat .* um2px^2);  %MODIFICADO plotElipse->plot_gaussian_ellipsoid
             set(ellipHand, 'Color', 'r');
             
             % Label the Track Number
@@ -807,13 +840,16 @@ if (saveMovie)
         set(hText, 'Color', 'w');
         
         % Wait (allow time to save)
-        pause(0.05);
+        pause(0.01);
         
         % Save the frame to the movie file
         currFrame = getframe(gcf);
-        writeVideo(vidObj, currFrame);
         
-        % Clear the frame
+        open(vidObj);
+        writeVideo(vidObj, currFrame)           %MODIFICADO     
+                                 %MODIFICADO
+        close(vidObj);
+        %Clear the frame
         if (k<numFrames)
             clf
         end
@@ -821,9 +857,8 @@ if (saveMovie)
         k
         
     end
-    
     % Close the movie file
-    close(vidObj);
+    %close(vidObj);
     
 end
 
@@ -839,12 +874,12 @@ end
 % /////////////////////////////////////////////////////////////////////// %
 
 %snapShot = 1;
-snapShot = 0;
+
 
 if (snapShot)
     
     figure; set(gca, 'Box', 'On');
-    iptsetpref('ImshowBorder', 'tight')
+    %iptsetpref('ImshowBorder', 'tight')
     
     % Length of Trail History (in frames)
     trailLength = (1 * 15);
@@ -853,7 +888,8 @@ if (snapShot)
     for k = 13 + [5 10 15 20 25 30]
         
         % Display the video frame
-        imshow(imcomplement(rgb2gray(read(video, k))));
+        %imshow(imcomplement(rgb2gray(read(video, k))));            %MODIFICADO
+        imshow(imcomplement(rgb2gray(readFrame(video, k))));        %MODIFICADO
         
         % imshow(rgb2gray(read(video, k)));
         hold on;
@@ -908,8 +944,10 @@ if (snapShot)
             plot(measX(end), measY(end), 'r+');
             
             % Plot the track gate
-            % ellipHand = plotEllipse([posX(end); posY(end)], gx * SpMat .* um2px^2);
-            % set(ellipHand, 'Color', 'r');
+            %ellipHand = plotEllipse([posX(end); posY(end)], gx * SpMat .* um2px^2);    %MODIFICADO
+            ellipHand = plot_gaussian_ellipsoid([posX(end); posY(end)], gx * SpMat .* um2px^2);
+            set(ellipHand, 'Color', 'r');
+            
             
             % Label the Track Number
             text(posX(end)+5, posY(end)-5, num2str(trk), ...
@@ -924,7 +962,7 @@ if (snapShot)
         axis([80 80+150 220 220+150])
         set(gcf, 'PaperPositionMode', 'Auto')
         set(gcf, 'renderer', 'painters');
-        % print(gcf, '-dpng', '-r300', [videoFile, 'MTT', num2str(mttAlgorithm), '_NewSnapshotFrame', num2str(k), '.png'])
+        print(gcf, '-dpng', '-r300', [videoFile, 'MTT', num2str(mttAlgorithm), '_NewSnapshotFrame', num2str(k), '.png'])
         
     end
     
@@ -943,7 +981,7 @@ end
 %   Track Results
 %
 % /////////////////////////////////////////////////////////////////////// %
-plotTrackResults = 1;
+%plotTrackResults = 1;
 
 if (plotTrackResults)
     
@@ -952,7 +990,7 @@ if (plotTrackResults)
     subplot(2,4, [1 2 5 6]); hold on;
     
     %plotTrackHistory_2L(TrackRecord, T, um2px)
-    plotTrackHistory_4L(TrackRecord, T, um2px, 0, 20) %lo cambié por 4L
+    plotTrackHistory_4L(TrackRecord, T, um2px, 0, numFrames) %lo cambié por 4L
     set(gca, 'Box', 'On', 'FontName', 'Arial', 'FontSize', 11, 'FontWeight', 'Bold')
     axis equal; axis([0 ROIx 0 ROIy]/um2px);
     
@@ -988,13 +1026,13 @@ end
 %
 % /////////////////////////////////////////////////////////////////////// %
 %analyzeMotility = 1;
-analyzeMotility = 0;
+
 if (analyzeMotility)
     
     % [stats] = analyzeTrackRecord_rev_3L(TrackRecord, T);
     % [stats] = analyzeTrackRecord_rev_4L(TrackRecord, T);
     %[stats] = analyzeTrackRecord_rev_5L(TrackRecord, T);
-    [stats] = analyzeTrackRecord_rev_7L(TrackRecord, T, 1); % cambié a 7L
+    [stats] = analyzeTrackRecord(TrackRecord, T, 1); %MODIFICADO cambié a 7L
     
     TRKNUM = stats.sampleTRK;
     VCL = stats.sampleVCL;
@@ -1450,8 +1488,8 @@ if (snapShot)
         
         % Display the video frame
         % imshow(imcomplement(rgb2gray(read(video, k))));
-        imshow(rgb2gray(read(video, k)));
-        
+        %imshow(rgb2gray(read(video, k)));           %MODIFICADO(matlab->octave)
+        imshow(rgb2gray(readFrame(video, k)));       %MODIFICADO(matlab->octave)
         % imshow(rgb2gray(read(video, k)));
         hold on;
         set(gcf, 'Position', [255 90 955 715]);

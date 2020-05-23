@@ -19,7 +19,7 @@ for trk = trackList
 
     % Plot moving tracks
     %%%%%%Cambio endTime a mano acá y startTime
-    endTime = 20
+    endTime = 50
     startTime = 0
     timeIdx = find(time >= startTime & time <= endTime);        
     %plot(measX(timeIdx), measY(timeIdx), 'k.'); 

@@ -17,7 +17,7 @@ clear all; close all; font_size = 12;
 pkg load video
 pkg load image
 
-videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/output.mp4';
+videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/_noise_added_0_1.mp4';
 
 
 tic
@@ -33,7 +33,7 @@ tic
 video = VideoReader(videoFile);
 
 % Number of frames to process (1.5 minutes)
-numFrames = 60 * 15;
+numFrames = 50;
 
 % Display the waitbar
 % hWaitbar = waitbar(0, 'Processing ...');
@@ -46,8 +46,7 @@ h1 = fspecial('gaussian', 11, 1);
 h2 = fspecial('log', 10, 0.3);
 
 % Process Each Frame
-%for k = 1:numFrames;
-for k = 1:20;
+for k = 1:numFrames;
     %currFrame = rgb2gray(read(video, k));
     currFrame = rgb2gray(readFrame(video, k)); %adaptado a octave
     I = currFrame;
