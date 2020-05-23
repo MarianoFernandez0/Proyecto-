@@ -14,7 +14,26 @@ import math
 
 def make_sequence(sequence_parameters, all_population):
     '''
+    Primary function that make the specific sequence
 
+    Inputs:
+        - sequence_parameters: list of parameters
+            {
+                path_data_out: string with the path where the data is going to be saved
+                path_seq_out:  string with the path where the video is going to be saved
+                M: Height of each frame
+                N: Width of each frame
+                frames: Total number of frames
+                rgb: Boolean if the output is rgb or not
+                std_blur: Standard deviation of blurring image
+                std_noise_added: List of possible power of the added noise
+                low_limit: Inferior limit of intensity
+                extension: List of video extensions (tiff, mp4, jpg)
+                file_name: Name of the ouput file
+                fps: frame rate when the ouput is mp4
+            }
+        - all_population: list of pupulation data
+        TODO: Terminar de explicar las entradas de cada poblacion
     '''
     # Load the parameters from the list
     HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
@@ -148,10 +167,15 @@ def make_sequence(sequence_parameters, all_population):
 
 def save_video_file(sequence, extensions, file_name, path_out, fps=None):
     '''
-    sequence (frames, M, N)
+    Save a numpy array as specific format video
 
+    Inputs:
+     - sequence: numpy array (frames, M, N)
+     - extensions: list of the extensions (tiff, mp4, jpg)
+     - file_name: string with the name of the file
+     - path_out path to the directory where the output is going to be saved
+     - fps: if the format is mp4, is necessary to specify the fps. Type float
     '''
-    error = False
     for extension in extensions:
         if extension == "tiff":
             path_out_tiff = path_out + "/tiff_ouput"
@@ -164,13 +188,20 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
             path_out_mp4 = path_out + "/mp4_ouput"
             fetch_output("", path_out_mp4)
             mp4_writer(path_out_mp4 + "/" + file_name + ".mp4", sequence, fps)
-    return error
+    return
 
 
 def save_data_file(data_frame_in, path_data_out, file_name):
-    error = False
+    """
+    Save the data in csv file
+
+    Inputs:
+        - data_frame_in: DataFrame with the data
+        - path_data_out: Directory where the data will be saved
+    """
+
     data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
-    return error
+    return
 
 
 def read_parameters(path='config.txt'):
@@ -192,6 +223,7 @@ def read_parameters(path='config.txt'):
                     the edge of the particles are smoothed out
             std_noise_added:  list of different noises power to be added
         - all_population: list of dictionaries for each population data.
+        TODO: Terminar de explicar la data de las poblaciones
     '''
 
     config = configparser.ConfigParser()
