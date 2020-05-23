@@ -4,14 +4,12 @@
 from skimage.filters import gaussian
 from skimage.draw import ellipse
 from skimage.external.tifffile import TiffWriter
+from imageio import mimwrite as mp4_writer
 import numpy as np
 import pandas as pd
 import configparser
 import os
 import math
-
-HOUSING_PATH_SEQ_OUT = os.path.join("datasets", "video_sequence")
-HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
 
 
 def make_sequence(sequence_parameters, all_population):
@@ -19,14 +17,25 @@ def make_sequence(sequence_parameters, all_population):
 
     '''
     # Load the parameters from the list
+    HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
+    HOUSING_PATH_SEQ_OUT = os.path.join("datasets", "video_sequence")
+
     (path_data_out, path_seq_out, M, N, frames, rgb,
-     std_blur, std_noise_added, low_limit, extension, file_name) = sequence_parameters
-    fetch_output(housing_path_seq_data=HOUSING_PATH_SEQ_DATA, housing_path_seq_out=HOUSING_PATH_SEQ_OUT)
+     std_blur, std_noise_added, low_limit, extension, file_name, fps) = sequence_parameters
+
+    if not path_data_out:
+        path_data_out = HOUSING_PATH_SEQ_DATA
+    if not path_seq_out:
+        path_seq_out = HOUSING_PATH_SEQ_OUT
+
+    fetch_output(housing_path_seq_data=path_data_out, housing_path_seq_out=path_seq_out)
     df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'frame', 'intensity'])
     next_id = 0
-    # np.random.seed(seed)
     final_sequence = np.zeros((frames, M, N))
     final_sequence_segmented = np.zeros((frames, M, N))
+
+    it = 0
+    tot_it = len(all_population) * frames
 
     for population in all_population:
         particles, mean, cov_mean = population['particles'], population['mean'], population['cov_mean']
@@ -53,6 +62,9 @@ def make_sequence(sequence_parameters, all_population):
 
         # Each frame is created
         for f in range(frames):
+            # Progress bar printing
+            it += 1
+            printProgressBar(it, tot_it)
             if f > 0:
                 x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
                 y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
@@ -86,45 +98,78 @@ def make_sequence(sequence_parameters, all_population):
             # Add blur so there are no drastic changes in the border of the particles
             image_normalized = gaussian(image_aux, std_blur, mode='reflect', preserve_range=True)
             final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
+            image_normalized[image_normalized < 0] = 0
+            image_normalized[image_normalized > 255] = 255
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step
             v = np.abs(np.random.normal(v, std_velocity, particles))
             theta = np.random.normal(theta, std_direction, particles)
         next_id = np.max(id_particles)
 
+    it = 0
+    tot_it = len(std_noise_added)
     for std_noise in std_noise_added:
-        sequence_plus_noise = final_sequence.copy()
-        sequence_plus_noise += np.random.normal(0, std_noise, size=final_sequence.shape)
-        save_video_file(sequence_plus_noise, extension,
-                        file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
+        it += 1
+        print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
+        if rgb:
+            sequence_plus_noise = np.zeros((final_sequence.shape[0], final_sequence.shape[1],
+                                            final_sequence.shape[2], 3))
+            sequence_plus_noise[:, :, :, 0] = final_sequence
+            sequence_plus_noise += np.random.normal(0, std_noise, size=sequence_plus_noise.shape)
+            sequence_plus_noise[sequence_plus_noise < 0] = 0
+            sequence_plus_noise[sequence_plus_noise > 255] = 255
+            save_video_file(sequence_plus_noise, extension,
+                            file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
+        else:
+            sequence_plus_noise = final_sequence.copy()
+            sequence_plus_noise += np.random.normal(0, std_noise, size=sequence_plus_noise.shape)
+            sequence_plus_noise[sequence_plus_noise < 0] = 0
+            sequence_plus_noise[sequence_plus_noise > 255] = 255
+            save_video_file(np.uint8(sequence_plus_noise), extension,
+                            file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
+        print() if it == tot_it else False
 
-    save_video_file(final_sequence, extension, file_name, path_seq_out)
-    save_video_file(final_sequence_segmented, extension, file_name + "_segmented_", path_seq_out)
+    final_sequence = np.uint8(final_sequence)
+    print("Saving sequence without noise...")
+    if not rgb:
+        save_video_file(final_sequence, extension, file_name, path_seq_out)
+    else:
+        final_sequence_rgb = np.zeros((final_sequence.shape[0], final_sequence.shape[1],
+                                       final_sequence.shape[2], 3), dtype=np.uint8)
+        final_sequence_rgb[:, :, :, 0] = final_sequence
+        save_video_file(final_sequence_rgb, extension, file_name, path_seq_out)
+
+    print("Saving segmented sequence...")
+    save_video_file(np.uint8(final_sequence_segmented), extension, file_name + "_segmented_", path_seq_out)
     save_data_file(df_info, path_data_out, file_name)
 
     return 0
 
 
-def save_video_file(sequence, extensions, file_name, path_out):
+def save_video_file(sequence, extensions, file_name, path_out, fps=None):
     '''
     sequence (frames, M, N)
 
     '''
-    print("'Saving'")
     error = False
     for extension in extensions:
         if extension == "tiff":
+            path_out_tiff = path_out + "/tiff_ouput"
+            fetch_output("", path_out_tiff)
             # Guardo como tiff
-            with TiffWriter(HOUSING_PATH_SEQ_OUT + "/" + file_name + "." + extension, bigtiff=True) as tif:
+            with TiffWriter(path_out_tiff + "/" + file_name + ".tiff", bigtiff=True) as tif:
                 for frame in range(sequence.shape[0]):
                     tif.save((sequence[frame]))
+        elif extension == "mp4":
+            path_out_mp4 = path_out + "/mp4_ouput"
+            fetch_output("", path_out_mp4)
+            mp4_writer(path_out_mp4 + "/" + file_name + ".mp4", sequence, fps)
     return error
 
 
 def save_data_file(data_frame_in, path_data_out, file_name):
     error = False
-    data_frame_in.to_csv(HOUSING_PATH_SEQ_DATA + "/" + file_name + "_data.csv", index=False)
-
+    data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
     return error
 
 
@@ -157,14 +202,15 @@ def read_parameters(path='config.txt'):
     path_data_out = config["Output path"]["PATH_OUTPUT_DATA_CSV"]
     path_seq_out = config["Output path"]["PATH_OUTPUT_DATA_SEQ"]
     M_N_frames = np.array(config["Sequence parameters"]["height_width_frames"].split(), dtype=np.int)
-    rgb = config["Sequence parameters"]["rgb"]
+    rgb = (config["Sequence parameters"]["rgb"]).lower() == "true"
     std_blur = float(config["Sequence parameters"]["std_blur"])
     std_noise_added = np.array(config["Sequence parameters"]["std_noise_added"].split(), dtype=np.float)
     low_limit = float(config["Sequence parameters"]["low_limit"])
     file_format = config["Sequence parameters"]["file_format"].split()
     file_name = config["Sequence parameters"]["file_name"]
+    fps = float(config["Sequence parameters"]["frame_rate"])
     sequence_parameters = [path_data_out, path_seq_out, M_N_frames[0], M_N_frames[1],
-                           M_N_frames[2], rgb, std_blur, std_noise_added, low_limit, file_format, file_name]
+                           M_N_frames[2], rgb, std_blur, std_noise_added, low_limit, file_format, file_name, fps]
 
     # load populations
     all_population = []
@@ -183,7 +229,7 @@ def read_parameters(path='config.txt'):
     return sequence_parameters, all_population
 
 
-def fetch_output(housing_path_seq_data=HOUSING_PATH_SEQ_DATA, housing_path_seq_out=HOUSING_PATH_SEQ_OUT):
+def fetch_output(housing_path_seq_data, housing_path_seq_out):
     """
     This function takes the output files paths. If exists, does nothing, if not
     creates de directory
@@ -194,8 +240,23 @@ def fetch_output(housing_path_seq_data=HOUSING_PATH_SEQ_DATA, housing_path_seq_o
         - housing_path_seq_out : A string with the path where is going
         to be saved the output sequences
     """
-    if not os.path.isdir(housing_path_seq_data):
+    if not os.path.isdir(housing_path_seq_data) and housing_path_seq_data:
         os.makedirs(housing_path_seq_data)
-    if not os.path.isdir(housing_path_seq_out):
+    if not os.path.isdir(housing_path_seq_out) and housing_path_seq_out:
         os.makedirs(housing_path_seq_out)
+    return
+
+
+def printProgressBar(iteration, total, prefix='Making sequence', suffix='', decimals=1, length=20, fill="\u25AE",
+                     printEnd="\r"):
+    """
+    Call in a loop to create terminal progress bar
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '_' * (length - filledLength)
+    print('\r%s %s %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
     return

@@ -7,3 +7,4 @@ Image
 Tifffile
 pandas
 modest
+imageio-ffmpeg
