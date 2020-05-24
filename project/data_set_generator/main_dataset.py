@@ -8,9 +8,9 @@ def __init__():
     The call must be as follow:
     main_dataset.py path/to/config/file.txt
     """
-    path = sys.argv[1]
-    if not path:
-        path = 'config.txt'
+    path = 'config.txt'
+    if len(sys.argv) > 1:
+        path = sys.argv[1]
     sequence_parameters, all_population = read_parameters(path=path)
     make_sequence(sequence_parameters, all_population)
     return

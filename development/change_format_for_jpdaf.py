@@ -92,9 +92,9 @@ def save_secuence_as_jpgs_for_jpdaf(tiff_sequence, sequence_folder_directory):
     """
     tiff_sequence = tiff_sequence.asarray()
     tiff_sequence = tiff_sequence.astype(np.uint8)
-    pathlib.Path(sequence_folder_directory+'video/').mkdir(parents=True, exist_ok=True)
+    pathlib.Path(sequence_folder_directory + 'video/').mkdir(parents=True, exist_ok=True)
     for i in range(tiff_sequence.shape[0]):
-        imsave(folder_directory+'video/'+str(i)+'.jpg', tiff_sequence[i, :, :])
+        imsave(folder_directory +'video/'+str(i)+'.jpg', tiff_sequence[i, :, :])
 
 
 # ----------------------------------------------------------------------------------------------------------------------
