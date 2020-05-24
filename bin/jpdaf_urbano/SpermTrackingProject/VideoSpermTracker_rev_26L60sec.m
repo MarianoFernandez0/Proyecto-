@@ -23,13 +23,23 @@ pkg load io
 % dbstop if error
 
 % Video A
-dataFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/_noise_added_0_1.mp4_MergedMeasurementDataFile.dat';
+reformat_dataFile = 1;
+dataFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/_data.csv';
 videoFile = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/_noise_added_0_1.mp4';
 
 csv_tracks = '/home/mariano/Projects/TDE/git/Proyecto-/bin/jpdaf_urbano/data/dataset/mp4_ouput/csv_tracks.csv'; %MODIFICADO - agragar la ruta al csv de salida
 
+
 % Load Data File
-zTotal = csvread(dataFile);
+%-------------------------------------------------------------------------------------------------------------------------------------------------------------
+if reformat_dataFile
+	zTotal_aux = csvread(dataFile);
+	zTotal = zTotal_aux(:,[3 2 4])';
+	
+else
+	zTotal = csvread(dataFile);
+end
+%-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 % Number of frames to analyze (60 sec x 15 fps = 900)
 % numFrames = 10 * 15; % length(unique(zTotal(3,:)));
@@ -85,19 +95,19 @@ qMat = [T^3/3 0 T^2/2 0; 0 T^3/3 0 T^2/2; T^2/2 0 T 0; 0 T^2/2 0 T];
 %deltaV = 20;                             %--------MODIFICADO
 deltaV = 80;                              %--------MODIFICADO
 qIntensity = deltaV^2/T;                  %--------MODIFICADO
-qIntensity = 20;                  %--------MODIFICADO
+qIntensity = 20;                  	   %--------MODIFICADO
 Q0 = qMat * qIntensity;
 
 % Initial covariance matrix
-% P0 = [N N./T; N./T 2*N./T^2];
-P0 = Q0; % [2^2 0 0 0; 0 2^2 0 0; 0 0 1 0; 0 0 0 1];
+P0 = [N N./T; N./T 2*N./T^2];  		%MODIFICADO Este anda mejor
+%P0 = Q0; % [2^2 0 0 0; 0 2^2 0 0; 0 0 1 0; 0 0 0 1];
 
 % Initial residual covariance matrix
 S0 = H * P0 * H' + N;
 
 % Statistical Parameters
 PG = 0.997;      %   Prob. that a detected target falls in validation gate
-PD = 0.99;       %   Prob. of detection
+PD = 0.999;       %   Prob. of detection
 
 % Expected number of measurements due to clutter per unit area of the
 % surveillance space per scan of data
@@ -745,13 +755,12 @@ if (saveMovie)
     
     % Open the Movie File
     
-    movieFile = fullfile([videoFile, '_Aug23PaperMovie10sec_', num2str(mttAlgorithm), '.avi'])     %MODIFICADO
+    movieFile = fullfile([videoFile, '_Aug23PaperMovie10sec_', num2str(mttAlgorithm), '.mp4'])     %MODIFICADO
     
     vidObj = VideoWriter(movieFile);
     %set(vidObj, 'Quality', 100);			%MODIFICADO
     %set(vidObj, 'FrameRate', 1/T);			%MODIFICADO 
-    %open(vidObj)					%MODIFICADO 
-
+    open(vidObj)					%MODIFICADO 
 
     % Length of Trail History (in frames)
     trailLength = (1 * 15);
@@ -832,8 +841,8 @@ if (saveMovie)
         end
         
         % Draw 100um scale bar
-        hRectangle = rectangle('Position', [20 460 100*um2px 5*px2um]);
-        set(hRectangle, 'FaceColor', 'w', 'EdgeColor', 'w');
+        %hRectangle = rectangle('Position', [20 460 100*um2px 5*px2um]);
+        %set(hRectangle, 'FaceColor', 'w', 'EdgeColor', 'w');
         
         % Sign your name
         hText = text(440, 460, 'L. Urbano, et al (2015) Drexel University', 'FontSize', 12);
@@ -844,11 +853,10 @@ if (saveMovie)
         
         % Save the frame to the movie file
         currFrame = getframe(gcf);
+        if k>1
+	        writeVideo(vidObj, currFrame)           %MODIFICADO     
+        end                         %MODIFICADO
         
-        open(vidObj);
-        writeVideo(vidObj, currFrame)           %MODIFICADO     
-                                 %MODIFICADO
-        close(vidObj);
         %Clear the frame
         if (k<numFrames)
             clf
@@ -858,7 +866,7 @@ if (saveMovie)
         
     end
     % Close the movie file
-    %close(vidObj);
+    close(vidObj);
     
 end
 
