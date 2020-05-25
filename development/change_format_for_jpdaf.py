@@ -122,6 +122,6 @@ def save_secuence_as_jpgs_for_jpdaf(tiff_sequence, sequence_folder_directory):
 #     detected = evaluation(tiff, include_mask=True)
 #     folder_directory = 'sequences_for_jpdaf/' + video_sequences[num_seq] + '/'
 #     save_secuence_as_jpgs_for_jpdaf(tiff, folder_directory)
-#     write_csv_for_jpdaf(detected, folder_directory)
+#
 
 # ----------------------------------------------------------------------------------------------------------------------
