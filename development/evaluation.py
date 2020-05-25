@@ -10,7 +10,7 @@ import skimage.color as color
 def evaluation(tif, include_mask=False):
     '''
     Entrada: .tif
-            include_mask (boolean): Deterina si el dataframe de salida incluye a la máscara de cada partícula detectada.
+            include_mask (boolean): Determina si el dataframe de salida incluye a la máscara de cada partícula detectada.
     Salida: dataframe
 
     Funcion que dado un .tif devuelve un dataframe con los campos {x, y, frame, ctcf, mean_gray_value}.
