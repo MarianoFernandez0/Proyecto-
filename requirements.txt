@@ -8,3 +8,4 @@ Tifffile
 pandas
 modest
 imageio-ffmpeg
+oct2py
