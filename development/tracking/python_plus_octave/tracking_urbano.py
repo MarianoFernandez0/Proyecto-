@@ -33,12 +33,14 @@ def tracking_urbano(config_params):
     ROIx = int(config["Input"]["ROIx"])
     ROIy = int(config["Input"]["ROIy"])
 
-    csv_tracks = config["Output"]["CSV_TRACKS_PATH"]
+    csvTracks = config["Output"]["CSV_TRACKS_PATH"]
+    videoFileOut = config["Output"]["VIDEOFILE_OUT_PATH"]
 
-    mttAlgorithm = int(config["Algoritmn params"]["mttAlgorithm"])
-    PG = float(config["Algoritmn params"]["PG"])
-    PD = float(config["Algoritmn params"]["PD"])
-    gv = float(config["Algoritmn params"]["gv"])
+    detectionAlgorithm = int(config["Algorithm params"]["detectionAlgorithm"])
+    mttAlgorithm = int(config["Algorithm params"]["mttAlgorithm"])
+    PG = float(config["Algorithm params"]["PG"])
+    PD = float(config["Algorithm params"]["PD"])
+    gv = float(config["Algorithm params"]["gv"])
 
     plotResults = int(config["Do"]["plotResults"])
     saveMovie = int(config["Do"]["saveMovie"])
@@ -46,14 +48,17 @@ def tracking_urbano(config_params):
     plotTrackResults = int(config["Do"]["plotTrackResults"])
     analyzeMotility = int(config["Do"]["analyzeMotility"])
 
-    # Load tiff sequence
-    tiff = tifffile.TiffFile(videoFile_tiff)
-    # Perform detection step
-    detected = evaluation(tiff)
-    detected.to_csv(dataFile)
+    if detectionAlgorithm:
+        # Python implementation for segmentation and detection
+        tiff = tifffile.TiffFile(videoFile_tiff)
+        detected = evaluation(tiff)
+        detected.to_csv(dataFile)
+    else:
+        # Urbano matlab implementation for segmentation and detection
+        octave.Detector(dataFile, videoFile_mp4, numFrames)
 
     # Perform tracking step
-    octave.Tracker(dataFile, videoFile_mp4, csv_tracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy,
+    octave.Tracker(dataFile, videoFile_mp4, videoFileOut, csvTracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy,
                    mttAlgorithm, PG, PD, gv, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility,
                    nout=0)
     octave.clear_all(nout=0)

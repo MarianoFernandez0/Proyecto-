@@ -1,6 +1,6 @@
 #Input
 [Input]
-	DATAFILE_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/_data.csv
+	DATAFILE_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/tracking/_data.csv
 	reformat_dataFile: 1
 	VIDEOFILE_MP4_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/mp4_ouput/_noise_added_0_1.mp4
 	VIDEOFILE_TIFF_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/tiff_ouput/_noise_added_0_1.tiff
@@ -12,17 +12,23 @@
 
 #Output
 [Output]
-	CSV_TRACKS_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/mp4_ouput/csv_tracks.csv
+	CSV_TRACKS_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/tracking/tracks.csv
+	# VIDEOFILE_OUT_PATH = .mp4
+	VIDEOFILE_OUT_PATH: /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/dataset/tracking/_noise_added_0_1_ground_truth.mp4
 
-# algoritmn parameters
-# Multi-Target Tracking Algorithm
-	# 1 = NN
-	# 2 = GNN
-	# 3 = PDAF
-	# 4 = JPDAF
-	# 5 = ENN-JPDAF
-	# 6 = Iterated Multi-assignment
-[Algoritmn params]
+# algorithm parameters
+    # detection algorithm
+        # 0 = urbano implementation
+        # 1 = python implementation
+    # Multi-Target Tracking Algorithm
+        # 1 = NN
+        # 2 = GNN
+        # 3 = PDAF
+        # 4 = JPDAF
+        # 5 = ENN-JPDAF
+        # 6 = Iterated Multi-assignment
+[Algorithm params]
+    detectionAlgorithm: 1
 	mttAlgorithm: 5
 	
 	# Statistical Parameters

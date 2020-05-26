@@ -9,7 +9,7 @@
 %
 % /////////////////////////////////////////////////////////////////////// %
 
-function Tracker(dataFile, videoFile, csv_tracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy, mttAlgorithm, PG, PD, gv, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility)
+function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy, mttAlgorithm, PG, PD, gv, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility)
 	pkg load statistics
 	pkg load video
 	pkg load image
@@ -679,7 +679,7 @@ function Tracker(dataFile, videoFile, csv_tracks, reformat_dataFile, numFrames, 
 
 
 	%1 19 20 4 = id_trk, x, y, frame
-	csvwrite(csv_tracks, TrackRecord(:,[1 19 20 4]))
+	csvwrite(csvTracks, TrackRecord(:,[1 19 20 4]))
 
 	%------------------------------------------------------------------------------
 	% Close the waitbar
@@ -705,10 +705,8 @@ function Tracker(dataFile, videoFile, csv_tracks, reformat_dataFile, numFrames, 
 	    %iptsetpref('ImshowBorder', 'tight')           %MODIFICADO (no existe en octave)
 	    
 	    % Open the Movie File
-	    
-	    movieFile = fullfile([videoFile, '_Aug23PaperMovie10sec_', num2str(mttAlgorithm), '.mp4'])     %MODIFICADO
-	    
-	    vidObj = VideoWriter(movieFile);
+	    videoFileOut
+	    vidObj = VideoWriter(videoFileOut);
 	    %set(vidObj, 'Quality', 100);			%MODIFICADO
 	    %set(vidObj, 'FrameRate', 1/T);			%MODIFICADO 
 	    open(vidObj)					%MODIFICADO 
@@ -772,7 +770,7 @@ function Tracker(dataFile, videoFile, csv_tracks, reformat_dataFile, numFrames, 
 		    % Set of Measurements at Frame k assuming PD
 		    Z = [];
 		    Z = zTotal(1:2, (zTotal(3,:) == k));
-		    plot(Z(1,:), Z(2,:), 'r+')
+		    plot(Z(1,:), Z(2,:), 'r+');
 		    
 		    % Plot the Tracks and Measurements up to time k
 		    plot(posX , posY, 'b');
