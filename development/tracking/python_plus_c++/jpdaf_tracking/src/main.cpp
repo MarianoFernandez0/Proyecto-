@@ -112,11 +112,11 @@ int main(int argc, char** argv)
   std::vector<cv::Point2f> points;
   
   //const double& milliseconds = 1000 / 7;
-  const double& milliseconds = 250 / 7;
+  const double& milliseconds = 1000 / 7;
   
   // Setup output video
 cv::VideoWriter output_cap("output.avi", 
-               cv::VideoWriter::fourcc('D','I','V','X'),
+               cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
 		7,
                cv::Size(1536, 576));
   //----------------------------------------
@@ -140,7 +140,9 @@ cv::VideoWriter output_cap("output.avi",
   //----------------------------------------
   //----------------------------------------
 
-  for(uint i = 0; i < detections.size(); ++i)
+  int aux = detections.size();
+
+  for(uint i = 0; i < aux; ++i)
   {
     
     rects.clear();

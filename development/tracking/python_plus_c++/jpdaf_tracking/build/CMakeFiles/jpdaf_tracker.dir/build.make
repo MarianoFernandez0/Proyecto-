@@ -63,10 +63,10 @@ RM = /usr/local/Cellar/cmake/3.17.2/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking
+CMAKE_SOURCE_DIR = /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build
+CMAKE_BINARY_DIR = /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/jpdaf_tracker.dir/depend.make
@@ -79,120 +79,120 @@ include CMakeFiles/jpdaf_tracker.dir/flags.make
 
 CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o: ../src/global_tracker.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/global_tracker.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/global_tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/global_tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/global_tracker.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o: ../src/hungarianAlg.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/hungarianAlg.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.cpp > CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/hungarianAlg.cpp > CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.cpp -o CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/hungarianAlg.cpp -o CMakeFiles/jpdaf_tracker.dir/src/hungarianAlg.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o: ../src/imagemanager.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/imagemanager.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.cpp > CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/imagemanager.cpp > CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.cpp -o CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/imagemanager.cpp -o CMakeFiles/jpdaf_tracker.dir/src/imagemanager.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o: ../src/kalman.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/kalman.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.cpp > CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/kalman.cpp > CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.cpp -o CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/kalman.cpp -o CMakeFiles/jpdaf_tracker.dir/src/kalman.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o: ../src/local_tracker.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/local_tracker.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/local_tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/local_tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/local_tracker.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o: ../src/main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/main.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/main.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/main.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/main.cpp > CMakeFiles/jpdaf_tracker.dir/src/main.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/main.cpp > CMakeFiles/jpdaf_tracker.dir/src/main.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/main.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/main.cpp -o CMakeFiles/jpdaf_tracker.dir/src/main.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/main.cpp -o CMakeFiles/jpdaf_tracker.dir/src/main.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o: ../src/track.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/track.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/track.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/track.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/track.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.cpp > CMakeFiles/jpdaf_tracker.dir/src/track.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/track.cpp > CMakeFiles/jpdaf_tracker.dir/src/track.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/track.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/track.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.cpp -o CMakeFiles/jpdaf_tracker.dir/src/track.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/track.cpp -o CMakeFiles/jpdaf_tracker.dir/src/track.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o: ../src/tracker.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.cpp > CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.cpp -o CMakeFiles/jpdaf_tracker.dir/src/tracker.cpp.s
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o: CMakeFiles/jpdaf_tracker.dir/flags.make
 CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o: ../src/tracker_param.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o"
-	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o"
+	/Library/Developer/CommandLineTools/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.o -c /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker_param.cpp
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.i"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.cpp > CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.i
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker_param.cpp > CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.i
 
 CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.s"
-	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.cpp -o CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.s
+	/Library/Developer/CommandLineTools/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker_param.cpp -o CMakeFiles/jpdaf_tracker.dir/src/tracker_param.cpp.s
 
 # Object files for target jpdaf_tracker
 jpdaf_tracker_OBJECTS = \
@@ -272,7 +272,7 @@ jpdaf_tracker_EXTERNAL_OBJECTS =
 ../bin/jpdaf_tracker: /usr/local/lib/libopencv_imgproc.4.3.0.dylib
 ../bin/jpdaf_tracker: /usr/local/lib/libopencv_core.4.3.0.dylib
 ../bin/jpdaf_tracker: CMakeFiles/jpdaf_tracker.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable ../bin/jpdaf_tracker"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX executable ../bin/jpdaf_tracker"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/jpdaf_tracker.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -285,6 +285,6 @@ CMakeFiles/jpdaf_tracker.dir/clean:
 .PHONY : CMakeFiles/jpdaf_tracker.dir/clean
 
 CMakeFiles/jpdaf_tracker.dir/depend:
-	cd /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/build/CMakeFiles/jpdaf_tracker.dir/DependInfo.cmake --color=$(COLOR)
+	cd /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/CMakeFiles/jpdaf_tracker.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/jpdaf_tracker.dir/depend
 

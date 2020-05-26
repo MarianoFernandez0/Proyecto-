@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++11 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOS
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src -I/usr/local/include/eigen3 -isystem /usr/local/Cellar/opencv/4.3.0/include/opencv4 
+CXX_INCLUDES = -I/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src -I/usr/local/include/eigen3 -isystem /usr/local/Cellar/opencv/4.3.0/include/opencv4 
 

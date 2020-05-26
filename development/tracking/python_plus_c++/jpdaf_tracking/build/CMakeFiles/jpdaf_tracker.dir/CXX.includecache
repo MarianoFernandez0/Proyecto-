@@ -6,37 +6,13 @@
 
 #IncludeRegexTransform: 
 
-../src/imagemanager.h
-iostream
--
-vector
--
-string.h
--
-algorithm
--
-dirent.h
--
-stdio.h
--
-
-../src/natural_less.h
-iostream
--
-stdlib.h
--
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/detection.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/detection.h
 iostream
 -
 opencv2/opencv.hpp
 -
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.cpp
-global_tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/global_tracker.h
 iostream
 -
 Eigen/Dense
@@ -48,17 +24,11 @@ opencv2/core/eigen.hpp
 numeric
 -
 tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.h
 local_tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/local_tracker.h
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.cpp
-hungarianAlg.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.h
-limits
--
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/hungarianAlg.h
 vector
 -
 iostream
@@ -70,15 +40,7 @@ time.h
 assert.h
 -
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.cpp
-imagemanager.h
--
-natural_less.h
--
-assert.h
--
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/imagemanager.h
 iostream
 -
 vector
@@ -92,11 +54,7 @@ dirent.h
 stdio.h
 -
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.cpp
-kalman.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/kalman.h
 iostream
 -
 Eigen/Dense
@@ -104,35 +62,27 @@ Eigen/Dense
 opencv2/opencv.hpp
 -
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.cpp
-local_tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/local_tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/local_tracker.h
 tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.h
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/main.cpp
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/main.cpp
 iostream
 -
 fstream
 -
 tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.h
 global_tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/global_tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/global_tracker.h
 imagemanager.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/imagemanager.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/imagemanager.h
 detection.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/detection.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/detection.h
 cstdio
 -
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.cpp
-track.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/track.h
 iostream
 -
 memory
@@ -144,13 +94,9 @@ opencv2/core/eigen.hpp
 opencv2/opencv.hpp
 -
 kalman.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/kalman.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/kalman.h
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.cpp
-tracker.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker.h
 iostream
 -
 Eigen/Dense
@@ -176,19 +122,15 @@ sstream
 stdio.h
 -
 track.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/track.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/track.h
 tracker_param.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker_param.h
 detection.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/detection.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/detection.h
 hungarianAlg.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/hungarianAlg.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/hungarianAlg.h
 
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.cpp
-tracker_param.h
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.h
-
-/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/bin/jpdaf_tracking/src/tracker_param.h
+/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/src/tracker_param.h
 iostream
 -
 fstream

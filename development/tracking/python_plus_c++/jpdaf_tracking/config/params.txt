@@ -33,4 +33,4 @@
 10
 
 [MAX_MISSED_RATE]
-9
+5
