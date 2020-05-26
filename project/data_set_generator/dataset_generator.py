@@ -3,7 +3,7 @@
 
 from skimage.filters import gaussian
 from skimage.draw import ellipse
-from skimage.external.tifffile import TiffWriter
+from tifffile import TiffWriter
 from imageio import mimwrite as mp4_writer
 from imageio import imwrite
 import numpy as np

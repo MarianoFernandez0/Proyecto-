@@ -1,7 +1,7 @@
 #Output path. Defect is in directory "dataset"
 [Output path]
-PATH_OUTPUT_DATA_CSV :
-PATH_OUTPUT_DATA_SEQ :
+PATH_OUTPUT_DATA_CSV : 
+PATH_OUTPUT_DATA_SEQ : 
 
 #Dimensions for the final sequence
 [Sequence parameters]
