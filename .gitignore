@@ -6,4 +6,6 @@ __pycache__/
 .csv
 Vent/
 video_sequence/
-.ipynb_checkpoints
+*.ipynb_checkpoints
+*.jpg
+*.mp4

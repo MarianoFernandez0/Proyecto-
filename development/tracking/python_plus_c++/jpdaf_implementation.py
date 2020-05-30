@@ -14,6 +14,7 @@ def main_jpdaf_implementation(video_sequence_path):
          the path for the images jpg
     '''
     video_sequence = os.listdir(video_sequence_path)[0]
+    print(os.listdir(video_sequence_path))
     if len(os.listdir(video_sequence_path)) > 1:
         print("Must have only one sequence in directory")
         return
