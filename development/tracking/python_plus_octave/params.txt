@@ -41,7 +41,7 @@
 #stuff
 [Do]
 	plotResults: 0
-	saveMovie: 1
+	saveMovie: 0
 	# snapShot no anda
 	snapShot: 0
 	plotTrackResults: 0

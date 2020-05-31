@@ -679,6 +679,7 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 
 
 	%1 19 20 4 = id_trk, x, y, frame
+	csvwrite(csvTracks, 'a')
 	csvwrite(csvTracks, TrackRecord(:,[1 19 20 4]))
 
 	%------------------------------------------------------------------------------

@@ -4,16 +4,17 @@ import os
 from oct2py import octave
 import configparser
 import pandas as pd
+import numpy as np
 
 current_path = os.getcwd()
 octave.addpath(current_path+'/SpermTrackingProject')
 
 
 def tracking_urbano(config_params):
-    '''
+    """
     Perform detectoin and tracking with the .m urbano implementation.
     The parameters must be specified in the config_params file.
-    '''
+    """
 
     # Read params
     config_path = config_params
@@ -62,9 +63,17 @@ def tracking_urbano(config_params):
                    mttAlgorithm, PG, PD, gv, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility,
                    nout=0)
     octave.clear_all(nout=0)
+
+    tracks = pd.read_csv(csvTracks)
+    tracks.columns = ['id', 'x', 'y', 'frame']
+    tracks['fluorescence'] = np.nan
+    tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
+    tracks.to_csv(csvTracks)
+
 ########################################################
 #  START
 ########################################################
+
 
 config_params = 'params.txt'
 

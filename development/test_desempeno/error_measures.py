@@ -80,22 +80,20 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
     """
     Toma como entrada dos trayectorias y calcula la distancia entre ellas.
     Parameters:
-        track_a: dimensiones (N, 4), siendo sus comlumnas 1)posición x, 2)posición y 4)frame.
-        track_b: de la misma forma que track_x
+        track_a: dataframe que contiene las columnas (x, y, frame).
+        track_b: igual que track_x
         max_dist: distancia máxima, si la distancia entre dos puntos es mayor a la distancia máxima se considera un
                     error en la asignacion.
     Returns:
         distance (float): distancia entre las dos trayectorias.
     """
-    min_frame_a = np.min(track_a[:, 4])
-    print('min_frame_x', min_frame_a)
-    min_frame_b = np.min(track_b[:, 4])
-    print('min_frame_y', min_frame_b)
-    min_frame = int(min(min_frame_a, min_frame_b))
-    print('min_frame', min_frame)
 
-    max_frame_a = np.max(track_a[:, 4])
-    max_frame_b = np.max(track_b[:, 4])
+    min_frame_a = track_a['frame'].min()
+    min_frame_b = track_b['frame'].min()
+    min_frame = int(min(min_frame_a, min_frame_b))
+
+    max_frame_a = track_a['frame'].max()
+    max_frame_b = track_b['frame'].max()
     max_frame = int(max(max_frame_a, max_frame_b))
 
     distance = 0
@@ -109,8 +107,8 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
         elif frame > max_frame_b:
             distance += max_dist
         else:
-            coord_track_a = track_a[track_a[:, 4] == frame][:, 1:3].squeeze()
-            coord_track_b = track_b[track_b[:, 4] == frame][:, 1:3].squeeze()
+            coord_track_a = track_a[track_a['frame'] == frame][['x', 'y']].squeeze()
+            coord_track_b = track_b[track_b['frame'] == frame][['x', 'y']].squeeze()
             l2_distance = np.sqrt((coord_track_a[0] - coord_track_b[0]) ** 2 +
                                   (coord_track_a[1] - coord_track_b[1]) ** 2)
             distance += max(l2_distance, max_dist)
@@ -145,23 +143,14 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
 # print(TP, FN, FP, JSC)
 
 # ----------------------------------------------------------------------------------------------------------------------
+# PRUEBA: distance_between_two_tracks()
+#
 # tracks = pd.read_csv('tracks.csv')
 # print(tracks.head())
-# tracks = tracks.to_numpy()
-# print(tracks.shape)
-# track_a = tracks[tracks[:, 0] == 2]
-# track_a_new = np.zeros((track_a.shape[0], track_a.shape[1]+1))
-# track_a_new[:, :4] = track_a
-# track_a_new[:, 4] = track_a[:, 3]
-
-# print('track_a_new', track_a_new.shape)
-# track_b = tracks[tracks[:, 0] == 3]
-
-# track_b_new = np.zeros((track_b.shape[0], track_b.shape[1]+1))
-# track_b_new[:, :4] = track_b
-# track_b_new[:, 4] = track_b[:, 3]
-# print(track_a.shape)
-# print(track_b.shape)
-# dist = distance_between_two_tracks(track_a_new, track_b_new, 0)
+# track_a = tracks[tracks['id'] == 2]
+# track_b = tracks[tracks['id'] == 3]
+# print(track_a.head())
+# print(track_b.head())
+# dist = distance_between_two_tracks(track_a, track_b, 0)
 # print(dist)
 # ----------------------------------------------------------------------------------------------------------------------
