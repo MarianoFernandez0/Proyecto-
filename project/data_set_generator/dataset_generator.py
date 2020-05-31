@@ -49,7 +49,7 @@ def make_sequence(sequence_parameters, all_population):
         path_seq_out = HOUSING_PATH_SEQ_OUT
 
     fetch_output(housing_path_seq_data=path_data_out, housing_path_seq_out=path_seq_out)
-    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'frame', 'intensity'])
+    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
     next_id = 0
     final_sequence = np.zeros((frames, M, N))
     final_sequence_segmented = np.zeros((frames, M, N))
@@ -110,8 +110,8 @@ def make_sequence(sequence_parameters, all_population):
                 # Agrego aquellas que entran en el cuadro
                 if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
                     df_info = df_info.append(
-                        {'id_particle': id_particles[p], 'x': x[p, f], 'y': y[p, f], 'frame': f,
-                         'intensity': intensity[p, f]},
+                        {'id_particle': id_particles[p], 'x': y[p, f], 'y': x[p, f],
+                         'fluorescence': intensity[p, f], 'frame': f},
                         ignore_index=True)
                 else:
                     id_particles[p] = np.max(id_particles) + 1
@@ -205,7 +205,6 @@ def save_data_file(data_frame_in, path_data_out, file_name):
         - data_frame_in: DataFrame with the data
         - path_data_out: Directory where the data will be saved
     """
-
     data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
     return
 
