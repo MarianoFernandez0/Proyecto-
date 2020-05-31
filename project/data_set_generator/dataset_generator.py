@@ -118,8 +118,7 @@ def make_sequence(sequence_parameters, all_population):
             # Add blur so there are no drastic changes in the border of the particles
             image_normalized = gaussian(image_aux, std_blur, mode='reflect', preserve_range=True)
             final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
-            image_normalized[image_normalized < 0] = 0
-            image_normalized[image_normalized > 255] = 255
+            image_normalized = image_normalized.clip(0, 255)
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step
             v = np.abs(np.random.normal(v, std_velocity, particles))
@@ -138,7 +137,7 @@ def make_sequence(sequence_parameters, all_population):
             sequence_plus_noise += np.random.normal(0, std_noise, size=sequence_plus_noise.shape)
             sequence_plus_noise[sequence_plus_noise < 0] = 0
             sequence_plus_noise[sequence_plus_noise > 255] = 255
-            save_video_file(sequence_plus_noise, extension,
+            save_video_file(np.uint8(sequence_plus_noise), extension,
                             file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
         else:
             sequence_plus_noise = final_sequence.copy()

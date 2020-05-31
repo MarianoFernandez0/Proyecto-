@@ -2,8 +2,11 @@ __pycache__/
 .idea
 *.pyc
 *.tif
+*.tiff
 .DS_Store
 .csv
 Vent/
 video_sequence/
-.ipynb_checkpoints
+*.ipynb_checkpoints
+*.jpg
+*.mp4
