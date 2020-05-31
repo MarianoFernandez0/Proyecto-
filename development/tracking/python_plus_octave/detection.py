@@ -39,15 +39,15 @@ def detect_particles(seg_img):
 	return particles
 
 
-def size_filter(particles,pixel_size):
+def size_filter(particles, pixel_size):
 	"""
 	Toma la lista de partículas y filtra las que son menores a 10 micrometros cuadrados.
 
-	Parámetros:
+	Parameters:
 		particles (df(id, coord_x, coord_y, total_pixels, mask)): DataFrame de partículas a filtrar.
 		pixel_size (list(float,float)): Las dimensiones de un pixel en micrometros.
 
-	Retorna:
+	Returns:
 		particles (df(id, coord_x, coord_y, total_pixels, mask)): DataFrame de partículas filtradas.
 	"""
 
