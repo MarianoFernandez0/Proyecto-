@@ -3,9 +3,6 @@
 echo "---------- Capturing date and time ---------------------"
 datetime=$(date '+%d/%m/%Y %H:%M:%S');
 
-echo "---------- Moving to the folder: Timag  --------------"
-cd /home/leo/Desktop/SPERM_ANALISIS_TOOL
-
 echo "-------------- Git pulling -----------------------------"
 git pull origin master
 

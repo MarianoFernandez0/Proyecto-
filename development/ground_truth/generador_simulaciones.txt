@@ -1,4 +1,0 @@
-La función genera una secuencia de espermatozoides simulada con las características dadas.
-La secuencia se guarda como una imágen .png para cada cuadro en una carpeta de nombre "Simulated". 
-Se pueden agregar grupos de espermatozoides a secuencias ya generadas.
-También hay funciones para calcular velocidad y distancia recorrida de los espermatozoides de la simulación.

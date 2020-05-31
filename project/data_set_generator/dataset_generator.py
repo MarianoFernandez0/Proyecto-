@@ -29,7 +29,7 @@ def make_sequence(sequence_parameters, all_population):
                 std_blur: Standard deviation of blurring image
                 std_noise_added: List of possible power of the added noise
                 low_limit: Inferior limit of intensity
-                extension: List of video extensions (tiff, mp4, jpg)
+                extension: List of video extensions (tif, mp4, jpg)
                 file_name: Name of the ouput file
                 fps: frame rate when the ouput is mp4
             }
@@ -177,11 +177,11 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
      - fps: if the format is mp4, is necessary to specify the fps. Type float
     '''
     for extension in extensions:
-        if extension == "tiff":
+        if extension == "tif":
             path_out_tiff = path_out + "/tiff_ouput"
             fetch_output("", path_out_tiff)
             # Guardo como tiff
-            with TiffWriter(path_out_tiff + "/" + file_name + ".tiff", bigtiff=True) as tif:
+            with TiffWriter(path_out_tiff + "/" + file_name + ".tif", bigtiff=True) as tif:
                 for frame in range(sequence.shape[0]):
                     tif.save((sequence[frame]))
         elif extension == "mp4":
