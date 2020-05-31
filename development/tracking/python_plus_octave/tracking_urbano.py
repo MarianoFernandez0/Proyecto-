@@ -68,7 +68,8 @@ def tracking_urbano(config_params):
     tracks.columns = ['id', 'x', 'y', 'frame']
     tracks['fluorescence'] = np.nan
     tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
-    tracks.to_csv(csvTracks)
+    
+    tracks.to_csv(csvTracks, index=False)
 
 ########################################################
 #  START
