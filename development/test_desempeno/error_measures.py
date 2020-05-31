@@ -111,7 +111,9 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
         else:
             coord_track_a = track_a[track_a[:, 4] == frame][:, 1:3].squeeze()
             coord_track_b = track_b[track_b[:, 4] == frame][:, 1:3].squeeze()
-            distance += np.sqrt((coord_track_a[0] - coord_track_b[0])**2 + (coord_track_a[1] - coord_track_b[1])**2)
+            l2_distance = np.sqrt((coord_track_a[0] - coord_track_b[0]) ** 2 +
+                                  (coord_track_a[1] - coord_track_b[1]) ** 2)
+            distance += max(l2_distance, max_dist)
 
     return distance
 
