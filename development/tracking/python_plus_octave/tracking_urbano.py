@@ -80,8 +80,8 @@ def tracking_urbano(config_params):
     tracks.to_csv(csv_tracks, index=False)
 
     if save_movie:
-        video = mp4_reader(video_file_out)
-        mp4_writer(video_file_mp4, video, format='mp4', fps=fps)
+        video = mp4_reader(video_file_out, memtest=False)
+        mp4_writer(video_file_mp4, video, format='mp4', fps=fps//2)
 
 ########################################################
 #  START

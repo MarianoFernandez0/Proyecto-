@@ -2,8 +2,8 @@
 [Input]
 	DATAFILE_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/tracking/_data.csv
 	reformat_dataFile: 1
-	VIDEOFILE_MP4_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/9.mp4
-	VIDEOFILE_TIFF_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/9.tif
+	VIDEOFILE_MP4_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/10/10.mp4
+	VIDEOFILE_TIFF_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/10/10.tif
 	numFrames: 200
 	fps: 10
 	px2um: 0.1
@@ -12,9 +12,9 @@
 
 #Output
 [Output]
-	CSV_TRACKS_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/tracking/tracks.csv
+	CSV_TRACKS_PATH : /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/10/tracking/tracks.csv
 	# VIDEOFILE_OUT_PATH = .mp4
-	VIDEOFILE_OUT_PATH: /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/tracking/9.mp4
+	VIDEOFILE_OUT_PATH: /home/mariano/Projects/TDE/git/Proyecto-/development/tracking/python_plus_octave/data/real/10/tracking/10.mp4
 
 # algorithm parameters
     # detection algorithm
