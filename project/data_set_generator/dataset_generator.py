@@ -43,7 +43,7 @@ def make_sequence(sequence_parameters, all_population):
     (path_data_out, path_seq_out, M, N, frames, rgb, std_blur,
      std_noise_added, low_limit, extension, file_name, fps, seed) = sequence_parameters
 
-    if seed > 0: np.random.seed(seed)
+    if seed > 0 : np.random.seed(seed)
 
     if not path_data_out:
         path_data_out = HOUSING_PATH_SEQ_DATA
