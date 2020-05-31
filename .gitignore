@@ -1,10 +1,10 @@
 __pycache__/
-.idea
+*.idea
 *.pyc
 *.tif
 *.tiff
-.DS_Store
-.csv
+*.DS_Store
+*.csv
 Vent/
 video_sequence/
 *.ipynb_checkpoints
