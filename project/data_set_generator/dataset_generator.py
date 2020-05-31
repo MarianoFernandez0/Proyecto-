@@ -40,8 +40,10 @@ def make_sequence(sequence_parameters, all_population):
     HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
     HOUSING_PATH_SEQ_OUT = os.path.join("datasets", "video_sequence")
 
-    (path_data_out, path_seq_out, M, N, frames, rgb,
-     std_blur, std_noise_added, low_limit, extension, file_name, fps) = sequence_parameters
+    (path_data_out, path_seq_out, M, N, frames, rgb, std_blur,
+     std_noise_added, low_limit, extension, file_name, fps, seed) = sequence_parameters
+
+    if seed > 0: np.random.seed(seed)
 
     if not path_data_out:
         path_data_out = HOUSING_PATH_SEQ_DATA
@@ -247,8 +249,9 @@ def read_parameters(path='config.txt'):
     file_format = config["Sequence parameters"]["file_format"].split()
     file_name = config["Sequence parameters"]["file_name"]
     fps = float(config["Sequence parameters"]["frame_rate"])
+    seed = int(config["Sequence parameters"]["seed"])
     sequence_parameters = [path_data_out, path_seq_out, M_N_frames[0], M_N_frames[1],
-                           M_N_frames[2], rgb, std_blur, std_noise_added, low_limit, file_format, file_name, fps]
+                           M_N_frames[2], rgb, std_blur, std_noise_added, low_limit, file_format, file_name, fps, seed]
 
     # load populations
     all_population = []

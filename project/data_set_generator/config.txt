@@ -14,9 +14,11 @@ PATH_OUTPUT_DATA_SEQ :
 	std_noise_added : 1 5 10 15
 	#Limit from its consider that the particle is not visible
 	low_limit : 0
-	file_format = tif mp4 jpg
-	file_name = seq
-	frame_rate = 10
+	file_format : tif mp4 jpg
+	file_name : seq
+	frame_rate : 10
+	# If not seed required, put -1
+	seed : 10
 
 #Parameters for each population
 [Population1]
