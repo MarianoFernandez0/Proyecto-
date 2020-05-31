@@ -41,5 +41,4 @@ def evaluation(tif, include_mask=False):
                 data = data.append(
                     {'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf,
                      'mean_gray_value': mean_gray_value}, ignore_index=True)
-
     return data

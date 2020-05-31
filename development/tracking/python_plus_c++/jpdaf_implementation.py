@@ -13,18 +13,21 @@ def main_jpdaf_implementation(video_sequence_path):
          the path of the csv output
          the path for the images jpg
     '''
+
     video_sequence = os.listdir(video_sequence_path)[0]
     print(os.listdir(video_sequence_path))
-    if len(os.listdir(video_sequence_path)) > 1:
-        print("Must have only one sequence in directory")
-        return
+    #if len(os.listdir(video_sequence_path)) > 1:
+    #    print("Must have only one sequence in directory")
+    #    return 1
+
     print('Sequence name %s' % video_sequence)
     tiff = tifffile.TiffFile(video_sequences_path + '/' + video_sequence)
     detected = evaluation(tiff, include_mask=True)
+
     folder_directory = 'sequences_for_jpdaf/'
     save_secuence_as_jpgs_for_jpdaf(tiff, folder_directory)
     write_csv_for_jpdaf(detected, folder_directory)
-    return
+    return 0
 
 
 ########################################################
@@ -32,5 +35,4 @@ def main_jpdaf_implementation(video_sequence_path):
 ########################################################
 
 video_sequences_path = "./data_in/sequences"
-main_jpdaf_implementation(video_sequences_path)
-call("./execute_jpdaf.sh")
+call("./execute_jpdaf.sh") if main_jpdaf_implementation(video_sequences_path) == 0 else print("error")
