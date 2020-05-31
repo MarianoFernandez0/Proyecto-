@@ -33,17 +33,8 @@ def _get_rectangle_detection(x, y, mask):
     height = max_x - min_x
     width = max_y - min_y
 
-    x_new = min_x
-    y_new = min_y
-
-    # lo que está comentado usaba el centro cálculado en a detección, pero para definir la esquina del recuadro parece
-    # más adecuado lo anterior.
-    # x_new = x - height/2
-    # y_new = y - width/2
-    # if x_new < 0:
-    #     x_new = 0
-    # if y_new < 0:
-    #     y_new = 0
+    x_new = min_y
+    y_new = min_x
 
     return x_new, y_new, height, width
 
@@ -92,7 +83,8 @@ def save_secuence_as_jpgs_for_jpdaf(tiff_sequence, sequence_folder_directory):
     """
     tiff_sequence = tiff_sequence.asarray()
     tiff_sequence = tiff_sequence.astype(np.uint8)
-    pathlib.Path(sequence_folder_directory+'video/').mkdir(parents=True, exist_ok=True)
+    pathlib.Path(sequence_folder_directory + 'video/').mkdir(parents=True, exist_ok=True)
+    print(sequence_folder_directory + 'video/')
     for i in range(tiff_sequence.shape[0]):
         imsave(sequence_folder_directory + 'video/{0:03d}.jpg'.format(i), tiff_sequence[i, :, :])
 
