@@ -43,6 +43,7 @@ def error_measures(ground_truth_df, detected_df, max_dist):
         M (int): Ancho de la imagen.
         N (int): Largo de la imagen.
         max_dist (int): Máxima distancia entre dos partículas para considerar que no son la misma.
+                        max_dist debería ser del órden del doble del tamaño promedio de las partículas.
 
     Returns:
         TP (int): Verdaderos Positivos

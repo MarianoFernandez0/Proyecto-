@@ -1,4 +1,4 @@
-from evaluation import evaluation
+from functions.evaluation import evaluation
 import tifffile
 import os
 from oct2py import octave
@@ -88,6 +88,6 @@ def tracking_urbano(config_params):
 ########################################################
 
 
-params = 'params_real.txt'
+params = 'params.txt'
 
 tracking_urbano(params)
