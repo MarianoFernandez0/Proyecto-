@@ -1,0 +1,48 @@
+#Input
+[Input]
+	DATAFILE_PATH : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/real/9/tracking_GNN/detection_data.csv
+	reformat_dataFile: 1
+	VIDEOFILE_MP4_PATH : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/real/9/9.mp4
+	VIDEOFILE_TIFF_PATH : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/real/9/9.tif
+	fps: 10
+	px2um: 0.1
+	ROIx: 512
+	ROIy: 512
+
+#Output
+[Output]
+	CSV_TRACKS_PATH : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/real/9/tracking_GNN/tracks.csv
+	# VIDEOFILE_OUT_PATH = .mp4
+	VIDEOFILE_OUT_PATH: /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/real/9/tracking_GNN/9.mp4
+
+# algorithm parameters
+    # detection algorithm
+        # 0 = urbano implementation
+        # 1 = python implementation
+    # Multi-Target Tracking Algorithm
+        # 1 = NN
+        # 2 = GNN
+        # 3 = PDAF
+        # 4 = JPDAF
+        # 5 = ENN-JPDAF
+        # 6 = Iterated Multi-assignment
+[Algorithm params]
+    detectionAlgorithm: 1
+	mttAlgorithm: 2
+	
+	# Statistical Parameters
+	# Prob. that a detected target falls in validation gate
+	PG: 0.997
+	#Prob. of detection      
+	PD: 0.999
+	# Velocity Gate (um/s)	
+	gv: 50
+#stuff
+[Do]
+	plotResults: 0
+	saveMovie: 0	
+	# snapShot no anda
+	snapShot: 0
+	plotTrackResults: 0
+	# analyzeMotility no anda
+	analyzeMotility: 0

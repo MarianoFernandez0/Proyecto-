@@ -8,6 +8,7 @@ import numpy as np
 from imageio import mimwrite as mp4_writer
 from imageio import mimread as mp4_reader
 import time
+import sys
 
 current_path = os.getcwd()
 octave.addpath(current_path+'/SpermTrackingProject')
@@ -96,6 +97,8 @@ def tracking_urbano(config_params):
 ########################################################
 
 
-params = 'params_real.txt'
+params = 'params.txt'
+if len(sys.argv) > 1:
+    params = sys.argv[1]
 
 tracking_urbano(params)

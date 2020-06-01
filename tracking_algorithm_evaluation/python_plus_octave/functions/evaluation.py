@@ -1,6 +1,6 @@
-from segmentation import segmentation
-from detection import detect_particles, size_filter
-from fluorescence import fluorescence
+from .segmentation import segmentation
+from .detection import detect_particles, size_filter
+from .fluorescence import fluorescence
 
 import pandas as pd
 import numpy as np

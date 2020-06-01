@@ -1,10 +1,11 @@
-from evaluation import evaluation
+from functions.evaluation import evaluation
 import tifffile
 import os
 from oct2py import octave
 import configparser
 import pandas as pd
 import numpy as np
+import sys
 from imageio import mimwrite as mp4_writer
 from imageio import mimread as mp4_reader
 import time
@@ -57,6 +58,7 @@ def tracking_urbano(config_params):
     mp4_writer(video_file_mp4, sequence, format='mp4', fps=fps)
 
     num_frames = sequence.shape[0]
+    print('NUM FRAMES', num_frames)
     print('Running detection: ')
     start = time.time()
     if detection_algorithm:
@@ -96,6 +98,8 @@ def tracking_urbano(config_params):
 ########################################################
 
 
-params = 'params_real.txt'
+params = 'params.txt'
 
+if len(sys.argv) > 1:
+    params = sys.argv[1]
 tracking_urbano(params)
