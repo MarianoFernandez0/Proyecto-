@@ -21,7 +21,7 @@ def evaluation(tif, include_mask=False):
     '''
     sequence = tif.asarray()
     data = pd.DataFrame(columns=['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
-
+    middle_data_frame = pd.DataFrame(columns=['x', 'y', 'frame', 'mean_gray_value'])
     for nro_frame in range(sequence.shape[0]):
         image = sequence[nro_frame, :, :]
         seg_img = segmentation(image)
@@ -31,7 +31,7 @@ def evaluation(tif, include_mask=False):
         for index, row in particles.iterrows():
             # fluorescencia
             mask = row['mask']
-            ctcf, mean_gray_value = fluorescence(grayscale, mask, seg_img / 255)
+            ctcf, mean_gray_value = fluorescence(grayscale, mask, seg_img)
             # rellenar dataframe
             if include_mask:
                 data = data.append(
@@ -41,4 +41,10 @@ def evaluation(tif, include_mask=False):
                 data = data.append(
                     {'x': row['x'], 'y': row['y'], 'frame': nro_frame, 'ctcf': ctcf,
                      'mean_gray_value': mean_gray_value}, ignore_index=True)
+
+            middle_data_frame = middle_data_frame.append(
+                {'x': row['x'], 'y': row['y'], 'frame': nro_frame,
+                 'mean_gray_value': mean_gray_value}, ignore_index=True)
+
+    middle_data_frame.to_csv("detections_fluo_values.csv")
     return data
