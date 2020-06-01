@@ -31,9 +31,9 @@ std::map<int, std::vector< std::vector< std::string > > > petsReading(const std:
       std::vector<std::string> row;
       while (end != std::string::npos)
       {
-	row.push_back(line.substr(start, end - start));
-	start = end + delimiter.length();
-	end = line.find(delimiter, start);
+      	row.push_back(line.substr(start, end - start));
+      	start = end + delimiter.length();
+      	end = line.find(delimiter, start);
       }
       row.push_back(line.substr(start, end - start));
       
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
   const double& milliseconds = 1000 / 7;
   
   // Setup output video
-cv::VideoWriter output_cap("output.avi", 
+  cv::VideoWriter output_cap("output.avi", 
                cv::VideoWriter::fourcc('M', 'J', 'P', 'G'),
 		7,
                cv::Size(1536, 576));
@@ -128,7 +128,7 @@ cv::VideoWriter output_cap("output.avi",
 
   std::ofstream csvFile;
   csvFile.open(filename, std::fstream::app);
-  std::vector<std::string> cols = {"track_id", "x", "y", "frame"};
+  std::vector<std::string> cols = {"track_id", "x", "y", "fluorescnece", "frame"};
 
   for(int i=0; i<cols.size(); i++)
   {
@@ -182,9 +182,9 @@ cv::VideoWriter output_cap("output.avi",
     tracker->track(dets);
     tracker->drawTracks(trackingImg, i);
     const cv::Mat& m = mosaic(image, trackingImg);
-    cv::imshow("JPDAFTracker", m);
+    //cv::imshow("JPDAFTracker", m);
     output_cap << m;
-    cv::waitKey(cvRound(milliseconds));
+    //cv::waitKey(cvRound(milliseconds));
     dets.clear();  
   }
   

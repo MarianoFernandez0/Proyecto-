@@ -1,4 +1,4 @@
-# Install script for directory: /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking
+# Install script for directory: /Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/tracking_algorithm_evaluation/python_plus_c++/jpdaf_tracking
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/development/tracking/python_plus_c++/jpdaf_tracking/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/Users/leonardodelossantos/Desktop/FING/Proyecto/Proyecto-/tracking_algorithm_evaluation/python_plus_c++/jpdaf_tracking/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

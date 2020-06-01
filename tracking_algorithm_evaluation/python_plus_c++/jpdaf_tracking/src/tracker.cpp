@@ -33,6 +33,8 @@ void Tracker::drawTracks(cv::Mat &_img, int frame) const
       csvFile << ",";
       csvFile << std::to_string(p.y);
       csvFile << ",";
+      csvFile << -1;
+      csvFile << ",";
       csvFile << std::to_string(frame);
       csvFile << "\n";
       

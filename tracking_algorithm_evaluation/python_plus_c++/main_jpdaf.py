@@ -40,7 +40,7 @@ video_sequence = os.listdir(video_sequences_path)[0]
 tiff = tifffile.TiffFile(video_sequences_path + '/' + video_sequence)
 seq = tiff.asarray()
 csv_output = pd.read_csv("./output/tracks.csv")
-print(csv_output.insert(3, "fluorescence", -1))
+#print(csv_output.insert(3, "fluorescence", -1))
 tracks_drawed = draw_tracks(seq, csv_output.to_numpy())
 with tifffile.TiffWriter("./output/tracks_drawed.tiff", bigtiff=True) as tif:
     for frame in range(tracks_drawed.shape[0]):
