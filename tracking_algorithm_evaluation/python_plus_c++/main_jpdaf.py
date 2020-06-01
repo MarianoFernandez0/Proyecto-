@@ -2,7 +2,10 @@ from functions.evaluation import evaluation
 from functions.change_format_for_jpdaf import write_csv_for_jpdaf, save_secuence_as_jpgs_for_jpdaf
 import tifffile
 import os
+from draw_tracks import draw_tracks
 from subprocess import call
+import pandas as pd
+from numpy import nan
 
 def main_jpdaf_implementation(video_sequence_path):
     '''
@@ -16,12 +19,9 @@ def main_jpdaf_implementation(video_sequence_path):
 
     video_sequence = os.listdir(video_sequence_path)[0]
     print(os.listdir(video_sequence_path))
-    #if len(os.listdir(video_sequence_path)) > 1:
-    #    print("Must have only one sequence in directory")
-    #    return 1
 
     print('Sequence name %s' % video_sequence)
-    tiff = tifffile.TiffFile(video_sequences_path + '/' + video_sequence)
+    tiff = tifffile.TiffFile(video_sequence_path + '/' + video_sequence)
     detected = evaluation(tiff, include_mask=True)
 
     folder_directory = 'sequences_for_jpdaf/'
@@ -36,3 +36,14 @@ def main_jpdaf_implementation(video_sequence_path):
 
 video_sequences_path = "./data_in/sequences"
 call("./execute_jpdaf.sh") if main_jpdaf_implementation(video_sequences_path) == 0 else print("error")
+video_sequence = os.listdir(video_sequences_path)[0]
+tiff = tifffile.TiffFile(video_sequences_path + '/' + video_sequence)
+seq = tiff.asarray()
+csv_output = pd.read_csv("./output/tracks.csv")
+print(csv_output.insert(3, "fluorescence", -1))
+tracks_drawed = draw_tracks(seq, csv_output.to_numpy())
+with tifffile.TiffWriter("./output/tracks_drawed.tiff", bigtiff=True) as tif:
+    for frame in range(tracks_drawed.shape[0]):
+        tif.save((tracks_drawed[frame]))
+from imageio import mimwrite as mp4_writer
+mp4_writer("./output/tracks_drawed.mp4", tracks_drawed, format="mp4", fps=5.)
