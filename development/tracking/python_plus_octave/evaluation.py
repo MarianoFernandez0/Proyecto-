@@ -23,10 +23,11 @@ def evaluation(tif, include_mask=False):
     data = pd.DataFrame(columns=['x', 'y', 'frame', 'ctcf', 'mean_gray_value'])
 
     for nro_frame in range(sequence.shape[0]):
+        print('frame', nro_frame)
         image = sequence[nro_frame, :, :]
         seg_img = segmentation(image)
         particles = detect_particles(seg_img)
-        # particles = size_filter(particles, pixel_size=10)
+        particles = size_filter(particles, pixel_size=[0.1, 0.1])
         image_bw = color.rgb2gray(image)
         grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
         for index, row in particles.iterrows():

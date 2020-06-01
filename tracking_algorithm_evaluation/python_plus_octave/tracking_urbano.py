@@ -1,4 +1,4 @@
-from functions.evaluation import evaluation
+from evaluation import evaluation
 import tifffile
 import os
 from oct2py import octave
@@ -7,6 +7,7 @@ import pandas as pd
 import numpy as np
 from imageio import mimwrite as mp4_writer
 from imageio import mimread as mp4_reader
+import time
 
 current_path = os.getcwd()
 octave.addpath(current_path+'/SpermTrackingProject')
@@ -56,6 +57,8 @@ def tracking_urbano(config_params):
     mp4_writer(video_file_mp4, sequence, format='mp4', fps=fps)
 
     num_frames = sequence.shape[0]
+    print('Running detection: ')
+    start = time.time()
     if detection_algorithm:
         # Python implementation for segmentation and detection
         tiff = tifffile.TiffFile(video_file_tiff)
@@ -64,17 +67,22 @@ def tracking_urbano(config_params):
     else:
         # Urbano matlab implementation for segmentation and detection
         octave.Detector(data_file, video_file_mp4, num_frames)
-
+    end = time.time()
+    print('Time to run detection: ', end - start)
     # Perform tracking step
+    start = time.time()
     octave.Tracker(data_file, video_file_mp4, video_file_out, csv_tracks, reformat_data_file, num_frames, fps, px2um,
                    ROIx, ROIy, mtt_algorithm, PG, PD, gv, plot_results, save_movie, snap_shot, plot_track_results,
                    analyze_motility, nout=0)
+    end = time.time()
+    print('Time to run tracking: ', end - start)
     octave.clear_all(nout=0)
 
     # reformat csv_tracks file
     tracks = pd.read_csv(csv_tracks)
     tracks.columns = ['id', 'x', 'y', 'frame']
     tracks['fluorescence'] = np.nan
+    tracks['frame'] = tracks['frame']
     tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
     tracks[['x', 'y']] = tracks[['x', 'y']]/px2um
     tracks.to_csv(csv_tracks, index=False)
@@ -88,6 +96,6 @@ def tracking_urbano(config_params):
 ########################################################
 
 
-params = 'params.txt'
+params = 'params_real.txt'
 
 tracking_urbano(params)
