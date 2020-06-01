@@ -9,5 +9,10 @@ echo "----------------------------"
 
 echo "----------------------------"
 echo "Calling C++ script"
+
 aux=$PWD/jpdaf_tracking/bin/jpdaf_tracker
+
+mkdir output
+cd output
 $aux $jpdaf_params $jpdaf_detections $jpdaf_in
+cd ..
