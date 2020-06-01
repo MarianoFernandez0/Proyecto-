@@ -33,7 +33,7 @@ def evaluation(tif, include_mask=False):
         for index, row in particles.iterrows():
             # fluorescencia
             mask = row['mask']
-            ctcf, mean_gray_value = fluorescence(grayscale, mask, seg_img / 255)
+            ctcf, mean_gray_value = fluorescence(mask, grayscale, seg_img / 255)
             # rellenar dataframe
             if include_mask:
                 data = data.append(
