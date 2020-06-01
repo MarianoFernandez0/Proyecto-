@@ -1,9 +1,9 @@
 def read_file(fileName):
 
-    POS_TRACK_ID = 2
-    POS_X = 4
-    POS_Y = 5
-    POS_T = 7
+    POS_TRACK_ID = 1
+    POS_X = 2
+    POS_Y = 3
+    POS_T = 5
 
     X = []
     Y = []

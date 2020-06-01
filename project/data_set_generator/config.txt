@@ -7,11 +7,11 @@ PATH_OUTPUT_DATA_SEQ :
 [Sequence parameters]
 	height_width_frames : 512 512 100
 	#RGB sequence
-	rgb : True
+	rgb : False
 	#Standard deviation for blurring and smooth
 	#the edges of the blobs
 	std_blur : 6
-	std_noise_added : 1 5 10 15
+	std_noise_added :
 	#Limit from its consider that the particle is not visible
 	low_limit : 0
 	file_format : tif mp4 jpg
