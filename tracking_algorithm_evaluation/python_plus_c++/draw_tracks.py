@@ -53,8 +53,8 @@ def draw_tracks(sequence: np.array, tracks_data: np.array) -> np.array:
     # dense drawn
     for frame in range(frames):
         start = 1
-        if frame > 5:
-            start = frame - 5
+        if frame > 10:
+            start = frame - 10
         for i in range(start, frame + 1):
 
             for tr, track in enumerate(tracks):

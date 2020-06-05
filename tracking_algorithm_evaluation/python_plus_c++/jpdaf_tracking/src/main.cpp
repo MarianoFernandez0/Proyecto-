@@ -128,7 +128,7 @@ int main(int argc, char** argv)
 
   std::ofstream csvFile;
   csvFile.open(filename, std::fstream::app);
-  std::vector<std::string> cols = {"track_id", "x", "y", "fluorescnece", "frame"};
+  std::vector<std::string> cols = {"track_id", "x", "y", "fluorescence", "frame"};
 
   for(int i=0; i<cols.size(); i++)
   {

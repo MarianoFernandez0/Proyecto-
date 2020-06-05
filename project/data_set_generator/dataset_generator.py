@@ -180,14 +180,14 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
     '''
     for extension in extensions:
         if extension == "tif":
-            path_out_tiff = path_out + "/tiff_ouput"
+            path_out_tiff = path_out + "/tiff_output"
             fetch_output("", path_out_tiff)
             # Guardo como tiff
             with TiffWriter(path_out_tiff + "/" + file_name + ".tif", bigtiff=True) as tif:
                 for frame in range(sequence.shape[0]):
                     tif.save((sequence[frame]))
         elif extension == "mp4":
-            path_out_mp4 = path_out + "/mp4_ouput"
+            path_out_mp4 = path_out + "/mp4_output"
             fetch_output("", path_out_mp4)
             mp4_writer(path_out_mp4 + "/" + file_name + ".mp4", sequence, fps)
         elif extension == "jpg":

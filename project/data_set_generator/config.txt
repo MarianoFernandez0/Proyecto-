@@ -22,7 +22,7 @@ PATH_OUTPUT_DATA_SEQ :
 
 #Parameters for each population
 [Population1]
-	tot_particles : 50
+	tot_particles : 1
 	#dimensions
 	#Two values (long, width)
 	mean : 18 7 
@@ -38,20 +38,20 @@ PATH_OUTPUT_DATA_SEQ :
 
 [Population2]
 	#Population 2
-	tot_particles : 25
+	tot_particles : 100
 	#dimensions
 	mean : 18 7 
 	cov_mean : 4 0 0 4
 	#movement
-	mean_velocity : 20
+	mean_velocity : 10
 	std_velocity : 1.5
-	std_direction : 10
-	head_displ_limits : 30
+	std_direction : 40
+	head_displ_limits : 3
 	std_depth : 20
 
 
 [Population3]
-	tot_particles : 50
+	tot_particles : 1
 	#dimensions
 	mean : 20 9 
 	cov_mean : 4 0 0 4
