@@ -63,15 +63,15 @@ def make_sequence(sequence_parameters, all_population):
         particles, mean, cov_mean = population['particles'], population['mean'], population['cov_mean']
         mean_velocity, std_velocity, std_direction = population['mean_velocity'], population['std_velocity'], \
                                                      population['std_direction']
-        head_displ_limits, std_depth = population['head_displ_limits'], population['std_depth']
+        head_displ, std_depth, mov_type = population['head_displ'], population['std_depth'], population['movement_type']
         x = np.zeros([particles, frames])
         y = np.zeros([particles, frames])
         intensity = np.zeros([particles, frames])
-        # Inicial intensity vector for every particle
-        intensity[:, 0] = np.random.uniform(100, 250, particles)
+        # Initial intensity vector for every particle
+        intensity[:, 0] = np.random.uniform(150, 250, particles)
         id_particles = np.arange(next_id, next_id + particles)
 
-        # Inicial positions of the particles in a square of (3N, 3M)
+        # Initial positions of the particles in a square of (3N, 3M)
         x[:, 0] = np.random.uniform(-N, 2 * N, particles)
         y[:, 0] = np.random.uniform(-M, 2 * M, particles)
         # Size of the particles population
@@ -79,7 +79,8 @@ def make_sequence(sequence_parameters, all_population):
         a = np.max(dimensions, axis=1)
         l = np.min(dimensions, axis=1)
 
-        theta = np.random.uniform(0, 360, particles)  # Initial angle
+        theta = np.random.uniform(-180, 180, particles)  # Initial angle
+        prev_sign = np.zeros(theta.shape)
         v = np.random.normal(mean_velocity, std_velocity, particles)  # Initial speed
 
         # Each frame is created
@@ -95,9 +96,8 @@ def make_sequence(sequence_parameters, all_population):
             image_segmented = final_sequence_segmented[f, :, :].copy()
             # Each particle is added
             for p in range(particles):
-                head_displ = np.radians(np.random.uniform(-head_displ_limits, head_displ_limits))
                 rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image_aux.shape,
-                                 np.radians(theta[p]) - math.pi / 2 + head_displ)
+                                 np.radians(theta[p]) - math.pi / 2)
                 if f > 0:
                     random_int_add = np.random.normal(0, std_depth)
                     intensity[p, f] = intensity[p, f - 1] + random_int_add
@@ -124,7 +124,16 @@ def make_sequence(sequence_parameters, all_population):
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step
             v = np.abs(np.random.normal(v, std_velocity, particles))
-            theta = np.random.normal(theta, std_direction, particles)
+
+            if mov_type == "a":
+                theta = np.random.normal(theta, std_direction, particles)
+            elif mov_type == "d":
+                continue
+            else:
+                random_dir = np.random.normal(head_displ, std_direction, particles)
+                random_dir[prev_sign == np.sign(random_dir)] = -1 * random_dir[prev_sign == np.sign(random_dir)]
+                prev_sign = np.sign(random_dir)
+                theta += random_dir
         next_id = np.max(id_particles)
 
     it = 0
@@ -263,8 +272,9 @@ def read_parameters(path='config.txt'):
             'mean_velocity': float(config[pop]["mean_velocity"]),
             'std_velocity': float(config[pop]["std_velocity"]),
             'std_direction': float(config[pop]["std_direction"]),  # previous name was std_theta
-            'head_displ_limits': float(config[pop]["head_displ_limits"]),
-            'std_depth': float(config[pop]["std_depth"])
+            'head_displ': float(config[pop]["head_displ"]),
+            'std_depth': float(config[pop]["std_depth"]),
+            'movement_type': (config[pop]["movement_type"]).lower()
         }
         all_population.append(population)
     return sequence_parameters, all_population
