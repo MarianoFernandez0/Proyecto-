@@ -4,6 +4,7 @@ import pandas as pd
 from pprint import PrettyPrinter
 # pd.options.mode.chained_assignment = 'raise'
 
+
 def fix_particles_oustide(X, M, N):
     # Se guarda en esta lista las partículas que están dentro del rango posible
     x_grater_0 = X.x > 0
@@ -39,31 +40,59 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
         distance = np.nan
         return distance
 
-    min_frame_a = track_a['frame'].min()
-    min_frame_b = track_b['frame'].min()
-    min_frame = int(min(min_frame_a, min_frame_b))
+    # ------------------------------------------------------------------------------------------------------------------
+    # old version:
+    #    min_frame_a = track_a['frame'].min()
+    #    min_frame_b = track_b['frame'].min()
+    #    min_frame = int(min(min_frame_a, min_frame_b))
+    #    max_frame_a = track_a['frame'].max()
+    #    max_frame_b = track_b['frame'].max()
+    #    max_frame = int(max(max_frame_a, max_frame_b))
+    #
+    #    distance = 0
+    #    for frame in range(min_frame, max_frame+1):
+    #        if frame < min_frame_a:
+    #            distance += max_dist
+    #        elif frame < min_frame_b:
+    #            distance += max_dist
+    #        elif frame > max_frame_a:
+    #            distance += max_dist
+    #        elif frame > max_frame_b:
+    #            distance += max_dist
+    #        else:
+    #            coord_track_a = track_a[track_a['frame'] == frame][['x', 'y']].to_numpy().squeeze()
+    #            coord_track_b = track_b[track_b['frame'] == frame][['x', 'y']].to_numpy().squeeze()
+    #            l2_distance = np.sqrt((coord_track_a[0] - coord_track_b[0]) ** 2 +
+    #                                  (coord_track_a[1] - coord_track_b[1]) ** 2)
+    #            distance += min(l2_distance, max_dist)
+    # ------------------------------------------------------------------------------------------------------------------
 
-    max_frame_a = track_a['frame'].max()
-    max_frame_b = track_b['frame'].max()
-    max_frame = int(max(max_frame_a, max_frame_b))
+    first_frame_a = track_a['frame'].min()
+    first_frame_b = track_b['frame'].min()
+    first_frame = int(max(first_frame_a, first_frame_b))
+
+    last_frame_a = track_a['frame'].max()
+    last_frame_b = track_b['frame'].max()
+    last_frame = int(min(last_frame_a, last_frame_b))
 
     distance = 0
-    for frame in range(min_frame, max_frame+1):
-        if frame < min_frame_a:
-            distance += max_dist
-        elif frame < min_frame_b:
-            distance += max_dist
-        elif frame > max_frame_a:
-            distance += max_dist
-        elif frame > max_frame_b:
-            distance += max_dist
-        else:
-            coord_track_a = track_a[track_a['frame'] == frame][['x', 'y']].to_numpy().squeeze()
-            coord_track_b = track_b[track_b['frame'] == frame][['x', 'y']].to_numpy().squeeze()
-            l2_distance = np.sqrt((coord_track_a[0] - coord_track_b[0]) ** 2 +
-                                  (coord_track_a[1] - coord_track_b[1]) ** 2)
-            distance += min(l2_distance, max_dist)
+    distance += (first_frame - first_frame_a)*max_dist
+    distance += (first_frame - first_frame_b)*max_dist
+    distance += (last_frame_a - last_frame)*max_dist
+    distance += (last_frame_b - last_frame)*max_dist
 
+    track_a = track_a[track_a['frame'] >= first_frame]
+    track_a = track_a[track_a['frame'] <= last_frame]
+
+    track_b = track_b[track_b['frame'] >= first_frame]
+    track_b = track_b[track_b['frame'] <= last_frame]
+
+    coords_a = track_a.loc[:, ['x', 'y']].to_numpy()
+    coords_b = track_b.loc[:, ['x', 'y']].to_numpy()
+
+    distances = np.linalg.norm((coords_a - coords_b), axis=1)
+    distance += np.sum(np.minimum(distances, max_dist))
+    #print(distances)
     return distance
 
 
@@ -264,12 +293,16 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
             first_frame = np.max(np.array([track_frames.min(), gt_track_frames.min()]))
             last_frame = np.min(np.array([track_frames.max(), gt_track_frames.max()]))
 
-            for frame in range(first_frame, last_frame+1):
-                est_coord = estimated_track.loc[estimated_track['frame'] == frame, ['x', 'y']].to_numpy()
-                gt_coord = gt_track.loc[gt_track['frame'] == frame, ['x', 'y']].to_numpy()
-                dist = np.linalg.norm(est_coord-gt_coord)
-                if dist < max_dist:
-                    TP_positions += 1
+            estimated_track = estimated_track[estimated_track['frame'] >= first_frame]
+            estimated_track = estimated_track[estimated_track['frame'] <= last_frame]
+            gt_track = gt_track[gt_track['frame'] >= first_frame]
+            gt_track = gt_track[gt_track['frame'] <= last_frame]
+
+            est_coords = estimated_track.loc[:, ['x', 'y']].to_numpy()
+            gt_coords = gt_track.loc[:, ['x', 'y']].to_numpy()
+
+            dists = np.linalg.norm((est_coords - gt_coords), axis=1)
+            TP_positions += np.sum(dists < max_dist)
 
     # Number of positions assigned to dummy tracks:
     FN_positions = ground_truth[ground_truth['opt_track_id'] < 0].shape[0]
