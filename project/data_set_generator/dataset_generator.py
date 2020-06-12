@@ -119,7 +119,6 @@ def make_sequence(sequence_parameters, all_population):
                     id_particles[p] = np.max(id_particles) + 1
             # Add blur so there are no drastic changes in the border of the particles
             image_normalized = gaussian(image_aux, std_blur, mode='reflect', preserve_range=True)
-            final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
             image_normalized = image_normalized.clip(0, 255)
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step
@@ -187,6 +186,7 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
      - path_out path to the directory where the output is going to be saved
      - fps: if the format is mp4, is necessary to specify the fps. Type float
     '''
+
     for extension in extensions:
         if extension == "tif":
             path_out_tiff = path_out + "/tiff_output"
