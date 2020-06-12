@@ -3,67 +3,36 @@
 	PATH_OUTPUT_DATA_SEQ : 
 
 [Sequence parameters]
-	height_width_frames : 512 512 100
+	#Duration of the observation in seconds	
+	height_width_duration : 512 512 20
+	#In Hz
+	frame_rate : 7
 	rgb : true
-	std_blur : 4
-	std_noise_added : 15
-	low_limit : 0
+	std_blur : 10
+	std_noise_added :
+	low_limit : 10
 	file_format : tif mp4 jpg
-	file_name : all_types
-	frame_rate : 10
+	file_name : all_types_test
+	#pixels per um
+	resolution : 1
 	# If not seed required, put -1
-	seed : 10
+	seed : -1
 
-[Population1]
-	tot_particles : 100
-	#dimensions
-	mean : 9 3 
-	cov_mean : 1 0 0 1
-	#movement
-	mean_velocity : 15
-	std_velocity : 0.5
-	std_direction : 10
-	head_displ : 40
-	std_depth : 5
-	movement_type : A
 
-[Population2]
-	tot_particles : 100
-	#dimensions
-	mean : 9 3 
-	cov_mean : 1 0 0 1
-	#movement
-	mean_velocity : 2
-	std_velocity : 0.5
-	std_direction : 10
-	head_displ : 40
-	std_depth : 5
-	movement_type : B
 
 [Population3]
 	tot_particles : 100
 	#dimensions
-	mean : 9 3
+	mean : 9 2  
 	cov_mean : 1 0 0 1
-	#movement
-	mean_velocity : 1
-	std_velocity : 0.5
-	std_direction : 180
-	head_displ : 45
-	std_depth : 1
-	movement_type : B
-
-[Population4]
-	tot_particles : 100
-	#dimensions
-	mean : 9 3
-	cov_mean : 1 0 0 1
-	#movement
-	mean_velocity : 0
-	std_velocity : 0
-	std_direction : 180
-	head_displ : 45
-	std_depth : 1
-	movement_type : D
-
-#https://www.reproduccionasistida.org/analisis-de-la-movilidad-de-los-espermatozoides/
+	#movement mu/s
+	mean_velocity : 90
+	std_velocity : 10
+	Tp : 0.00001
+	head_displ : true
+	std_depth : 5
+	movement_type : a
+	ALH_mean : 5.4
+	ALH_std : 2.9
+	BCP_mean : 15.7
+	BCP_std : 5.1
