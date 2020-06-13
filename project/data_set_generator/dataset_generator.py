@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import configparser
 import os
-import math
+from math import pi
 
 
 def make_sequence(sequence_parameters, all_population):
@@ -72,26 +72,27 @@ def make_sequence(sequence_parameters, all_population):
             'std_velocity'] * resolution, \
                                           population['Tp']
         head_displ, std_depth, mov_type = population['head_displ'], population['std_depth'], population['movement_type']
-        ALH_mean, ALH_std, BCP_mean, BCP_std = (population['ALH_mean'], population['ALH_std'],
+        ALH_mean, ALH_std, BCP_mean, BCP_std = (population['ALH_mean']+resolution, population['ALH_std']*resolution,
                                                 population['BCP_mean'], population['BCP_std'])
 
         x = np.zeros([particles, frames])
         y = np.zeros([particles, frames])
         intensity = np.zeros([particles, frames])
         # Initial intensity vector for every particle
-        intensity[:, 0] = np.random.uniform(200, 250, particles)
+        intensity[:, 0] = np.random.uniform(150, 250, particles)
         id_particles = np.arange(next_id, next_id + particles)
 
         # Initial positions of the particles in a square of (3N, 3M)
-        x[:, 0] = np.random.uniform(-N, 2 * N, particles)
-        y[:, 0] = np.random.uniform(-M, 2 * M, particles)
+        inf_x, sup_x, inf_y, sup_y = -N, 2 * N, -M, 2 * M
+        x[:, 0] = np.random.uniform(inf_x, sup_x, particles)
+        y[:, 0] = np.random.uniform(inf_y, sup_y, particles)
         # Size of the particles population
         dimensions = np.random.multivariate_normal(mean, cov_mean, particles)
         a = np.max(dimensions, axis=1)
         l = np.min(dimensions, axis=1)
 
         theta = np.random.uniform(-180, 180, particles)  # Initial angle
-        BCP_freq, BCP_fase = np.random.normal(BCP_mean, BCP_std, particles), np.random.uniform(-180, 180, particles)
+        BCP_freq, BCP_fase = np.random.normal(BCP_mean, BCP_std, particles), np.random.uniform(-pi, pi, particles)
         v = np.random.normal(mean_velocity, std_velocity, particles)  # Initial speed
 
         head_x = head_y = head_angle = np.zeros(particles)
@@ -104,26 +105,27 @@ def make_sequence(sequence_parameters, all_population):
             if f > 0:
                 x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta)) * time_step
                 y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta)) * time_step
-                x.clip(-N, 2 * N)
-                y.clip(-M, 2 * M)
-                if head_displ:
-                    head_pos = np.sin(BCP_freq*2*np.pi*time_step*f + BCP_fase)
-                    head_pos *= np.random.normal(ALH_mean, ALH_std, particles) * resolution
+                # Fuera del campo de observación, sentido opuesto
+                indexes = np.logical_or(np.logical_or(np.logical_or(x[:, f] < inf_x, x[:, f] > sup_x), y[:, f] < inf_y), y[:, f] > sup_y)
+                theta[indexes] *= -1
+                if head_displ and mov_type != "d":
+                    head_pos = np.sin(BCP_freq*2*pi*time_step*f + BCP_fase)
+                    head_pos *= np.random.normal(ALH_mean, ALH_std, particles)
                     head_x = head_pos * np.cos(np.radians(theta + 90))
                     head_y = head_pos * np.sin(np.radians(theta + 90))
-                    head_angle = np.arctan(head_pos/(v * time_step))
+                    head_angle = pi/4 * np.sin(BCP_freq*2*pi*time_step*f + BCP_fase)
             image_aux = final_sequence[f, :, :].copy()
             image_segmented = final_sequence_segmented[f, :, :].copy()
             # Each particle is added
             for p in range(particles):
                 rr, cc = ellipse(x[p, f] + head_x[p],
                                  y[p, f] + head_y[p], l[p], a[p], image_aux.shape,
-                                 np.radians(theta[p]) + head_angle[p] - math.pi / 2)
+                                 np.radians(theta[p]) + head_angle[p] - pi / 2)
                 if f > 0:
                     random_int_add = np.random.normal(0, std_depth)
                     intensity[p, f] = intensity[p, f - 1] + random_int_add
                 if low_limit < intensity[p, f] <= 255:
-                    image_segmented[rr, cc] = 255
+                    image_segmented[rr, cc] = 1
                 if intensity[p, f] <= low_limit:
                     image_aux[rr, cc] = 0
                     intensity[p, f] = 0
@@ -139,7 +141,7 @@ def make_sequence(sequence_parameters, all_population):
                 else:
                     id_particles[p] = np.max(id_particles) + 1
             # Add blur so there are no drastic changes in the border of the particles
-            image_normalized = gaussian(image_aux, std_blur, truncate=1)
+            image_normalized = gaussian(image_aux, std_blur, truncate=3)
             final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
             image_normalized = image_normalized.clip(0, 255)
             final_sequence[f, :, :] = np.uint8(image_normalized)
@@ -150,6 +152,8 @@ def make_sequence(sequence_parameters, all_population):
             else:
                 theta += np.random.normal(0, 1, theta.shape) * np.sqrt(2 / Tp) * time_step
         next_id = np.max(id_particles)
+
+    final_sequence *= 255/np.max(final_sequence)
 
     it = 0
     tot_it = len(std_noise_added)
@@ -286,16 +290,16 @@ def read_parameters(path='config.txt'):
             'particles': int(config[pop]["tot_particles"]),
             'mean': np.array(config[pop]["mean"].split(), dtype=np.float),
             'cov_mean': (np.array(config[pop]["cov_mean"].split(), dtype=np.float)).reshape(2, 2),
-            'mean_velocity': float(config[pop]["VSL"]),
-            'std_velocity': float(config[pop]["VSL_deviation"]),
+            'mean_velocity': float(config[pop]["VAP"]),
+            'std_velocity': float(config[pop]["VAP_deviation"]),
             'Tp': float(config[pop]["Tp"]),
             'head_displ': (config[pop]["head_displ"]).lower() == "true",
             'std_depth': float(config[pop]["std_depth"]),
             'movement_type': (config[pop]["movement_type"]).lower(),
             'ALH_mean': float(config[pop]["ALH_mean"]),
             'ALH_std': float(config[pop]["ALH_std"]),
-            'BCP_mean': float(config[pop]["BCP_mean"]),
-            'BCP_std': float(config[pop]["BCP_std"])
+            'BCP_mean': float(config[pop]["BCF_mean"]),
+            'BCP_std': float(config[pop]["BCF_std"])
         }
         all_population.append(population)
     return sequence_parameters, all_population
