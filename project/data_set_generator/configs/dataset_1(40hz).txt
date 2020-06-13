@@ -1,0 +1,92 @@
+[Output path]
+	PATH_OUTPUT_DATA_CSV : 
+	PATH_OUTPUT_DATA_SEQ : 
+
+[Sequence parameters]
+	#Duration of the observation in seconds	
+	height_width_duration : 512 512 4
+	#In Hz
+	frame_rate : 40
+	rgb : true
+	std_blur : 3
+	std_noise_added : 15
+	low_limit : 10
+	file_format : tif mp4 jpg
+	file_name : dataset_1
+	#pixels per um
+	resolution : 1
+	# If not seed required, put -1
+	seed : 30
+
+[PopulationA]
+	tot_particles : 100
+	#dimensions
+	mean : 8 2
+	cov_mean : 2 0 0 2
+	#movement mu/s
+	VAP : 100
+	VAP_deviation : 10
+	Tp : 0.001
+	head_displ : true
+	std_depth : 5
+	movement_type : a
+	ALH_mean : 5.4
+	ALH_std : 0.1
+	BCF_mean : 15
+	BCF_std : 2
+
+
+[PopulationB]
+	tot_particles : 70
+	#dimensions
+	mean : 9 2
+	cov_mean : 1 0 0 1
+	#movement mu/s
+	VAP : 90
+	VAP_deviation : 10
+	Tp : 0.0001
+	head_displ : true
+	std_depth : 5
+	movement_type : b
+	ALH_mean : 11
+	ALH_std : 0.5
+	BCF_mean : 10
+	BCF_std : 5
+
+
+[PopulationC]
+	tot_particles : 100
+	#dimensions
+	mean : 9 2
+	cov_mean : 1 0 0 1
+	#movement mu/s
+	VAP : 80
+	VAP_deviation : 10
+	Tp : 0.000001
+	head_displ : true
+	std_depth : 5
+	movement_type : c
+	ALH_mean : 12
+	ALH_std : 3
+	BCF_mean : 15
+	BCF_std : 10
+
+
+[PopulationD]
+	tot_particles : 30
+	#dimensions
+	mean : 9 2
+	cov_mean : 1 0 0 1
+	#movement mu/s
+	VAP : 0
+	VAP_deviation : 0
+	Tp : 0.000001
+	head_displ : true
+	std_depth : 5
+	movement_type : d
+	ALH_mean : 0
+	ALH_std : 0
+	BCF_mean : 0
+	BCF_std : 0
+
+
