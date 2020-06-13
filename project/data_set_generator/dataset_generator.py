@@ -133,7 +133,7 @@ def make_sequence(sequence_parameters, all_population):
                 # Agrego aquellas que entran en el cuadro
                 if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
                     df_info = df_info.append(
-                        {'id_particle': id_particles[p], 'x': y[p, f], 'y': x[p, f],
+                        {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
                          'fluorescence': intensity[p, f], 'frame': f},
                         ignore_index=True)
                 else:
@@ -144,7 +144,6 @@ def make_sequence(sequence_parameters, all_population):
             image_normalized = image_normalized.clip(0, 255)
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step
-            #v = np.abs(np.random.normal(v, std_velocity, particles))
 
             if mov_type == "d":
                 continue
@@ -287,8 +286,8 @@ def read_parameters(path='config.txt'):
             'particles': int(config[pop]["tot_particles"]),
             'mean': np.array(config[pop]["mean"].split(), dtype=np.float),
             'cov_mean': (np.array(config[pop]["cov_mean"].split(), dtype=np.float)).reshape(2, 2),
-            'mean_velocity': float(config[pop]["mean_velocity"]),
-            'std_velocity': float(config[pop]["std_velocity"]),
+            'mean_velocity': float(config[pop]["VSL"]),
+            'std_velocity': float(config[pop]["VSL_deviation"]),
             'Tp': float(config[pop]["Tp"]),
             'head_displ': (config[pop]["head_displ"]).lower() == "true",
             'std_depth': float(config[pop]["std_depth"]),

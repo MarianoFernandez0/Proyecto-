@@ -8,31 +8,31 @@
 	#In Hz
 	frame_rate : 7
 	rgb : true
-	std_blur : 10
+	std_blur : 8
 	std_noise_added :
 	low_limit : 10
 	file_format : tif mp4 jpg
-	file_name : all_types_test
+	file_name : tipeA
 	#pixels per um
-	resolution : 1
+	resolution : 0.9
 	# If not seed required, put -1
 	seed : -1
 
 
 
-[Population3]
+[Population1]
 	tot_particles : 100
 	#dimensions
-	mean : 9 2  
+	mean : 9 2
 	cov_mean : 1 0 0 1
 	#movement mu/s
-	mean_velocity : 90
-	std_velocity : 10
-	Tp : 0.00001
+	VSL : 50
+	VSL_deviation : 10
+	Tp : 0.001
 	head_displ : true
 	std_depth : 5
 	movement_type : a
-	ALH_mean : 5.4
-	ALH_std : 2.9
-	BCP_mean : 15.7
-	BCP_std : 5.1
+	ALH_mean : 1
+	ALH_std : 0.1
+	BCP_mean : 15
+	BCP_std : 5
