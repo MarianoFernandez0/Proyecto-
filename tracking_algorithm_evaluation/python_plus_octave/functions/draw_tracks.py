@@ -43,8 +43,8 @@ def draw_tracks(sequence: np.array, tracks_data: np.array) -> np.array:
     for track_id in tracks_id:
         data_track = tracks_data[tracks_data[:, 0] == track_id]
         coord = np.ones((frames, 4)) * -1
-        print(np.uint(data_track[:, 4]))
-        print(coord.shape)
+        #print(np.uint(data_track[:, 4]))
+        #print(coord.shape)
         coord[np.uint(data_track[:, 4])] = data_track[:, 0:4]
         tracks.append(coord)
 
@@ -66,7 +66,7 @@ def draw_tracks(sequence: np.array, tracks_data: np.array) -> np.array:
 
                     fontColor = colors[tr]
                     coord = (int(track[frame, 1]) + 5, int(track[frame, 2]) + 5)
-                    print('f', frame, (track[frame, 0], track[frame, 3]))
+                    # print('f', frame, (track[frame, 0], track[frame, 3]))
                     putText(seq_out[frame], 'Id: %d, F : %d' % (track[frame, 0], track[frame, 3]),
                                 coord,
                                 font,
