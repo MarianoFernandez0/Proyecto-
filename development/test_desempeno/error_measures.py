@@ -75,24 +75,40 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
     last_frame_b = track_b['frame'].max()
     last_frame = int(min(last_frame_a, last_frame_b))
 
+
     distance = 0
     distance += (first_frame - first_frame_a)*max_dist
     distance += (first_frame - first_frame_b)*max_dist
     distance += (last_frame_a - last_frame)*max_dist
     distance += (last_frame_b - last_frame)*max_dist
 
+    #print('BEFORE')
+    #print('track_b', track_b['frame'].unique())
+    #print('track_a', track_a['frame'].unique())
+    #print('AFTER')
     track_a = track_a[track_a['frame'] >= first_frame]
     track_a = track_a[track_a['frame'] <= last_frame]
-
     track_b = track_b[track_b['frame'] >= first_frame]
     track_b = track_b[track_b['frame'] <= last_frame]
+
+    union_index = np.isin(track_a['frame'], track_b['frame'].unique())
+    track_a = track_a[union_index]
+    #print('track_b', track_b['frame'].unique())
+    #print('track_a', track_a['frame'].unique())
+    distance += np.sum(~union_index)*max_dist
+
+    union_index = np.isin(track_b['frame'], track_a['frame'].unique())
+    track_b = track_b[union_index]
+    # print('track_b', track_b['frame'].unique())
+    # print('track_a', track_a['frame'].unique())
+    distance += np.sum(~union_index) * max_dist
 
     coords_a = track_a.loc[:, ['x', 'y']].to_numpy()
     coords_b = track_b.loc[:, ['x', 'y']].to_numpy()
 
     distances = np.linalg.norm((coords_a - coords_b), axis=1)
     distance += np.sum(np.minimum(distances, max_dist))
-    #print(distances)
+    # print(distances)
     return distance
 
 
@@ -225,11 +241,11 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
                                 y converge a cero a medida que el número aumenta.
                                 beta(ground_truth, tracks) = (d(ground_truth, dummy_tracks) - d(ground_truth, tracks)) /
                                                         (d(ground_truth, dummy_tracks) + d(right_tracks, dummy_tracks))
-                TP (int): True Positives. Número de trayectorias correctas de tracks.
-                FN (int): False Negatives. Número de trayectorias de ground truth que no se encuentran en tracks.
-                FP (int): False Positives. Número de trayectorias de tracks que no corresponden a ninguna de
+                TP Tracks (int): True Positives. Número de trayectorias correctas de tracks.
+                FN Tracks (int): False Negatives. Número de trayectorias de ground truth que no se encuentran en tracks.
+                FP Tracks (int): False Positives. Número de trayectorias de tracks que no corresponden a ninguna de
                                             ground_truth.
-                JSC (float): Índice de Jaccard. JSC = TP/(TP + FN + FP)
+                JSC Tracks (float): Índice de Jaccard. JSC = TP/(TP + FN + FP)
     """
 
     dummy_tracks = {'id': -ground_truth['id'].unique()}
@@ -297,6 +313,11 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
             estimated_track = estimated_track[estimated_track['frame'] <= last_frame]
             gt_track = gt_track[gt_track['frame'] >= first_frame]
             gt_track = gt_track[gt_track['frame'] <= last_frame]
+
+            union_index = np.isin(gt_track['frame'], estimated_track['frame'].unique())
+            gt_track = gt_track[union_index]
+            union_index = np.isin(estimated_track['frame'], gt_track['frame'].unique())
+            estimated_track = estimated_track[union_index]
 
             est_coords = estimated_track.loc[:, ['x', 'y']].to_numpy()
             gt_coords = gt_track.loc[:, ['x', 'y']].to_numpy()
@@ -369,12 +390,22 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 # ----------------------------------------------------------------------------------------------------------------------
 # PRUEBA: track_set_error()
 #
-tracks_csv = pd.read_csv('tracks_enn_jpdaf.csv')
-gt_tracks = pd.read_csv('_data.csv')
-gt_tracks = gt_tracks[gt_tracks['frame'] < 50]
-tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
-gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
-print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
+tracks_csv = pd.read_csv('Spots in tracks statistics-dataset1-10Hz.csv')
+#print(tracks_csv.columns)
+tracks_csv.rename(columns={'TRACK_ID': 'id',
+                           'POSITION_X': 'x',
+                           'POSITION_Y': 'y',
+                           'FRAME': 'frame'}, inplace=True)
+#print(tracks_csv.columns)
+gt_tracks = pd.read_csv('dataset_1_data.csv')
+#print(gt_tracks.head())
+gt_tracks.rename(columns={'id_particle': 'id'}, inplace=True)
+#print(gt_tracks.head())
+#gt_tracks = gt_tracks[gt_tracks['frame'] < 5]
+#tracks_csv = tracks_csv[tracks_csv['frame'] < 5]
+#gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
+#print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
+print('---------------------------------------------------TrackMate---------------------------------------------------')
 # print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
 # print('----------------------------------------------------')
 # print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
@@ -384,17 +415,17 @@ error = track_set_error(gt_tracks, tracks_csv, 40)
 print('\n Performance Measures:')
 PrettyPrinter(sort_dicts=False).pprint(error)
 
-tracks_csv = pd.read_csv('tracks_NN.csv')
-tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
-print('-------------------------------------------------------NN------------------------------------------------------')
+#tracks_csv = pd.read_csv('tracks_NN.csv')
+#tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
+#print('-------------------------------------------------------NN------------------------------------------------------')
 # print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
 # print('----------------------------------------------------')
 # print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
 # print('----------------------------------------------------')
 
-error = track_set_error(gt_tracks, tracks_csv, 40)
-print('\n Performance Measures:')
-PrettyPrinter(sort_dicts=False).pprint(error)
+#error = track_set_error(gt_tracks, tracks_csv, 40)
+#print('\n Performance Measures:')
+#PrettyPrinter(sort_dicts=False).pprint(error)
 
 # tracks_a = {
 #    'id': [3, 4, 4, 4, 55, 55, 3],
