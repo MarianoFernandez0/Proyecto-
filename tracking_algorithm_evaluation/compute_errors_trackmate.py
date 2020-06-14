@@ -29,7 +29,8 @@ for dataset_folder in datasets_list:
     gt_tracks.rename(columns={'id_particle': 'id'}, inplace=True)
 
     error = track_set_error(gt_tracks, tracks_csv, 40)
-    error = pd.DataFrame.from_dict(error, orient='index', columns=[frame_rate+'_'+algoritmn])
+    error = pd.DataFrame.from_dict(error, orient='index', columns=['dataset_' + dataset_num + '_' +
+                                                                   dataset_frec + 'Hz_trackmate'])
     error = error.transpose()
     performance_measures = pd.concat((performance_measures, error))
 performance_measures.to_csv('performance_measures_trackmate.csv')
