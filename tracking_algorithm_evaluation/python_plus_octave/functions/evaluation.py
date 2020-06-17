@@ -7,7 +7,7 @@ import numpy as np
 import skimage.color as color
 
 
-def evaluation(tif, include_mask=False):
+def evaluation(tif, pixel_size, include_mask=False):
     '''
     Entrada: .tif
             include_mask (boolean): Determina si el dataframe de salida incluye a la máscara de cada partícula detectada.
@@ -27,7 +27,7 @@ def evaluation(tif, include_mask=False):
         image = sequence[nro_frame, :, :]
         seg_img = segmentation(image)
         particles = detect_particles(seg_img)
-        particles = size_filter(particles, pixel_size=[0.1, 0.1])
+        particles = size_filter(particles, pixel_size=[pixel_size, pixel_size])
         image_bw = color.rgb2gray(image)
         grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
         for index, row in particles.iterrows():

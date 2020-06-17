@@ -390,42 +390,33 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 # ----------------------------------------------------------------------------------------------------------------------
 # PRUEBA: track_set_error()
 #
-tracks_csv = pd.read_csv('Spots in tracks statistics-dataset1-10Hz.csv')
-#print(tracks_csv.columns)
-tracks_csv.rename(columns={'TRACK_ID': 'id',
-                           'POSITION_X': 'x',
-                           'POSITION_Y': 'y',
-                           'FRAME': 'frame'}, inplace=True)
-#print(tracks_csv.columns)
-gt_tracks = pd.read_csv('dataset_1_data.csv')
-#print(gt_tracks.head())
-gt_tracks.rename(columns={'id_particle': 'id'}, inplace=True)
-#print(gt_tracks.head())
-#gt_tracks = gt_tracks[gt_tracks['frame'] < 5]
-#tracks_csv = tracks_csv[tracks_csv['frame'] < 5]
-#gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
-#print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
-print('---------------------------------------------------TrackMate---------------------------------------------------')
+# tracks_csv = pd.read_csv('tracks_enn_jpdaf.csv')
+# gt_tracks = pd.read_csv('_data.csv')
+# gt_tracks = gt_tracks[gt_tracks['frame'] < 50]
+# tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
+# gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
+# print('---------------------------------------------------ENN JPDAF---------------------------------------------------
+# ')
 # print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
 # print('----------------------------------------------------')
 # print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
 # print('----------------------------------------------------')
 
-error = track_set_error(gt_tracks, tracks_csv, 40)
-print('\n Performance Measures:')
-PrettyPrinter(sort_dicts=False).pprint(error)
+# error = track_set_error(gt_tracks, tracks_csv, 40)
+# print('\n Performance Measures:')
+# PrettyPrinter(sort_dicts=False).pprint(error)
 
-#tracks_csv = pd.read_csv('tracks_NN.csv')
-#tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
-#print('-------------------------------------------------------NN------------------------------------------------------')
+# tracks_csv = pd.read_csv('tracks_NN.csv')
+# tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
+# print('-------------------------------------------------------NN------------------------------------------------------')
 # print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
 # print('----------------------------------------------------')
 # print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
 # print('----------------------------------------------------')
 
-#error = track_set_error(gt_tracks, tracks_csv, 40)
-#print('\n Performance Measures:')
-#PrettyPrinter(sort_dicts=False).pprint(error)
+# error = track_set_error(gt_tracks, tracks_csv, 40)
+# print('\n Performance Measures:')
+# PrettyPrinter(sort_dicts=False).pprint(error)
 
 # tracks_a = {
 #    'id': [3, 4, 4, 4, 55, 55, 3],

@@ -64,7 +64,7 @@ def tracking_urbano(config_params):
     if detection_algorithm:
         # Python implementation for segmentation and detection
         tiff = tifffile.TiffFile(video_file_tiff)
-        detected = evaluation(tiff)
+        detected = evaluation(tiff, px2um)
         detected.to_csv(data_file)
     else:
         # Urbano matlab implementation for segmentation and detection
