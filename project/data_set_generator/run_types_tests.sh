@@ -1,4 +1,16 @@
-python main_dataset.py config_typeA.txt
-python main_dataset.py config_typeB.txt
-python main_dataset.py config_typeC.txt
-python main_dataset.py config_typeD.txt
+echo "1"
+python main_dataset.py "configs/dataset_1(10Hz).txt"
+echo "2"
+python main_dataset.py "configs/dataset_1(20Hz).txt"
+echo "3"
+python main_dataset.py "configs/dataset_1(30Hz).txt"
+echo "4"
+python main_dataset.py "configs/dataset_1(40Hz).txt"
+echo "5"
+python main_dataset.py "configs/dataset_2(10Hz).txt"
+echo "6"
+python main_dataset.py "configs/dataset_2(20Hz).txt"
+echo "7"
+python main_dataset.py "configs/dataset_2(30Hz).txt"
+echo "8"
+python main_dataset.py "configs/dataset_2(40Hz).txt"

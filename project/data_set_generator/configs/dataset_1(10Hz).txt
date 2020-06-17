@@ -13,8 +13,8 @@
 	std_blur : 3
 	std_noise_added : 15
 	low_limit : 10
-	file_format : tif mp4 jpg
-	file_name : dataset_1
+	file_format : tif
+	file_name : dataset_1_10Hz
 	#pixels per um
 	resolution : 1
 	# If not seed required, put -1
