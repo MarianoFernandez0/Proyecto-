@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from pprint import PrettyPrinter
 # pd.options.mode.chained_assignment = 'raise'
+import time
 
 
 def fix_particles_oustide(X, M, N):
@@ -40,6 +41,11 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
         distance = np.nan
         return distance
 
+    frames = 50
+    track_a_np = np.ones((2, frames))*9000
+    track_b_np = np.ones((2, frames))*9000
+    track_a_np[:, track_a['frame'].to_numpy(dtype='int32')] = track_a[['x', 'y']].to_numpy().T
+    track_b_np[:, track_b['frame'].to_numpy(dtype='int32')] = track_b[['x', 'y']].to_numpy().T
     # ------------------------------------------------------------------------------------------------------------------
     # old version:
     #    min_frame_a = track_a['frame'].min()
@@ -66,49 +72,25 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
     #                                  (coord_track_a[1] - coord_track_b[1]) ** 2)
     #            distance += min(l2_distance, max_dist)
     # ------------------------------------------------------------------------------------------------------------------
+    # distance = 0
 
-    first_frame_a = track_a['frame'].min()
-    first_frame_b = track_b['frame'].min()
-    first_frame = int(max(first_frame_a, first_frame_b))
+    # union_index = np.isin(track_a['frame'], track_b['frame'].unique())
+    # track_a = track_a[union_index]
+    # distance += np.sum(~union_index)*max_dist
 
-    last_frame_a = track_a['frame'].max()
-    last_frame_b = track_b['frame'].max()
-    last_frame = int(min(last_frame_a, last_frame_b))
+    # union_index = np.isin(track_b['frame'], track_a['frame'].unique())
+    # track_b = track_b[union_index]
+    # distance += np.sum(~union_index) * max_dist
 
+    # coords_a = track_a.loc[:, ['x', 'y']].to_numpy()
+    # coords_b = track_b.loc[:, ['x', 'y']].to_numpy()
 
-    distance = 0
-    distance += (first_frame - first_frame_a)*max_dist
-    distance += (first_frame - first_frame_b)*max_dist
-    distance += (last_frame_a - last_frame)*max_dist
-    distance += (last_frame_b - last_frame)*max_dist
+    # distances = np.linalg.norm((coords_a - coords_b), axis=1)
+    # distance += np.sum(np.minimum(distances, max_dist))
 
-    #print('BEFORE')
-    #print('track_b', track_b['frame'].unique())
-    #print('track_a', track_a['frame'].unique())
-    #print('AFTER')
-    track_a = track_a[track_a['frame'] >= first_frame]
-    track_a = track_a[track_a['frame'] <= last_frame]
-    track_b = track_b[track_b['frame'] >= first_frame]
-    track_b = track_b[track_b['frame'] <= last_frame]
+    distances = np.linalg.norm((track_a_np - track_b_np), axis=0)
+    distance = np.sum(np.minimum(distances, max_dist))
 
-    union_index = np.isin(track_a['frame'], track_b['frame'].unique())
-    track_a = track_a[union_index]
-    #print('track_b', track_b['frame'].unique())
-    #print('track_a', track_a['frame'].unique())
-    distance += np.sum(~union_index)*max_dist
-
-    union_index = np.isin(track_b['frame'], track_a['frame'].unique())
-    track_b = track_b[union_index]
-    # print('track_b', track_b['frame'].unique())
-    # print('track_a', track_a['frame'].unique())
-    distance += np.sum(~union_index) * max_dist
-
-    coords_a = track_a.loc[:, ['x', 'y']].to_numpy()
-    coords_b = track_b.loc[:, ['x', 'y']].to_numpy()
-
-    distances = np.linalg.norm((coords_a - coords_b), axis=1)
-    distance += np.sum(np.minimum(distances, max_dist))
-    # print(distances)
     return distance
 
 
@@ -168,20 +150,49 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
     tracks_b_grouped = tracks_b.groupby('id')
 
     cost = np.zeros([num_tracks_a, num_tracks_b])
+    t0 = time.time()
+    dt = 0
+
+    num_frames = tracks_a['frame'].to_numpy(dtype='int32').max()+1
+    tracks_a_np = np.zeros((2, num_frames, num_tracks_a))
+    tracks_b_np = np.zeros((2, num_frames, num_tracks_b))
+    for i in range(num_tracks_a):
+        tracks_a_np[:, tracks_a_grouped.get_group(ids_a[i])['frame'].to_numpy(dtype='int32'), i] = \
+            tracks_a_grouped.get_group(ids_a[i])[['x', 'y']].to_numpy().T
+    for i in range(num_tracks_b):
+        if ~(np.isnan(tracks_b_grouped.get_group(ids_b[i])[['x', 'y']].to_numpy())).any():
+            tracks_b_np[:, tracks_b_grouped.get_group(ids_b[i])['frame'].to_numpy(dtype='int32'), i] = \
+                tracks_b_grouped.get_group(ids_b[i])[['x', 'y']].to_numpy().T
+
     for i in range(num_tracks_a):
         for j in range(num_tracks_b):
-            cost[i, j] = distance_between_two_tracks(tracks_a_grouped.get_group(ids_a[i]),
-                                                     tracks_b_grouped.get_group(ids_b[j]),
-                                                     max_dist)
 
+            #cost[i, j] = distance_between_two_tracks(tracks_a_grouped.get_group(ids_a[i]),
+            #                                         tracks_b_grouped.get_group(ids_b[j]),
+            #                                         max_dist)
+
+            t_d0 = time.time()
+            distances = np.linalg.norm((tracks_a_np[:, :, i] - tracks_b_np[:, :, j]), axis=0)
+            cost[i, j] = np.sum(np.minimum(distances, max_dist))
+            t_d1 = time.time()
+            dt += t_d1 - t_d0
+    print('Time to sun all distance_between_two_tracks: ', dt)
+    t1 = time.time()
+    print('Time to compute cost matrix: ', t1 - t0)
+    t0 = time.time()
     row_ind, col_ind = linear_sum_assignment(cost)
+    t1 = time.time()
+    print('Time to run linear_sum_assignment: ', t1 - t0)
     # dist = cost[row_ind, col_ind].sum()
 
-    for i in range(len(col_ind)):
-        tracks_b.loc[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
-        tracks_a.loc[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
+    tracks_a_new = tracks_a.copy()
+    tracks_b_new = tracks_b.copy()
 
-    return tracks_a, tracks_b, cost[row_ind, col_ind]
+    for i in range(len(col_ind)):
+        tracks_a_new.at[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
+        tracks_b_new.at[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
+
+    return tracks_a_new, tracks_b_new, cost[row_ind, col_ind]
 
 
 def error_measures(ground_truth_df, detected_df, max_dist):
@@ -248,31 +259,36 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
                 JSC Tracks (float): Índice de Jaccard. JSC = TP/(TP + FN + FP)
     """
 
+    if any(estimated_tracks['id'].unique() == 0):
+        estimated_tracks.id = estimated_tracks['id'] + 1
+
     dummy_tracks = {'id': -ground_truth['id'].unique()}
     dummy_tracks = pd.DataFrame(data=dummy_tracks, columns=['id', 'frame'])
 
     tracks_extended = pd.concat([estimated_tracks, dummy_tracks])
     # Se calcula la distancia del conjunto de tracks al ground truth
+    t0 = time.time()
     ground_truth, tracks_extended, opt_distances = get_optimal_track_assignment(ground_truth, tracks_extended, max_dist)
+    t1 = time.time()
+    print('Time to run optimal assignment: ', t1 - t0)
     opt_distance = opt_distances.sum()
 
     # La máxima distancia posible entre tracks y ground_truth, es la distancia entre ground truth
     # y un conjunto de tracks vacías.
-    _, _, max_distances = get_optimal_track_assignment(ground_truth, dummy_tracks, max_dist)
-    max_distance = max_distances.sum()
+    max_distance = ground_truth.shape[0]*max_dist
 
     # tracks not assigned to ground_truth tracks
     wrong_tracks = tracks_extended[tracks_extended['opt_track_id'].isnull()]
     wrong_tracks = wrong_tracks[wrong_tracks['id'] > 0]                                # only non dummy tracks
-    dummy_tracks = {'id': -wrong_tracks['id'].unique()}
-    dummy_tracks = pd.DataFrame(data=dummy_tracks, columns=['id', 'frame'])
-    _, _, wrong_max_distances = get_optimal_track_assignment(wrong_tracks, dummy_tracks, max_dist)
-    wrong_max_distance = wrong_max_distances.sum()
+    wrong_max_distance = wrong_tracks.shape[0]*max_dist
 
     # tracks assigned to ground_truth tracks
     assigned_tracks = tracks_extended[~tracks_extended['opt_track_id'].isnull()]
     right_tracks = assigned_tracks[assigned_tracks['id'] > 0]                           # only non dummy assigned tracks
-    _, _, right_distances = get_optimal_track_assignment(right_tracks, ground_truth, max_dist)
+    # t0 = time.time()
+    # _, _, right_distances = get_optimal_track_assignment(right_tracks, ground_truth, max_dist)
+    right_distances = opt_distances[ground_truth['opt_track_id'].unique() > 0]
+
     # print('distance: ', opt_distance)
     # print('max_dist: ', max_distance)
 
@@ -297,6 +313,7 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 
     estimated_track_grouped = tracks_extended.groupby('id')
     gt_grouped = ground_truth.groupby('id')
+
     for opt_id in ground_truth['opt_track_id'].unique():
         if opt_id > 0:
             estimated_track = estimated_track_grouped.get_group(opt_id)
@@ -326,7 +343,7 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
             TP_positions += np.sum(dists < max_dist)
 
     # Number of positions assigned to dummy tracks:
-    FN_positions = ground_truth[ground_truth['opt_track_id'] < 0].shape[0]
+    FN_positions = ground_truth[ground_truth['opt_track_id'] <= 0].shape[0]
     # Number of positions of tracks not assigned to ground truth tracks:
     FP_positions = wrong_tracks.shape[0]
 
@@ -401,17 +418,19 @@ gt_tracks = pd.read_csv('dataset_1_data.csv')
 #print(gt_tracks.head())
 gt_tracks.rename(columns={'id_particle': 'id'}, inplace=True)
 #print(gt_tracks.head())
-#gt_tracks = gt_tracks[gt_tracks['frame'] < 5]
-#tracks_csv = tracks_csv[tracks_csv['frame'] < 5]
-#gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
+gt_tracks = gt_tracks[gt_tracks['frame'] < 5]
+tracks_csv = tracks_csv[tracks_csv['frame'] < 5]
+gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
 #print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
 print('---------------------------------------------------TrackMate---------------------------------------------------')
 # print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
 # print('----------------------------------------------------')
 # print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
 # print('----------------------------------------------------')
-
+start = time.time()
 error = track_set_error(gt_tracks, tracks_csv, 40)
+end = time.time()
+print('Time to run track_set_error: ', end - start)
 print('\n Performance Measures:')
 PrettyPrinter(sort_dicts=False).pprint(error)
 
