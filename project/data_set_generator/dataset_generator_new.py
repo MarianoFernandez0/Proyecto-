@@ -64,13 +64,14 @@ def make_sequence(sequence_parameters, all_population):
     path_data_out = Path(path_data_out)
     path_seq_out = Path(path_seq_out)
 
-    Path.mkdir(path_data_out, exist_ok=True)
-    Path.mkdir(path_seq_out, exist_ok=True)
+    Path.mkdir(path_data_out, exist_ok=True, parents=True)
+    Path.mkdir(path_seq_out, exist_ok=True, parents=True)
 
-    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
-    next_id = 0
+
 
     for frame_rate in frame_rates:
+        df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+        next_id = 0
         frames = int(np.round(duration * frame_rate, 0))
         time_step = 1 / frame_rate
         if not rgb:
