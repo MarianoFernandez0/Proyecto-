@@ -1,5 +1,5 @@
 [Output path]
-	PATH_OUTPUT_DATA_CSV : 
+	PATH_OUTPUT_DATA_CSV :
 	PATH_OUTPUT_DATA_SEQ : 
 
 [Sequence parameters]

@@ -1,6 +1,6 @@
 [Output path]
-	PATH_OUTPUT_DATA_CSV : 
-	PATH_OUTPUT_DATA_SEQ : 
+	PATH_OUTPUT_DATA_CSV : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/dataset_1_40Hz
+	PATH_OUTPUT_DATA_SEQ : /home/mariano/Projects/TDE/git/Proyecto-/tracking_algorithm_evaluation/python_plus_octave/data/dataset_1_40Hz
 
 [Sequence parameters]
 	#Duration of the observation in seconds	

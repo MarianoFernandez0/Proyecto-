@@ -1,6 +1,8 @@
 [Output path]
 	PATH_OUTPUT_DATA_CSV : 
-	PATH_OUTPUT_DATA_SEQ : 
+
+	PATH_OUTPUT_DATA_SEQ :
+
 
 [Sequence parameters]
 	#Duration of the observation in seconds	
