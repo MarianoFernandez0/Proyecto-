@@ -352,6 +352,31 @@ end = time.time()
 print('Time to run track_set_error: ', end - start)
 print('\n Performance Measures:')
 PrettyPrinter(sort_dicts=False).pprint(error)
+
+print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
+tracks_csv = pd.read_csv('tracks_enn_jpdaf.csv')
+# print(tracks_csv.columns)
+tracks_csv = tracks_csv[tracks_csv['frame'] < 40]
+
+t0 = time.time()
+error = track_set_error(gt_tracks, tracks_csv, 40)
+t1 = time.time()
+print('TIme to run track_set_error: ', t1-t0)
+print('\n Performance Measures:')
+PrettyPrinter(sort_dicts=False).pprint(error)
+
+print('---------------------------------------------------JPDAF C++---------------------------------------------------')
+tracks_csv = pd.read_csv('dataset_1_10Hz_C.csv')
+# print(tracks_csv.columns)
+tracks_csv.rename(columns={'track_id': 'id'}, inplace=True)
+tracks_csv = tracks_csv[tracks_csv['frame'] < 40]
+
+t0 = time.time()
+error = track_set_error(gt_tracks, tracks_csv, 40)
+t1 = time.time()
+print('TIme to run track_set_error: ', t1-t0)
+print('\n Performance Measures:')
+PrettyPrinter(sort_dicts=False).pprint(error)
 # ----------------------------------------------------------------------------------------------------------------------
 # tracks_a = {
 #    'id': [3, 4, 4, 4, 55, 55, 3],
