@@ -242,6 +242,10 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 
     # Number of right positions in tracks assigned to ground truth tracks.
     TP_positions = 0
+    # Number of positions assigned to dummy tracks:
+    FN_positions = ground_truth[ground_truth['opt_track_id'] <= 0].shape[0]
+    # Number of positions of tracks not assigned to ground truth tracks:
+    FP_positions = wrong_tracks.shape[0]
 
     right_tracks_grouped = right_tracks.groupby('id')
     gt_grouped = ground_truth.groupby('id')
@@ -259,16 +263,13 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
         max_x = max(right_track['x'].to_numpy(dtype='int32').max(), gt_track['x'].to_numpy(dtype='int32').max())
         max_y = max(right_track['y'].to_numpy(dtype='int32').max(), gt_track['x'].to_numpy(dtype='int32').max())
 
-        tracks_a_np, _ = pandas_tracks_to_numpy(right_track, num_frames, max_x*max_y)
-        tracks_b_np, _ = pandas_tracks_to_numpy(gt_track, num_frames, max_x*max_y)
+        tracks_right_np, _ = pandas_tracks_to_numpy(right_track, num_frames, max_x*max_y)
+        tracks_gt_np, _ = pandas_tracks_to_numpy(gt_track, num_frames, max_x*max_y)
 
-        distances = np.linalg.norm((tracks_a_np[:, :, 0] - tracks_b_np[:, :, 0]), axis=0)
+        distances = np.linalg.norm((tracks_right_np[:, :, 0] - tracks_gt_np[:, :, 0]), axis=0)
         TP_positions += np.sum(distances < max_dist) - min_frame
-
-    # Number of positions assigned to dummy tracks:
-    FN_positions = ground_truth[ground_truth['opt_track_id'] <= 0].shape[0]
-    # Number of positions of tracks not assigned to ground truth tracks:
-    FP_positions = wrong_tracks.shape[0]
+        FN_positions += np.sum(tracks_gt_np[0, distances > max_dist, 0] < max_x*max_y)
+        FP_positions += np.sum(tracks_right_np[0, distances > max_dist, 0] < max_x * max_y)
 
     JSC_positions = TP_positions/(TP_positions + FN_positions + FP_positions)
 
