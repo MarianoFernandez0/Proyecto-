@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import configparser
 from pathlib import Path
-import concurrent.futures
+import time
 
 
 def make_sequence(sequence_parameters, all_population):
@@ -55,7 +55,6 @@ def make_sequence(sequence_parameters, all_population):
     resolution = sequence_parameters['resolution']
 
     M, N = int(M), int(N)
-    if seed > 0: np.random.seed(seed)
     if not path_data_out:
         path_data_out = HOUSING_PATH_SEQ_DATA
     if not path_seq_out:
@@ -67,9 +66,11 @@ def make_sequence(sequence_parameters, all_population):
     Path.mkdir(path_data_out, exist_ok=True, parents=True)
     Path.mkdir(path_seq_out, exist_ok=True, parents=True)
 
-
+    if seed < 0:
+        seed = int(np.random.uniform(0, 2**32-1))
 
     for frame_rate in frame_rates:
+        np.random.seed(seed)
         print('Making sequence for %dHz' % frame_rate)
         df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
         next_id = 0
@@ -137,10 +138,11 @@ def make_sequence(sequence_parameters, all_population):
                     theta[indexes] *= -1
                     if head_displ and mov_type != "d":
                         head_pos = np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
-                        head_pos *= np.random.normal(ALH_mean, ALH_std, particles)
+                        ALH = np.random.normal(ALH_mean, ALH_std, particles)
+                        head_pos *= ALH
                         head_x = head_pos * np.cos(np.radians(theta + 90))
                         head_y = head_pos * np.sin(np.radians(theta + 90))
-                        head_angle = np.pi / 4 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+                        head_angle = np.pi / 6 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
 
                 image_aux = final_sequence[f, :, :].copy()
                 image_segmented = final_sequence_segmented[f, :, :].copy()
@@ -161,7 +163,7 @@ def make_sequence(sequence_parameters, all_population):
                         intensity[p, f] = 255
                     if not rgb:
                         image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
-                                                 image_aux[rr, cc])
+                                                     image_aux[rr, cc])
                     else:
                         image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
                                                      image_aux[rr, cc]) * color
@@ -194,21 +196,25 @@ def make_sequence(sequence_parameters, all_population):
 
         final_sequence *= 255 / np.max(final_sequence)
 
+        #cambio seed para generar ruidos distintos en cada frame
+        t = 1000 * time.time()  # current time in milliseconds
+        np.random.seed(int(t) % 2 ** 32)
         it = 0
         tot_it = len(noise_params)
-        for param in noise_params:
-            it += 1
-            print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
-            sequence_plus_noise = add_noise(final_sequence, param)
-            save_video_file(np.uint8(sequence_plus_noise), extension,
-                            file_name + "_noise_added_" + str(param).replace(".", "_"), path_seq_out,
-                            frame_rate)
-            print() if it == tot_it else False
+        for noise in noise_type:
+            for param in noise_params:
+                it += 1
+                print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
+                sequence_plus_noise = add_noise(final_sequence, noise=noise, param=param)
+                save_video_file(np.uint8(sequence_plus_noise), extension,
+                                file_name + ('(%dHz)' % frame_rate) + "_noise_added_" + str(param).replace(".", "_"),
+                                path_seq_out, frame_rate)
+                print() if it == tot_it else False
 
         final_sequence = np.uint8(final_sequence)
         print("Saving sequence without noise...")
         save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
-                            frame_rate)
+                        frame_rate)
 
         print("Saving segmented sequence...")
         save_video_file(np.uint8(final_sequence_segmented), extension,
@@ -219,16 +225,18 @@ def make_sequence(sequence_parameters, all_population):
     return 0
 
 
-def add_noise(sequence_in, type='white', param=15):
+def add_noise(sequence_in, noise='gaussian', param=1):
     sequence_out = sequence_in.copy()
-    if type == 'white':
-        sequence_out += np.random.normal(param, size=sequence_in.shape)
+    if noise == 'gaussian':
+        sequence_out /= 255
+        sequence_out += np.random.normal(0, param, size=sequence_in.shape[:-1])[:, :, :, np.newaxis]
+        sequence_out *= 255
         sequence_out.clip(0, 255)
-    elif type == 's&p':
+    elif noise == 's&p':
         s_vs_p = 0.5
         amount = param
         # Salt
-        num_salt = np.ceil(amount * sequence_out.shape * s_vs_p)
+        num_salt = np.ceil(amount * sequence_out.shape[:-2] * s_vs_p)
         coords = [np.random.randint(0, i - 1, int(num_salt))
                   for i in sequence_out.shape]
         sequence_out[coords] = 1
@@ -238,7 +246,7 @@ def add_noise(sequence_in, type='white', param=15):
         coords = [np.random.randint(0, i - 1, int(num_pepper))
                   for i in sequence_out.shape]
         sequence_out[coords] = 0
-    elif type == "poisson":
+    elif noise == "poisson":
         vals = len(np.unique(sequence_out))
         vals = 2 ** np.ceil(np.log2(vals))
         sequence_out = np.random.poisson(sequence_out * vals) / float(vals)
@@ -341,7 +349,7 @@ def read_parameters(path='config.txt'):
         np.array(config["Sequence parameters"]["height_width_duration"].split(), dtype=np.float)
     sequence_parameters['rgb'] = (config["Sequence parameters"]["rgb"]).lower() == "true"
     sequence_parameters['std_blur'] = float(config["Sequence parameters"]["std_blur"])
-    sequence_parameters['noise_type'] = config["Sequence parameters"]["noise_params"].split()
+    sequence_parameters['noise_type'] = config["Sequence parameters"]["noise_type"].split()
     sequence_parameters['noise_params'] = np.array(config["Sequence parameters"]["noise_params"].split(),
                                                    dtype=np.float)
     sequence_parameters['low_limit'] = float(config["Sequence parameters"]["low_limit"])
