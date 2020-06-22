@@ -3,6 +3,7 @@
 
 from skimage.filters import gaussian
 from skimage.draw import ellipse
+from skimage.util import random_noise
 from tifffile import TiffWriter
 from imageio import mimwrite as mp4_writer
 from imageio import imwrite
@@ -43,7 +44,7 @@ def make_sequence(sequence_parameters, all_population):
     path_data_out, path_seq_out = sequence_parameters['path_data_out'], sequence_parameters['path_seq_out']
     M, N, duration = int(sequence_parameters['height']), int(sequence_parameters['width']), sequence_parameters[
         'duration']
-    rgb = sequence_parameters['height']
+    rgb = sequence_parameters['rgb']
     std_blur = sequence_parameters['std_blur']
     noise_type = sequence_parameters['noise_type']
     noise_params = sequence_parameters['noise_params']
@@ -53,6 +54,8 @@ def make_sequence(sequence_parameters, all_population):
     frame_rates = sequence_parameters['frame_rate']
     seed = sequence_parameters['seed']
     resolution = sequence_parameters['resolution']
+
+    if noise_type == 'poisson' : noise_params=[0]
 
     M, N = int(M), int(N)
     if not path_data_out:
@@ -95,14 +98,13 @@ def make_sequence(sequence_parameters, all_population):
             std_depth, mov_type = population['std_depth'], population['movement_type']
             ALH_mean, ALH_std = population['ALH_mean'] * resolution, population['ALH_std'] * resolution,
             BCP_mean, BCP_std = population['BCP_mean'], population['BCP_std']
-
+            if particles == 0 : continue
             x = np.zeros([particles, frames])
             y = np.zeros([particles, frames])
             intensity = np.zeros([particles, frames])
             # Initial intensity vector for every particle
             intensity[:, 0] = np.random.uniform(150, 250, particles)
             id_particles = np.arange(next_id, next_id + particles)
-
             # Initial positions of the particles in a square of (3N, 3M)
             inf_x, sup_x, inf_y, sup_y = -N, 2 * N, -M, 2 * M
             x[:, 0] = np.random.uniform(inf_x, sup_x, particles)
@@ -121,7 +123,7 @@ def make_sequence(sequence_parameters, all_population):
             v = np.random.normal(mean_velocity, std_velocity, particles)
 
             head_x = head_y = head_angle = np.zeros(particles)
-
+            particles_out = np.zeros(particles)
             # Each frame is created
             for f in range(frames):
                 # Progress bar printing
@@ -169,11 +171,13 @@ def make_sequence(sequence_parameters, all_population):
                                                      image_aux[rr, cc]) * color
                     # Agrego aquellas que entran en el cuadro
                     if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
+                        particles_out[p] = 0
                         df_info = df_info.append(
                             {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
                              'fluorescence': intensity[p, f], 'frame': f},
                             ignore_index=True)
-                    else:
+                    elif particles_out[p] == 0:
+                        particles_out[p] = 1
                         id_particles[p] = np.max(id_particles) + 1
                 # Add blur so there are no drastic changes in the border of the particles
                 if not rgb:
@@ -201,15 +205,15 @@ def make_sequence(sequence_parameters, all_population):
         np.random.seed(int(t) % 2 ** 32)
         it = 0
         tot_it = len(noise_params)
-        for noise in noise_type:
-            for param in noise_params:
-                it += 1
-                print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
-                sequence_plus_noise = add_noise(final_sequence, noise=noise, param=param)
-                save_video_file(np.uint8(sequence_plus_noise), extension,
-                                file_name + ('(%dHz)' % frame_rate) + "_noise_added_" + str(param).replace(".", "_"),
-                                path_seq_out, frame_rate)
-                print() if it == tot_it else False
+
+        for param in noise_params:
+            it += 1
+            print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
+            sequence_plus_noise = add_noise(final_sequence, noise=noise_type, param=param)
+            save_video_file(np.uint8(sequence_plus_noise), extension,
+                            file_name + ('(%dHz)' % frame_rate) + noise_type + "_noise_added_" + str(param).replace(".", "_"),
+                            path_seq_out, frame_rate)
+            print() if it == tot_it else False
 
         final_sequence = np.uint8(final_sequence)
         print("Saving sequence without noise...")
@@ -227,30 +231,16 @@ def make_sequence(sequence_parameters, all_population):
 
 def add_noise(sequence_in, noise='gaussian', param=1):
     sequence_out = sequence_in.copy()
+    sequence_out /= 255
     if noise == 'gaussian':
-        sequence_out /= 255
-        sequence_out += np.random.normal(0, param, size=sequence_in.shape[:-1])[:, :, :, np.newaxis]
-        sequence_out *= 255
-        sequence_out.clip(0, 255)
+        sequence_out = random_noise(sequence_out, var=param **2, mode="gaussian", clip=True)
     elif noise == 's&p':
-        s_vs_p = 0.5
-        amount = param
-        # Salt
-        num_salt = np.ceil(amount * sequence_out.shape[:-2] * s_vs_p)
-        coords = [np.random.randint(0, i - 1, int(num_salt))
-                  for i in sequence_out.shape]
-        sequence_out[coords] = 1
-
-        # Pepper
-        num_pepper = np.ceil(amount * sequence_out.shape * (1. - s_vs_p))
-        coords = [np.random.randint(0, i - 1, int(num_pepper))
-                  for i in sequence_out.shape]
-        sequence_out[coords] = 0
+        sequence_out = random_noise(sequence_out, mode=noise, amount=param)
     elif noise == "poisson":
-        vals = len(np.unique(sequence_out))
-        vals = 2 ** np.ceil(np.log2(vals))
-        sequence_out = np.random.poisson(sequence_out * vals) / float(vals)
-    return sequence_out
+        sequence_out = random_noise(sequence_out)
+
+    sequence_out *= 255
+    return sequence_out.clip(0, 255)
 
 
 def printProgressBar(iteration, total, prefix='Making sequence', suffix='', decimals=1, length=20, fill="\u25AE",
@@ -349,7 +339,7 @@ def read_parameters(path='config.txt'):
         np.array(config["Sequence parameters"]["height_width_duration"].split(), dtype=np.float)
     sequence_parameters['rgb'] = (config["Sequence parameters"]["rgb"]).lower() == "true"
     sequence_parameters['std_blur'] = float(config["Sequence parameters"]["std_blur"])
-    sequence_parameters['noise_type'] = config["Sequence parameters"]["noise_type"].split()
+    sequence_parameters['noise_type'] = config["Sequence parameters"]["noise_type"]
     sequence_parameters['noise_params'] = np.array(config["Sequence parameters"]["noise_params"].split(),
                                                    dtype=np.float)
     sequence_parameters['low_limit'] = float(config["Sequence parameters"]["low_limit"])

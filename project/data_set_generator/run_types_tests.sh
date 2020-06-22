@@ -1,16 +1,16 @@
-echo "1"
-python main_dataset.py "configs/dataset_1(10Hz).txt"
-echo "2"
-python main_dataset.py "configs/dataset_1(20Hz).txt"
-echo "3"
-python main_dataset.py "configs/dataset_1(30Hz).txt"
-echo "4"
-python main_dataset.py "configs/dataset_1(40Hz).txt"
-echo "5"
-python main_dataset.py "configs/dataset_2(10Hz).txt"
-echo "6"
-python main_dataset.py "configs/dataset_2(20Hz).txt"
-echo "7"
-python main_dataset.py "configs/dataset_2(30Hz).txt"
-echo "8"
-python main_dataset.py "configs/dataset_2(40Hz).txt"
+#!/bin/bash
+
+files=./configs/*	
+iteration=1
+
+for file in $files
+do
+	echo "Running $file configuration"
+	python main_dataset.py "$file"
+	mkdir dataset_"$iteration"
+	mv -i datasets dataset_"$iteration"/datasets
+	echo $iteration
+	iteration=$((iteration + 1)) 
+	mkdir datasets
+done
+
