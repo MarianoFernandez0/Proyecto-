@@ -5,7 +5,8 @@ import numpy as np
 
 def segmentation(image):
     '''
-
+    Given a input image, its segmented by applying
+    OTSU, then it is steched and finally, dilated.
 
     Input:
         image: image in rgb or bw
