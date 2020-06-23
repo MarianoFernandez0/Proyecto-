@@ -5,14 +5,12 @@ import numpy as np
 
 def segmentation(image):
     '''
-    Segmenta una imagen dada.
-    En el estudio para el proyecto, se definió
-    que filtrar la imagen y luego segmentar utilizando OTSU
-    fue el mejor desempeño
-    Entradas:
-        image: imagen de tamaño NxMx3 la cual se desea segmentar
-    Salida:
-        Máscara de tamaño NxMx1 con la imagen segmentada
+
+
+    Input:
+        image: image in rgb or bw
+    Output:
+        mask: image segmented
     '''
     image_bw = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, image_tresh = cv2.threshold(image_bw, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
