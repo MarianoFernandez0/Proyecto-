@@ -6,29 +6,31 @@
 	#Duration of the observation in seconds	
 	height_width_duration : 512 512 4
 	#In Hz
-	frame_rate : 30
+	frame_rate : 60 50 40 30 15 7
 	rgb : true
 	std_blur : 3
-	std_noise_added : 15
+	noise_type : gaussian
+	noise_params : 0.08
 	low_limit : 10
-	file_format : tif mp4 jpg
-	file_name : dataset_2_30
+	file_format : tif mp4
+	file_name : dataset_1
 	#pixels per um
-	resolution : 1.4
+	resolution : 1
 	# If not seed required, put -1
 	seed : 40
 
 [PopulationA]
-	tot_particles : 150
+	tot_particles : 30
+	color : 1 0 0
 	#dimensions
 	mean : 8 2
-	cov_mean : 2 0 0 2
+	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
 	VAP : 100
 	VAP_deviation : 10
 	Tp : 0.001
 	head_displ : true
-	std_depth : 5
+	std_depth : 3
 	movement_type : a
 	ALH_mean : 5.4
 	ALH_std : 0.1
@@ -37,10 +39,11 @@
 
 
 [PopulationB]
-	tot_particles : 90
+	tot_particles : 45
+	color : 1 0 0
 	#dimensions
 	mean : 9 2
-	cov_mean : 1 0 0 1
+	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
 	VAP : 90
 	VAP_deviation : 10
@@ -48,17 +51,18 @@
 	head_displ : true
 	std_depth : 5
 	movement_type : b
-	ALH_mean : 11
+	ALH_mean : 8
 	ALH_std : 0.5
 	BCF_mean : 10
 	BCF_std : 5
 
 
 [PopulationC]
-	tot_particles : 50
+	tot_particles : 150
+	color : 1 0 0
 	#dimensions
 	mean : 9 2
-	cov_mean : 1 0 0 1
+	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
 	VAP : 80
 	VAP_deviation : 10
@@ -73,10 +77,11 @@
 
 
 [PopulationD]
-	tot_particles : 30
+	tot_particles : 75
+	color: 1 0 0
 	#dimensions
 	mean : 9 2
-	cov_mean : 1 0 0 1
+	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
 	VAP : 0
 	VAP_deviation : 0

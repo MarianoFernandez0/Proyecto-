@@ -8,7 +8,7 @@ def __init__():
     The call must be as follow:
     main_dataset.py path/to/config/file.txt
     """
-    path = 'config.txt'
+    path = 'configs/dataset_2(40Hz).txt'
     if len(sys.argv) > 1:
         path = sys.argv[1]
     sequence_parameters, all_population = read_parameters(path=path)

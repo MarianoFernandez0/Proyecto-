@@ -12,7 +12,7 @@
 	std_noise_added : 15
 	low_limit : 10
 	file_format : tif mp4 jpg
-	file_name : dataset_1
+	file_name : dataset_2_40
 	#pixels per um
 	resolution : 1.4
 	# If not seed required, put -1
