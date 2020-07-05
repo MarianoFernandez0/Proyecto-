@@ -11,7 +11,7 @@ from imageio import mimread as mp4_reader
 import time
 
 current_path = os.getcwd()
-octave.addpath(current_path+'/SpermTrackingProject')
+octave.addpath(current_path + '/SpermTrackingProject')
 
 
 def tracking_urbano(config_params):
@@ -86,12 +86,13 @@ def tracking_urbano(config_params):
     tracks['fluorescence'] = np.nan
     tracks['frame'] = tracks['frame']
     tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
-    tracks[['x', 'y']] = tracks[['x', 'y']]/px2um
+    tracks[['x', 'y']] = tracks[['x', 'y']] / px2um
     tracks.to_csv(csv_tracks, index=False)
 
     if save_movie:
         video = mp4_reader(video_file_out, memtest=False)
-        mp4_writer(video_file_mp4, video, format='mp4', fps=fps//2)
+        mp4_writer(video_file_mp4, video, format='mp4', fps=fps // 2)
+
 
 ########################################################
 #  START
