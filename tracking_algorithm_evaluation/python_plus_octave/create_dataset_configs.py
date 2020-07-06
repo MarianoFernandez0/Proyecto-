@@ -22,12 +22,11 @@ with open(default_config_dir, 'r') as f:
 datasets_list = [d for d in os.listdir(datasets_dir) if os.path.isdir(os.path.join(datasets_dir, d))]
 for dataset in datasets_list:
     data_files = os.listdir(os.path.join(datasets_dir, dataset, 'datasets/data_sequence'))
-    if not os.path.isdir(os.path.join(datasets_dir, dataset, 'jpdaf_configs')):
-        os.mkdir(os.path.join(datasets_dir, dataset, 'jpdaf_configs'))
+    if not os.path.isdir(os.path.join(datasets_dir, dataset, 'tracking_configs')):
+        os.mkdir(os.path.join(datasets_dir, dataset, 'tracking_configs'))
 
     if not os.path.isdir(os.path.join(datasets_dir, dataset, 'tracking_results')):
         os.mkdir(os.path.join(datasets_dir, dataset, 'tracking_results'))
-
 
     for data_file in data_files:
         frequency = get_freq(data_file)
@@ -43,7 +42,7 @@ for dataset in datasets_list:
 
         for i, _ in enumerate(att):
             config['Algorithm params']['detectionAlgorithm'] = i
-            config_dir = os.path.join(datasets_dir, dataset, 'jpdaf_configs', dataset + '_' + str(frequency)
+            config_dir = os.path.join(datasets_dir, dataset, 'tracking_configs', dataset + '_' + str(frequency)
                                       + 'Hz_' + str(att[i]) + '.json')
 
             config['Output']['CSV_TRACKS_PATH'] = os.path.join(datasets_dir, dataset, 'tracking_results', dataset + '_'
