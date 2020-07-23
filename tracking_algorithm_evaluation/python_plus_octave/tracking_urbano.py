@@ -2,7 +2,7 @@ from functions.evaluation import evaluation
 import tifffile
 import os
 from oct2py import octave
-import configparser
+import json
 import pandas as pd
 import numpy as np
 import sys
@@ -11,7 +11,7 @@ from imageio import mimread as mp4_reader
 import time
 
 current_path = os.getcwd()
-octave.addpath(current_path+'/SpermTrackingProject')
+octave.addpath(current_path + '/SpermTrackingProject')
 
 
 def tracking_urbano(config_params):
@@ -23,34 +23,33 @@ def tracking_urbano(config_params):
     # Read params
     config_path = config_params
 
-    config = configparser.ConfigParser()
-    config.read(config_path)
-    config.sections()
+    with open(config_path, 'r') as f:
+        config = json.load(f)
 
-    data_file = config["Input"]["DATAFILE_PATH"]
-    reformat_data_file = int(config["Input"]["reformat_dataFile"])
+    data_file = config['Input']['DATAFILE_PATH']
+    reformat_data_file = int(config['Input']['reformat_dataFile'])
 
-    video_file_mp4 = config["Input"]["VIDEOFILE_MP4_PATH"]
-    video_file_tiff = config["Input"]["VIDEOFILE_TIFF_PATH"]
-    fps = int(config["Input"]["fps"])
-    px2um = float(config["Input"]["px2um"])
-    ROIx = int(config["Input"]["ROIx"])
-    ROIy = int(config["Input"]["ROIy"])
+    video_file_mp4 = config['Input']['VIDEOFILE_MP4_PATH']
+    video_file_tiff = config['Input']['VIDEOFILE_TIFF_PATH']
+    fps = int(config['Input']['fps'])
+    px2um = float(config['Input']['px2um'])
+    ROIx = int(config['Input']['ROIx'])
+    ROIy = int(config['Input']['ROIy'])
 
-    csv_tracks = config["Output"]["CSV_TRACKS_PATH"]
-    video_file_out = config["Output"]["VIDEOFILE_OUT_PATH"]
+    csv_tracks = config['Output']['CSV_TRACKS_PATH']
+    video_file_out = config['Output']['VIDEOFILE_OUT_PATH']
 
-    detection_algorithm = int(config["Algorithm params"]["detectionAlgorithm"])
-    mtt_algorithm = int(config["Algorithm params"]["mttAlgorithm"])
-    PG = float(config["Algorithm params"]["PG"])
-    PD = float(config["Algorithm params"]["PD"])
-    gv = float(config["Algorithm params"]["gv"])
+    detection_algorithm = int(config['Algorithm params']['detectionAlgorithm'])
+    mtt_algorithm = int(config['Algorithm params']['mttAlgorithm'])
+    PG = float(config['Algorithm params']['PG'])
+    PD = float(config['Algorithm params']['PD'])
+    gv = float(config['Algorithm params']['gv'])
 
-    plot_results = int(config["Do"]["plotResults"])
-    save_movie = int(config["Do"]["saveMovie"])
-    snap_shot = int(config["Do"]["snapShot"])
-    plot_track_results = int(config["Do"]["plotTrackResults"])
-    analyze_motility = int(config["Do"]["analyzeMotility"])
+    plot_results = int(config['Do']['plotResults'])
+    save_movie = int(config['Do']['saveMovie'])
+    snap_shot = int(config['Do']['snapShot'])
+    plot_track_results = int(config['Do']['plotTrackResults'])
+    analyze_motility = int(config['Do']['analyzeMotility'])
 
     # save tiff as mp4
     tiff = tifffile.TiffFile(video_file_tiff)
@@ -86,12 +85,13 @@ def tracking_urbano(config_params):
     tracks['fluorescence'] = np.nan
     tracks['frame'] = tracks['frame']
     tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
-    tracks[['x', 'y']] = tracks[['x', 'y']]/px2um
+    tracks[['x', 'y']] = tracks[['x', 'y']] / px2um
     tracks.to_csv(csv_tracks, index=False)
 
     if save_movie:
         video = mp4_reader(video_file_out, memtest=False)
-        mp4_writer(video_file_mp4, video, format='mp4', fps=fps//2)
+        mp4_writer(video_file_mp4, video, format='mp4', fps=fps // 2)
+
 
 ########################################################
 #  START
