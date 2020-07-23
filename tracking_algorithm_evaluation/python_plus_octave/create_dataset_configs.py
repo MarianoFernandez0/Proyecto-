@@ -31,9 +31,11 @@ for dataset in datasets_list:
     for data_file in data_files:
         frequency = get_freq(data_file)
         mp4_dir = os.path.join(datasets_dir, dataset, 'datasets/video_sequence/mp4_output')
-        mp4_file = [f for f in os.listdir(mp4_dir) if str(frequency) in f][0]
+        mp4_file = [f for f in os.listdir(mp4_dir)
+                    if str(frequency) in f and 'noise' not in f and 'segmented' not in f][0]
         tiff_dir = os.path.join(datasets_dir, dataset, 'datasets/video_sequence/tiff_output')
-        tiff_file = [f for f in os.listdir(tiff_dir) if str(frequency) in f][0]
+        tiff_file = [f for f in os.listdir(tiff_dir)
+                     if str(frequency) in f and 'noise' not in f and 'segmented' not in f][0]
 
         config['Input']['DATAFILE_PATH'] = os.path.join(datasets_dir, dataset, 'datasets/data_sequence', data_file)
         config['Input']['VIDEOFILE_MP4_PATH'] = os.path.join(mp4_dir, mp4_file)

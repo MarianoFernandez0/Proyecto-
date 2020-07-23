@@ -5,7 +5,7 @@ from .fluorescence import fluorescence
 import pandas as pd
 import numpy as np
 import skimage.color as color
-
+import cv2
 
 def evaluation(tif, pixel_size, include_mask=False):
     '''
