@@ -1,4 +1,4 @@
-from dataset_generator import read_parameters, make_sequence
+from dataset_generator_new import read_parameters, make_sequence
 import sys
 
 def __init__():

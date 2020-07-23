@@ -3,69 +3,15 @@
 
 from skimage.filters import gaussian
 from skimage.draw import ellipse
+from skimage.util import random_noise
 from tifffile import TiffWriter
 from imageio import mimwrite as mp4_writer
 from imageio import imwrite
 import numpy as np
 import pandas as pd
 import configparser
-import os
-import math
-
-
-'''def make_sequence(sequence_parameters, all_population):
-    HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
-    HOUSING_PATH_SEQ_OUT = os.path.join("datasets", "video_sequence")
-
-    M, N, frame_rate = sequence_parameters['height'], sequence_parameters['width'], sequence_parameters['frame_rate']
-    duration = sequence_parameters['duration']
-    path_data_out = sequence_parameters['path_data_out']
-    path_seq_out = sequence_parameters['path_seq_out']
-
-    seed = sequence_parameters['seed']
-
-    if seed > 0: np.random.seed(seed)
-
-    if not path_data_out:
-        path_data_out = HOUSING_PATH_SEQ_DATA
-    if not path_seq_out:
-        path_seq_out = HOUSING_PATH_SEQ_OUT
-
-    fetch_output(housing_path_seq_data=path_data_out, housing_path_seq_out=path_seq_out)
-    df_particles = pd.DataFrame(columns=['id_track', 'x', 'y', 'fluorescence',
-                                         'frame', 'angle', 'velocity', 'head_displ',
-                                         'population_id'])
-
-    tot_particles_number = []
-    Tp = []
-    vel_means = []
-    vel_cov = []
-    tot_populations = len(all_population)
-
-    for population in all_population:
-        tot_particles_number.append(population['particles'])
-        Tp.append(population['T'])
-        vel_means.append(population['mean_velocity'])
-        vel_cov.append(population['std_velocity'])
-
-    frames = int(np.round(duration / frame_rate, 0))
-
-    for fr in range(frames):
-
-        for i in range(tot_populations):
-            particles_info = df_particles[df_particles['frame'] == fr - 1 and
-                                          df_particles['population_id'] == i]
-
-            velocities = particles_info['velocity'].to_numpy()
-            angles = particles_info['angle'].to_numpy()
-            fluorescences = particles_info['fluorescence'].to_numpy()
-            x, y = particles_info['x'].to_numpy(), particles_info['y'].to_numpy()
-
-            angles += np.sqrt(2 / Tp[i]) * np.random.normal(0, 1, angles.shape)
-            x += velocities * np.cos(angles)
-            y += velocities * np.sin(angles)
-            '''
-
+from pathlib import Path
+import time
 
 
 def make_sequence(sequence_parameters, all_population):
@@ -92,144 +38,236 @@ def make_sequence(sequence_parameters, all_population):
         TODO: Terminar de explicar las entradas de cada poblacion
     '''
     # Load the parameters from the list
-    HOUSING_PATH_SEQ_DATA = os.path.join("datasets", "data_sequence")
-    HOUSING_PATH_SEQ_OUT = os.path.join("datasets", "video_sequence")
+    HOUSING_PATH_SEQ_DATA = "datasets/data_sequence"
+    HOUSING_PATH_SEQ_OUT = "datasets/video_sequence"
 
-    (path_data_out, path_seq_out, M, N, frame_rate, rgb, std_blur,
-     std_noise_added, low_limit, extension, file_name, duration, seed) = sequence_parameters
+    path_data_out, path_seq_out = sequence_parameters['path_data_out'], sequence_parameters['path_seq_out']
+    M, N, duration = int(sequence_parameters['height']), int(sequence_parameters['width']), sequence_parameters[
+        'duration']
+    rgb = sequence_parameters['rgb']
+    std_blur = sequence_parameters['std_blur']
+    noise_type = sequence_parameters['noise_type']
+    noise_params = sequence_parameters['noise_params']
+    low_limit = sequence_parameters['low_limit']
+    extension = sequence_parameters['file_format']
+    file_name = sequence_parameters['file_name']
+    frame_rates = sequence_parameters['frame_rate']
+    seed = sequence_parameters['seed']
+    resolution = sequence_parameters['resolution']
 
-    if seed > 0 : np.random.seed(seed)
+    if noise_type == 'poisson' : noise_params=[0]
 
+    M, N = int(M), int(N)
     if not path_data_out:
         path_data_out = HOUSING_PATH_SEQ_DATA
     if not path_seq_out:
         path_seq_out = HOUSING_PATH_SEQ_OUT
 
-    fetch_output(housing_path_seq_data=path_data_out, housing_path_seq_out=path_seq_out)
-    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
-    next_id = 0
+    path_data_out = Path(path_data_out)
+    path_seq_out = Path(path_seq_out)
 
-    frames = int(np.round(duration / frame_rate, 0))
+    Path.mkdir(path_data_out, exist_ok=True, parents=True)
+    Path.mkdir(path_seq_out, exist_ok=True, parents=True)
 
-    final_sequence = np.zeros((frames, M, N))
-    final_sequence_segmented = np.zeros((frames, M, N))
+    if seed < 0:
+        seed = int(np.random.uniform(0, 2**32-1))
 
-    it = 0
-    tot_it = len(all_population) * frames
-
-    for population in all_population:
-        particles, mean, cov_mean = population['particles'], population['mean'], population['cov_mean']
-        mean_velocity, std_velocity, std_direction = population['mean_velocity'], population['std_velocity'], \
-                                                     population['Tp']
-        head_displ, std_depth, mov_type = population['head_displ'], population['std_depth'], population['movement_type']
-        x = np.zeros([particles, frames])
-        y = np.zeros([particles, frames])
-        intensity = np.zeros([particles, frames])
-        # Initial intensity vector for every particle
-        intensity[:, 0] = np.random.uniform(150, 250, particles)
-        id_particles = np.arange(next_id, next_id + particles)
-
-        # Initial positions of the particles in a square of (3N, 3M)
-        x[:, 0] = np.random.uniform(-N, 2 * N, particles)
-        y[:, 0] = np.random.uniform(-M, 2 * M, particles)
-        # Size of the particles population
-        dimensions = np.random.multivariate_normal(mean, cov_mean, particles)
-        a = np.max(dimensions, axis=1)
-        l = np.min(dimensions, axis=1)
-
-        theta = np.random.uniform(-180, 180, particles)  # Initial angle
-        prev_sign = np.zeros(theta.shape)
-        v = np.random.normal(mean_velocity, std_velocity, particles)  # Initial speed
-
-        # Each frame is created
-        for f in range(frames):
-            # Progress bar printing
-            it += 1
-            printProgressBar(it, tot_it)
-            if f > 0:
-                x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta))
-                y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta))
-
-            image_aux = final_sequence[f, :, :].copy()
-            image_segmented = final_sequence_segmented[f, :, :].copy()
-            # Each particle is added
-            for p in range(particles):
-                rr, cc = ellipse(x[p, f], y[p, f], l[p], a[p], image_aux.shape,
-                                 np.radians(theta[p]) - math.pi / 2)
-                if f > 0:
-                    random_int_add = np.random.normal(0, std_depth)
-                    intensity[p, f] = intensity[p, f - 1] + random_int_add
-                if low_limit < intensity[p, f] <= 255:
-                    image_segmented[rr, cc] = 255
-                if intensity[p, f] <= low_limit:
-                    image_aux[rr, cc] = 0
-                    intensity[p, f] = 0
-                if intensity[p, f] > 255:
-                    intensity[p, f] = 255
-                image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f], image_aux[rr, cc])
-                # Agrego aquellas que entran en el cuadro
-                if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
-                    df_info = df_info.append(
-                        {'id_particle': id_particles[p], 'x': y[p, f], 'y': x[p, f],
-                         'fluorescence': intensity[p, f], 'frame': f},
-                        ignore_index=True)
-                else:
-                    id_particles[p] = np.max(id_particles) + 1
-            # Add blur so there are no drastic changes in the border of the particles
-            image_normalized = gaussian(image_aux, std_blur, mode='reflect', preserve_range=True)
-            final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
-            image_normalized = image_normalized.clip(0, 255)
-            final_sequence[f, :, :] = np.uint8(image_normalized)
-            # Next step
-            v = np.abs(np.random.normal(v, std_velocity, particles))
-
-            if mov_type == "d":
-                continue
-            else:
-                random_dir = np.random.normal(head_displ, std_direction, particles)
-                random_dir[prev_sign == np.sign(random_dir)] = -1 * random_dir[prev_sign == np.sign(random_dir)]
-                prev_sign = np.sign(random_dir)
-                theta += random_dir
-        next_id = np.max(id_particles)
-
-    it = 0
-    tot_it = len(std_noise_added)
-    for std_noise in std_noise_added:
-        it += 1
-        print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
-        if rgb:
-            sequence_plus_noise = np.zeros((final_sequence.shape[0], final_sequence.shape[1],
-                                            final_sequence.shape[2], 3))
-            sequence_plus_noise[:, :, :, 0] = final_sequence
-            sequence_plus_noise += np.random.normal(0, std_noise, size=sequence_plus_noise.shape)
-            sequence_plus_noise[sequence_plus_noise < 0] = 0
-            sequence_plus_noise[sequence_plus_noise > 255] = 255
-            save_video_file(np.uint8(sequence_plus_noise), extension,
-                            file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
+    for frame_rate in frame_rates:
+        np.random.seed(seed)
+        print('Making sequence for %dHz' % frame_rate)
+        df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+        next_id = 0
+        frames = int(np.round(duration * frame_rate, 0))
+        time_step = 1 / frame_rate
+        if not rgb:
+            final_sequence = np.zeros((frames, M, N))
         else:
-            sequence_plus_noise = final_sequence.copy()
-            sequence_plus_noise += np.random.normal(0, std_noise, size=sequence_plus_noise.shape)
-            sequence_plus_noise[sequence_plus_noise < 0] = 0
-            sequence_plus_noise[sequence_plus_noise > 255] = 255
+            final_sequence = np.zeros((frames, M, N, 3))
+
+        final_sequence_segmented = np.zeros((frames, M, N))
+        it = 0
+        tot_it = len(all_population) * frames
+
+        for population in all_population:
+            particles = population['particles']
+            color = population['color']
+            mean, cov_mean = population['mean'] * resolution, population['cov_mean'] * resolution
+            mean_velocity, std_velocity = population['vap'] * resolution, population['vap_deviation'] * resolution
+            Tp = population['Tp']
+            head_displ = population['head_displ']
+            std_depth, mov_type = population['std_depth'], population['movement_type']
+            ALH_mean, ALH_std = population['ALH_mean'] * resolution, population['ALH_std'] * resolution,
+            BCP_mean, BCP_std = population['BCP_mean'], population['BCP_std']
+            if particles == 0 : continue
+            x = np.zeros([particles, frames])
+            y = np.zeros([particles, frames])
+            intensity = np.zeros([particles, frames])
+            # Initial intensity vector for every particle
+            intensity[:, 0] = np.random.uniform(150, 250, particles)
+            id_particles = np.arange(next_id, next_id + particles)
+            # Initial positions of the particles in a square of (3N, 3M)
+            inf_x, sup_x, inf_y, sup_y = -N, 2 * N, -M, 2 * M
+            x[:, 0] = np.random.uniform(inf_x, sup_x, particles)
+            y[:, 0] = np.random.uniform(inf_y, sup_y, particles)
+            # Size of the particles population
+            dimensions = np.random.multivariate_normal(mean, cov_mean, particles)
+            a = np.min(dimensions, axis=1)
+            l = np.max(dimensions, axis=1)
+
+            # Initial angle
+            theta = np.random.uniform(-180, 180, particles)
+            (BCP_freq, BCP_fase) = (np.random.normal(BCP_mean, BCP_std, particles),
+                                    np.random.uniform(-np.pi, np.pi, particles))
+
+            # Initial speed
+            v = np.random.normal(mean_velocity, std_velocity, particles)
+
+            head_x = head_y = head_angle = np.zeros(particles)
+            particles_out = np.zeros(particles)
+            # Each frame is created
+            for f in range(frames):
+                # Progress bar printing
+                it += 1
+                printProgressBar(it, tot_it)
+                if f > 0:
+                    x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta)) * time_step
+                    y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta)) * time_step
+
+                    # Fuera del campo de observación, sentido opuesto
+                    indexes = np.logical_or(
+                        np.logical_or(np.logical_or(x[:, f] < inf_x, x[:, f] > sup_x), y[:, f] < inf_y),
+                        y[:, f] > sup_y)
+                    theta[indexes] *= -1
+                    if head_displ and mov_type != "d":
+                        head_pos = np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+                        ALH = np.random.normal(ALH_mean, ALH_std, particles)
+                        head_pos *= ALH
+                        head_x = head_pos * np.cos(np.radians(theta + 90))
+                        head_y = head_pos * np.sin(np.radians(theta + 90))
+                        head_angle = np.pi / 6 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+
+                image_aux = final_sequence[f, :, :].copy()
+                image_segmented = final_sequence_segmented[f, :, :].copy()
+                # Each particle is added
+                for p in range(particles):
+                    rr, cc = ellipse(x[p, f] + head_x[p],
+                                     y[p, f] + head_y[p], l[p], a[p], image_aux.shape,
+                                     np.radians(theta[p]) + head_angle[p])
+                    if f > 0:
+                        random_int_add = np.random.normal(0, std_depth)
+                        intensity[p, f] = intensity[p, f - 1] + random_int_add
+                    if low_limit < intensity[p, f] <= 255:
+                        image_segmented[rr, cc] = 255
+                    if intensity[p, f] <= low_limit:
+                        image_aux[rr, cc] = 0
+                        intensity[p, f] = 0
+                    if intensity[p, f] > 255:
+                        intensity[p, f] = 255
+                    if not rgb:
+                        image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
+                                                     image_aux[rr, cc])
+                    else:
+                        image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
+                                                     image_aux[rr, cc]) * color
+                    # Agrego aquellas que entran en el cuadro
+                    if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
+                        particles_out[p] = 0
+                        df_info = df_info.append(
+                            {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
+                             'fluorescence': intensity[p, f], 'frame': f},
+                            ignore_index=True)
+                    elif particles_out[p] == 0:
+                        particles_out[p] = 1
+                        id_particles[p] = np.max(id_particles) + 1
+                # Add blur so there are no drastic changes in the border of the particles
+                if not rgb:
+                    image_normalized = gaussian(image_aux, std_blur, truncate=3)
+                else:
+                    image_normalized = gaussian(image_aux, std_blur, truncate=3, multichannel=True)
+                final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
+                image_normalized = image_normalized.clip(0, 255)
+                if not rgb:
+                    final_sequence[f] = np.uint8(image_normalized)
+                else:
+                    final_sequence[f] = np.uint8(image_normalized)
+
+                # Next step
+                if mov_type == "d":
+                    continue
+                else:
+                    theta += np.random.normal(0, 1, theta.shape) * np.sqrt(2 / Tp) * time_step
+            next_id = np.max(id_particles)
+
+        final_sequence *= 255 / np.max(final_sequence)
+
+        #cambio seed para generar ruidos distintos en cada frame
+        t = 1000 * time.time()  # current time in milliseconds
+        np.random.seed(int(t) % 2 ** 32)
+        it = 0
+        tot_it = len(noise_params)
+
+        for param in noise_params:
+            it += 1
+            print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
+            sequence_plus_noise = add_noise(final_sequence, noise=noise_type, param=param)
             save_video_file(np.uint8(sequence_plus_noise), extension,
-                            file_name + "_noise_added_" + str(std_noise).replace(".", "_"), path_seq_out)
-        print() if it == tot_it else False
+                            file_name + ('(%dHz)' % frame_rate) + noise_type + "_noise_added_" + str(param).replace(".", "_"),
+                            path_seq_out, frame_rate)
+            print() if it == tot_it else False
 
-    final_sequence = np.uint8(final_sequence)
-    print("Saving sequence without noise...")
-    if not rgb:
-        save_video_file(final_sequence, extension, file_name, path_seq_out)
-    else:
-        final_sequence_rgb = np.zeros((final_sequence.shape[0], final_sequence.shape[1],
-                                       final_sequence.shape[2], 3), dtype=np.uint8)
-        final_sequence_rgb[:, :, :, 0] = final_sequence
-        save_video_file(final_sequence_rgb, extension, file_name, path_seq_out)
+        final_sequence = np.uint8(final_sequence)
+        print("Saving sequence without noise...")
+        save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
+                        frame_rate)
 
-    print("Saving segmented sequence...")
-    save_video_file(np.uint8(final_sequence_segmented), extension, file_name + "_segmented_", path_seq_out)
-    save_data_file(df_info, path_data_out, file_name)
+        print("Saving segmented sequence...")
+        save_video_file(np.uint8(final_sequence_segmented), extension,
+                        file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
+
+        save_data_file(df_info, str(path_data_out), file_name + ('(%dHz)' % frame_rate))
 
     return 0
+
+
+def add_noise(sequence_in, noise='gaussian', param=1):
+    sequence_out = sequence_in.copy()
+    sequence_out /= 255
+    if noise == 'gaussian':
+        sequence_out = random_noise(sequence_out, var=param **2, mode="gaussian", clip=True)
+    elif noise == 's&p':
+        sequence_out = random_noise(sequence_out, mode=noise, amount=param)
+    elif noise == "poisson":
+        sequence_out = random_noise(sequence_out)
+
+    sequence_out *= 255
+    return sequence_out.clip(0, 255)
+
+
+def printProgressBar(iteration, total, prefix='Making sequence', suffix='', decimals=1, length=20, fill="\u25AE",
+                     printEnd="\r"):
+    """
+    Call in a loop to create terminal progress bar
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '_' * (length - filledLength)
+    print('\r%s %s %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()
+    return
+
+
+def save_data_file(data_frame_in, path_data_out, file_name):
+    """
+    Save the data in csv file
+
+    Inputs:
+        - data_frame_in: DataFrame with the data
+        - path_data_out: Directory where the data will be saved
+    """
+    data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
+    return
 
 
 def save_video_file(sequence, extensions, file_name, path_out, fps=None):
@@ -243,36 +281,26 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
      - path_out path to the directory where the output is going to be saved
      - fps: if the format is mp4, is necessary to specify the fps. Type float
     '''
+    path_out = Path(path_out)
     for extension in extensions:
         if extension == "tif":
-            path_out_tiff = path_out + "/tiff_output"
-            fetch_output("", path_out_tiff)
+            path_out_tiff = Path.joinpath(path_out, "tiff_output")
+            Path.mkdir(path_out_tiff, exist_ok=True)
+            path_out_tiff = Path.joinpath(path_out_tiff, file_name + ".tif")
             # Guardo como tiff
-            with TiffWriter(path_out_tiff + "/" + file_name + ".tif", bigtiff=True) as tif:
+            with TiffWriter(str(path_out_tiff), bigtiff=True) as tif:
                 for frame in range(sequence.shape[0]):
                     tif.save((sequence[frame]))
         elif extension == "mp4":
-            path_out_mp4 = path_out + "/mp4_output"
-            fetch_output("", path_out_mp4)
-            mp4_writer(path_out_mp4 + "/" + file_name + ".mp4", sequence, fps)
+            path_out_mp4 = Path.joinpath(path_out, "mp4_output")
+            Path.mkdir(path_out_mp4, exist_ok=True)
+            mp4_writer(str(path_out_mp4) + "/" + file_name + ".mp4", sequence, fps=fps)
         elif extension == "jpg":
-            path_out_jpg = path_out + "/jpg_output/"
-            fetch_output("", path_out_jpg)
+            path_out_jpg = Path.joinpath(path_out, "jpg_output")
+            Path.mkdir(path_out_jpg, exist_ok=True)
             for frame in range(sequence.shape[0]):
-                imwrite(path_out_jpg + file_name + "{0:04d}.jpg".format(frame), sequence[frame], format="jpg")
+                imwrite(str(path_out_jpg) + file_name + "{0:04d}.jpg".format(frame), sequence[frame], format="jpg")
 
-    return
-
-
-def save_data_file(data_frame_in, path_data_out, file_name):
-    """
-    Save the data in csv file
-
-    Inputs:
-        - data_frame_in: DataFrame with the data
-        - path_data_out: Directory where the data will be saved
-    """
-    data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
     return
 
 
@@ -305,67 +333,40 @@ def read_parameters(path='config.txt'):
     print("Reading configuration file...")
     # Parameters
     sequence_parameters = {}
-
     sequence_parameters['path_data_out'] = config["Output path"]["PATH_OUTPUT_DATA_CSV"]
     sequence_parameters['path_seq_out'] = config["Output path"]["PATH_OUTPUT_DATA_SEQ"]
-    sequence_parameters['height'], sequence_parameters['width'], sequence_parameters['frame_rate'] = np.array(
-        config["Sequence parameters"]["height_width_frames"].split(), dtype=np.int)
+    (sequence_parameters['height'], sequence_parameters['width'], sequence_parameters['duration']) = \
+        np.array(config["Sequence parameters"]["height_width_duration"].split(), dtype=np.float)
     sequence_parameters['rgb'] = (config["Sequence parameters"]["rgb"]).lower() == "true"
-    sequence_parameters['duration'] = float(config["Sequence parameters"]["duration"])
     sequence_parameters['std_blur'] = float(config["Sequence parameters"]["std_blur"])
-    sequence_parameters['std_noise_added'] = np.array(config["Sequence parameters"]["std_noise_added"].split(),
-                                                      dtype=np.float)
+    sequence_parameters['noise_type'] = config["Sequence parameters"]["noise_type"]
+    sequence_parameters['noise_params'] = np.array(config["Sequence parameters"]["noise_params"].split(),
+                                                   dtype=np.float)
     sequence_parameters['low_limit'] = float(config["Sequence parameters"]["low_limit"])
     sequence_parameters['file_format'] = config["Sequence parameters"]["file_format"].split()
     sequence_parameters['file_name'] = config["Sequence parameters"]["file_name"]
+    sequence_parameters['frame_rate'] = np.array(config["Sequence parameters"]["frame_rate"].split(), dtype=np.float)
     sequence_parameters['seed'] = int(config["Sequence parameters"]["seed"])
+    sequence_parameters['resolution'] = float(config["Sequence parameters"]["resolution"])
 
     # load populations
     all_population = []
     for pop in ((config.sections())[2:]):
         population = {
             'particles': int(config[pop]["tot_particles"]),
+            'color': np.array(config[pop]["color"].split(), dtype=np.float),
             'mean': np.array(config[pop]["mean"].split(), dtype=np.float),
             'cov_mean': (np.array(config[pop]["cov_mean"].split(), dtype=np.float)).reshape(2, 2),
-            'mean_velocity': float(config[pop]["mean_velocity"]),
-            'std_velocity': float(config[pop]["std_velocity"]),
-            'std_direction': float(config[pop]["std_direction"]),  # previous name was std_theta
-            'head_displ': float(config[pop]["head_displ"]),
+            'vap': float(config[pop]["VAP"]),
+            'vap_deviation': float(config[pop]["VAP_deviation"]),
+            'Tp': float(config[pop]["Tp"]),
+            'head_displ': (config[pop]["head_displ"]).lower() == "true",
             'std_depth': float(config[pop]["std_depth"]),
-            'movement_type': (config[pop]["movement_type"]).lower()
+            'movement_type': (config[pop]["movement_type"]).lower(),
+            'ALH_mean': float(config[pop]["ALH_mean"]),
+            'ALH_std': float(config[pop]["ALH_std"]),
+            'BCP_mean': float(config[pop]["BCF_mean"]),
+            'BCP_std': float(config[pop]["BCF_std"])
         }
         all_population.append(population)
     return sequence_parameters, all_population
-
-
-def fetch_output(housing_path_seq_data, housing_path_seq_out):
-    """
-    This function takes the output files paths. If exists, does nothing, if not
-    creates de directory
-
-    Inputs:
-        - housing_path_seq_data : A string with the path where is going
-        to be saved the output data
-        - housing_path_seq_out : A string with the path where is going
-        to be saved the output sequences
-    """
-    if not os.path.isdir(housing_path_seq_data) and housing_path_seq_data:
-        os.makedirs(housing_path_seq_data)
-    if not os.path.isdir(housing_path_seq_out) and housing_path_seq_out:
-        os.makedirs(housing_path_seq_out)
-    return
-
-
-def printProgressBar(iteration, total, prefix='Making sequence', suffix='', decimals=1, length=20, fill="\u25AE",
-                     printEnd="\r"):
-    """
-    Call in a loop to create terminal progress bar
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '_' * (length - filledLength)
-    print('\r%s %s %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
-    # Print New Line on Complete
-    if iteration == total:
-        print()
-    return

@@ -196,6 +196,7 @@ def make_sequence(sequence_parameters, all_population):
     save_video_file(np.uint8(final_sequence_segmented), extension, file_name + "_segmented_", path_seq_out, frame_rate)
     save_data_file(df_info, path_data_out, file_name)
 
+
     return 0
 
 

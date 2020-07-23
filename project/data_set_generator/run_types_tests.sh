@@ -1,4 +1,16 @@
-python main_dataset.py config_typeA.txt
-python main_dataset.py config_typeB.txt
-python main_dataset.py config_typeC.txt
-python main_dataset.py config_typeD.txt
+#!/bin/bash
+
+files=./configs/*	
+iteration=1
+
+for file in $files
+do
+	echo "Running $file configuration"
+	python main_dataset.py "$file"
+	mkdir dataset_"$iteration"
+	mv -i datasets dataset_"$iteration"/datasets
+	echo $iteration
+	iteration=$((iteration + 1)) 
+	mkdir datasets
+done
+

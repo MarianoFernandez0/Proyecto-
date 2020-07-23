@@ -23,9 +23,13 @@ csv_tracks = config["Output"]["CSV_TRACKS_PATH"]
 tiff = tifffile.TiffFile(video_file_tiff)
 sequence = tiff.asarray()[:, :, :]
 tracks_df = pd.read_csv(csv_tracks)
+print(tracks_df.head())
+# tracks = tracks_df.to_numpy()[:, 1:]
 tracks = tracks_df.to_numpy()
-tracks = tracks[tracks[:, 4] < 200]
+print(tracks.shape)
 tracks[:, 3] = np.zeros(tracks.shape[0])
+#tracks = tracks[:, [0, 2, 1, 3, 4]]
+tracks = tracks[tracks[:, 4] < 40]
 sequence_tracks = draw_tracks(sequence, tracks)
 mp4_writer(video_file_out, sequence_tracks, format='mp4', fps=5)
 

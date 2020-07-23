@@ -18,6 +18,15 @@ def main_jpdaf_implementation(video_sequence_path):
     '''
 
     video_sequence = os.listdir(video_sequence_path)[0]
+    
+    if len(os.listdir(video_sequence_path)) == 1:
+        video_sequence = os.listdir(video_sequence_path)[0]
+    elif video_sequence == os.listdir(video_sequence_path)[0][0] != ".":     
+        video_sequence = os.listdir(video_sequence_path)[0]
+    else:
+        video_sequence = os.listdir(video_sequence_path)[1]        
+
+
     print(os.listdir(video_sequence_path))
 
     print('Sequence name %s' % video_sequence)

@@ -1,19 +1,9 @@
 from scipy.optimize import linear_sum_assignment
 import numpy as np
 import pandas as pd
+import multiprocessing
 from pprint import PrettyPrinter
-# pd.options.mode.chained_assignment = 'raise'
-
-
-def fix_particles_oustide(X, M, N):
-    # Se guarda en esta lista las partículas que están dentro del rango posible
-    x_grater_0 = X.x > 0
-    x_smaller_M = X.x < M
-    y_grater_0 = X.y > 0
-    y_smaller_N = X.y < N
-    X_fix = X[np.logical_and(np.logical_and(x_grater_0, x_smaller_M), np.logical_and(y_grater_0, y_smaller_N))]
-
-    return X_fix
+import time
 
 
 def distance_between_two_tracks(track_a, track_b, max_dist):
@@ -29,70 +19,18 @@ def distance_between_two_tracks(track_a, track_b, max_dist):
         distance (float): distancia entre las dos trayectorias.
     """
 
-    # check for empty tracks:
-    if track_a['frame'].isnull().all() and not track_b['frame'].isnull().all():
-        distance = len(track_b['frame']) * max_dist
-        return distance
-    elif track_b['frame'].isnull().all() and not track_a['frame'].isnull().all():
-        distance = len(track_a['frame']) * max_dist
-        return distance
-    elif track_a['frame'].isnull().all() and track_b['frame'].isnull().all():
-        distance = np.nan
-        return distance
+    num_frames = max(track_a['frame'].to_numpy(dtype='int32').max(), track_b['frame'].to_numpy(dtype='int32').max()) + 1
+    max_x = max(track_a['x'].to_numpy(dtype='int32').max(), track_b['x'].to_numpy(dtype='int32').max())
+    max_y = max(track_a['y'].to_numpy(dtype='int32').max(), track_b['x'].to_numpy(dtype='int32').max())
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # old version:
-    #    min_frame_a = track_a['frame'].min()
-    #    min_frame_b = track_b['frame'].min()
-    #    min_frame = int(min(min_frame_a, min_frame_b))
-    #    max_frame_a = track_a['frame'].max()
-    #    max_frame_b = track_b['frame'].max()
-    #    max_frame = int(max(max_frame_a, max_frame_b))
-    #
-    #    distance = 0
-    #    for frame in range(min_frame, max_frame+1):
-    #        if frame < min_frame_a:
-    #            distance += max_dist
-    #        elif frame < min_frame_b:
-    #            distance += max_dist
-    #        elif frame > max_frame_a:
-    #            distance += max_dist
-    #        elif frame > max_frame_b:
-    #            distance += max_dist
-    #        else:
-    #            coord_track_a = track_a[track_a['frame'] == frame][['x', 'y']].to_numpy().squeeze()
-    #            coord_track_b = track_b[track_b['frame'] == frame][['x', 'y']].to_numpy().squeeze()
-    #            l2_distance = np.sqrt((coord_track_a[0] - coord_track_b[0]) ** 2 +
-    #                                  (coord_track_a[1] - coord_track_b[1]) ** 2)
-    #            distance += min(l2_distance, max_dist)
-    # ------------------------------------------------------------------------------------------------------------------
+    track_a_np = np.ones((2, num_frames))*max_x*max_y
+    track_b_np = np.ones((2, num_frames))*max_x*max_y
+    track_a_np[:, track_a['frame'].to_numpy(dtype='int32')] = track_a[['x', 'y']].to_numpy().T
+    track_b_np[:, track_b['frame'].to_numpy(dtype='int32')] = track_b[['x', 'y']].to_numpy().T
 
-    first_frame_a = track_a['frame'].min()
-    first_frame_b = track_b['frame'].min()
-    first_frame = int(max(first_frame_a, first_frame_b))
+    distances = np.linalg.norm((track_a_np - track_b_np), axis=0)
+    distance = np.sum(np.minimum(distances, max_dist))
 
-    last_frame_a = track_a['frame'].max()
-    last_frame_b = track_b['frame'].max()
-    last_frame = int(min(last_frame_a, last_frame_b))
-
-    distance = 0
-    distance += (first_frame - first_frame_a)*max_dist
-    distance += (first_frame - first_frame_b)*max_dist
-    distance += (last_frame_a - last_frame)*max_dist
-    distance += (last_frame_b - last_frame)*max_dist
-
-    track_a = track_a[track_a['frame'] >= first_frame]
-    track_a = track_a[track_a['frame'] <= last_frame]
-
-    track_b = track_b[track_b['frame'] >= first_frame]
-    track_b = track_b[track_b['frame'] <= last_frame]
-
-    coords_a = track_a.loc[:, ['x', 'y']].to_numpy()
-    coords_b = track_b.loc[:, ['x', 'y']].to_numpy()
-
-    distances = np.linalg.norm((coords_a - coords_b), axis=1)
-    distance += np.sum(np.minimum(distances, max_dist))
-    #print(distances)
     return distance
 
 
@@ -100,8 +38,8 @@ def get_optimal_assignment(X, Y, max_dist):
     """
     Determina el subconjunto Y_opt de Y que cumple dist(X,Y_opt) = min(X, Y*), siendo Y* cualquier subconjunto de Y.
     Parameters:
-        X (array): De dimensiones (N, 2), siendo N la cantidad de coordenadas.
-        Y (array): De dimensiones (M+N, 2), siendo N la cantidad de coordenadas.
+        X (ndarray): De dimensiones (N, 2), siendo N la cantidad de coordenadas.
+        Y (ndarray): De dimensiones (M+N, 2), siendo N la cantidad de coordenadas.
         max_dist (int): Máxima distancia entre dos partículas para considerar que no son la misma.
                         max_dist debería ser del órden del doble del tamaño promedio de las partículas.
 
@@ -128,13 +66,38 @@ def get_optimal_assignment(X, Y, max_dist):
     return Y_opt
 
 
+def pandas_tracks_to_numpy(tracks, num_frames, max_num):
+    """
+    Cambia el formato de un conjunto de tracks, de un DataFrame a un array de numpy.
+    Parameters:
+        tracks (DataFrame): Conjunto de tracks con las columnas ['x', 'y', 'frame', 'id']
+        num_frames (int): Número de frames.
+        max_num (int): Número a asignar en los puntos vacíos.
+    Returns:
+        tracks_new (ndarray): Numpy array con dimensiones (2, numframe, num_tracks).
+        ids (ndarray): lookup table con los ids de las tracks.
+    """
+    ids = tracks['id'].unique()
+    num_tracks = len(ids)
+
+    tracks_grouped = tracks.groupby('id')
+    tracks_new = np.ones((2, num_frames, num_tracks))*max_num
+    tracks_new[:, tracks_grouped.get_group(ids[0])['frame'].to_numpy(dtype='int32'), 0] = 1
+    for i in range(num_tracks):
+        if ~(np.isnan(tracks_grouped.get_group(ids[i])[['x', 'y']].to_numpy())).any():
+            tracks_new[:, tracks_grouped.get_group(ids[i])['frame'].to_numpy(dtype='int32'), i] = \
+                tracks_grouped.get_group(ids[i])[['x', 'y']].to_numpy().T
+
+    return tracks_new, ids
+
+
 def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
     """
     Determina el subconjunto Y_opt de Y que cumple dist(X,Y_opt) = min(X, Y*), siendo Y* cualquier subconjunto de Y.
     Parameters:
-        tracks_a (DataFrame): Con las columnas ['id', 'x', 'y', 'frame'].
-        tracks_b (DataFrame): Columnas ['id', 'x', 'y', 'frame'].
-        max_dist (int): Máxima distancia entre dos partículas para considerar que no son la misma.
+        tracks_a (pd.DataFrame): Con las columnas ['id', 'x', 'y', 'frame'].
+        tracks_b (pd.DataFrame): Columnas ['id', 'x', 'y', 'frame'].
+        max_dist (float): Máxima distancia entre dos partículas para considerar que no son la misma.
                         max_dist debería ser del órden del doble del tamaño promedio de las partículas.
     Returns:
         tracks_a (DataFrame): Se agrega la columna 'opt_track_id' al dataframe de entrada tracks_a, indicando el
@@ -143,32 +106,296 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
                                 id_track de track_a asignado.
         cost (list): Distancias de las trayectorias asignadas. Ordenado ...
     """
-    ids_a = tracks_a['id'].unique()
-    ids_b = tracks_b['id'].unique()
+    num_frames = tracks_a['frame'].to_numpy(dtype='int32').max()+1
+    max_x = max(tracks_a['x'].to_numpy(dtype='int32').max(), tracks_b['x'].to_numpy(dtype='int32').max())
+    max_y = max(tracks_a['y'].to_numpy(dtype='int32').max(), tracks_b['x'].to_numpy(dtype='int32').max())
+
+    tracks_a_np, ids_a = pandas_tracks_to_numpy(tracks_a, num_frames, max_x*max_y)
+    tracks_b_np, ids_b = pandas_tracks_to_numpy(tracks_b, num_frames, max_x*max_y)
     num_tracks_a = len(ids_a)
     num_tracks_b = len(ids_b)
-
-    tracks_a_grouped = tracks_a.groupby('id')
-    tracks_b_grouped = tracks_b.groupby('id')
 
     cost = np.zeros([num_tracks_a, num_tracks_b])
     for i in range(num_tracks_a):
         for j in range(num_tracks_b):
-            cost[i, j] = distance_between_two_tracks(tracks_a_grouped.get_group(ids_a[i]),
-                                                     tracks_b_grouped.get_group(ids_b[j]),
-                                                     max_dist)
+            distances = np.linalg.norm((tracks_a_np[:, :, i] - tracks_b_np[:, :, j]), axis=0)
+            cost[i, j] = np.sum(np.minimum(distances, max_dist))
 
     row_ind, col_ind = linear_sum_assignment(cost)
-    # dist = cost[row_ind, col_ind].sum()
+
+    tracks_a_new = tracks_a.copy()
+    tracks_b_new = tracks_b.copy()
 
     for i in range(len(col_ind)):
-        tracks_b.loc[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
-        tracks_a.loc[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
+        tracks_a_new.at[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
+        tracks_b_new.at[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
 
-    return tracks_a, tracks_b, cost[row_ind, col_ind]
+    return tracks_a_new, tracks_b_new, cost[row_ind, col_ind]
 
 
-def error_measures(ground_truth_df, detected_df, max_dist):
+def base_distance_ospa(position_a, position_b, p_prime, alpha):
+    """
+    Calcula la distancia base entre dos puntos, de la forma que está definida en el paper:
+
+    Ristic, B., Vo, B-N., Clark, D., & Vo, B-T. (2011). A Metric for Performance Evaluation
+    of Multi-Target Tracking Algorithms. IEEE Transactions on Signal Processing, 59(7), 3452-3457.
+    https://doi.org/10.1109/TSP.2011.2140111
+
+    Parameters:
+        position_a (pd.DataFrame): posisión con las columnas ['x', 'y', 'id', 'opt_track_id'].
+        position_b (pd.DataFrame): posisión con las columnas ['x', 'y', 'id', 'opt_track_id'].
+        p_prime (int): Definido en el paper, órden de la norma a utilizar para la distancia.
+        alpha (float): Definido en el paper, ∈ [0, c] controls the penalty assigned to the labeling error.
+    Returns:
+        base_dist (float): Distancia base.
+    """
+    localisation_base_dist = np.linalg.norm(position_a[['x', 'y']].to_numpy() - position_b[['x', 'y']].to_numpy(),
+                                            ord=p_prime)
+
+    if position_a['id'].to_numpy() == position_b['opt_track_id'].to_numpy():
+        labeling_error = 0
+    else:
+        labeling_error = alpha
+
+    base_dist = (localisation_base_dist ** p_prime + labeling_error ** p_prime) ** (1/p_prime)
+    return base_dist
+
+
+def get_optimal_position_assignment(gt_positions, est_positions, c, p, p_prime, alpha):
+    """
+    Calcula la asignación óptima para las posiciones en un determinado frame.
+    Se utiliza base_distance_ospa() para los costos de la matriz.
+
+    Parameters:
+        gt_positions (pd.DataFrame): Posiciones de ground truth en determinado frame.
+        est_positions (pd.DataFrame): Posiciones estimadas a evaluar en determinado frame.
+        c (float):  cut-off parameter, a measure of penalty assigned to missed or false tracks.
+        p (float): 1 ≤ p < ∞ is the OSPA metric order parameter.
+        p_prime (int):  1 ≤ p′ < ∞ is the base distance order parameter.
+        alpha (float): ∈ [0, c] in controls the penalty assigned to the labeling error.
+    Returns:
+        sum_base_dists (float): Suma de las distancias obtenidas de la asignación óptima.
+    """
+    gt_ids = gt_positions['id'].unique()
+    est_ids = est_positions['id'].unique()
+    gt_id_groups = gt_positions.groupby('id')
+    est_id_groups = est_positions.groupby('id')
+
+    cost_matrix = np.ones((len(gt_ids), len(est_ids)))*c
+    for gt_id in range(len(gt_ids)):
+        gt_position = gt_id_groups.get_group(gt_ids[gt_id])
+        for est_id in range(len(est_ids)):
+            est_position = est_id_groups.get_group(est_ids[est_id])
+            base_dist = base_distance_ospa(gt_position, est_position, p_prime, alpha)
+            cost_matrix[gt_id, est_id] = min(c, base_dist) ** p
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    sum_base_dists = np.sum(cost_matrix[row_ind, col_ind])
+
+    return sum_base_dists
+
+
+def get_optimal_position_assignment_2(gt_positions, est_positions, c, p, p_prime, alpha):
+    """
+    Calcula la asignación óptima para las posiciones en un determinado frame.
+    Se calculan los costos de la matriz con np.array's.
+
+    Parameters:
+        gt_positions (pd.DataFrame): Posiciones de ground truth en determinado frame.
+        est_positions (pd.DataFrame): Posiciones estimadas a evaluar en determinado frame.
+        c (float):  cut-off parameter, a measure of penalty assigned to missed or false tracks.
+        p (float): 1 ≤ p < ∞ is the OSPA metric order parameter.
+        p_prime (int):  1 ≤ p′ < ∞ is the base distance order parameter.
+        alpha (float): ∈ [0, c] in controls the penalty assigned to the labeling error.
+    Returns:
+        sum_base_dists (float): Suma de las distancias obtenidas de la asignación óptima.
+    """
+    max_x = max(gt_positions['x'].to_numpy(dtype='int32').max(), est_positions['x'].to_numpy(dtype='int32').max())
+    max_y = max(gt_positions['y'].to_numpy(dtype='int32').max(), est_positions['x'].to_numpy(dtype='int32').max())
+    gt_positions_aux = gt_positions.copy()
+    est_positions_aux = est_positions.copy()
+    gt_positions_aux['frame'] = 0
+    est_positions_aux['frame'] = 0
+    gt_positions_np, gt_ids = pandas_tracks_to_numpy(gt_positions_aux, 1, max_x*max_y)
+    est_positions_np, est_ids = pandas_tracks_to_numpy(est_positions_aux, 1, max_x*max_y)
+
+    cost_matrix = np.ones((len(gt_ids), len(est_ids)))*c
+    for gt_id in range(len(gt_ids)):
+        gt_position = gt_positions_np[:, 0, gt_id]
+        gt_opt_id = gt_positions[gt_positions['id'] == gt_ids[gt_id]]['opt_track_id'].unique()
+        for est_id in range(len(est_ids)):
+            est_position = est_positions_np[:, 0, est_id]
+            localisation_base_dist = np.linalg.norm(gt_position - est_position, ord=p_prime)
+            labeling_error = alpha * (not est_ids[est_id] == gt_opt_id)
+            base_dist = (localisation_base_dist ** p_prime + labeling_error ** p_prime) ** (1/p_prime)
+
+            cost_matrix[gt_id, est_id] = min(c, base_dist) ** p
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    sum_base_dists = np.sum(cost_matrix[row_ind, col_ind])
+
+    return sum_base_dists
+
+
+def get_optimal_position_assignment_3(gt_positions, est_positions, c, p, p_prime, alpha):
+    """
+    Calcula la asignación óptima para las posiciones en un determinado frame.
+    Se calcula la matriz de costos de forma vectorial.
+
+    Parameters:
+        gt_positions (pd.DataFrame): Posiciones de ground truth en determinado frame.
+        est_positions (pd.DataFrame): Posiciones estimadas a evaluar en determinado frame.
+        c (float):  cut-off parameter, a measure of penalty assigned to missed or false tracks.
+        p (float): 1 ≤ p < ∞ is the OSPA metric order parameter.
+        p_prime (int):  1 ≤ p′ < ∞ is the base distance order parameter.
+        alpha (float): ∈ [0, c] in controls the penalty assigned to the labeling error.
+    Returns:
+        sum_base_dists (float): Suma de las distancias obtenidas de la asignación óptima.
+    """
+    max_x = max(gt_positions['x'].to_numpy(dtype='int32').max(), est_positions['x'].to_numpy(dtype='int32').max())
+    max_y = max(gt_positions['y'].to_numpy(dtype='int32').max(), est_positions['x'].to_numpy(dtype='int32').max())
+    gt_positions_aux = gt_positions.copy()
+    est_positions_aux = est_positions.copy()
+    gt_positions_aux['frame'] = 0
+    est_positions_aux['frame'] = 0
+    gt_positions_np, gt_ids = pandas_tracks_to_numpy(gt_positions_aux, 1, max_x*max_y)
+    est_positions_np, est_ids = pandas_tracks_to_numpy(est_positions_aux, 1, max_x*max_y)
+
+    gt_opt_ids = []
+    for gt_id in range(len(gt_ids)):
+        gt_opt_ids.append(gt_positions[gt_positions['id'] == gt_ids[gt_id]]['opt_track_id'].unique())
+
+    labeling_error = (alpha * (~(np.array(est_ids)[:, np.newaxis] == np.array(gt_opt_ids).T))).T
+    localisation_base_dist = np.linalg.norm(gt_positions_np[:, 0, np.newaxis, :] - est_positions_np[:, 0, :, np.newaxis]
+                                            , ord=p_prime, axis=0).T
+    base_dist = (localisation_base_dist ** p_prime + labeling_error ** p_prime) ** (1 / p_prime)
+
+    cost_matrix = np.minimum(c, base_dist) ** p
+    row_ind, col_ind = linear_sum_assignment(cost_matrix)
+    sum_base_dists = np.sum(cost_matrix[row_ind, col_ind])
+
+    return sum_base_dists
+
+
+def ospa_distance(ground_truth, estimated_tracks, c, p, p_prime, alpha):
+    """
+    Calcula la distancia ospa entre conjuntos de trayectorias, toma como entrada dos conjuntos de
+    trayectorias con sus respectivas asignaciones óptimas.
+    Basado en el paper:
+    Ristic, B., Vo, B-N., Clark, D., & Vo, B-T. (2011). A Metric for Performance Evaluation
+    of Multi-Target Tracking Algorithms. IEEE Transactions on Signal Processing, 59(7), 3452-3457.
+    https://doi.org/10.1109/TSP.2011.2140111
+
+    Parameters:
+        ground_truth (pd.DataFrame): contiene las columnas (id, x, y, frame, opt_track_id).
+        estimated_tracks (pd.DataFrame): contiene las columnas (id, x, y, frame, opt_track_id).
+        c (float):  cut-off parameter, a measure of penalty assigned to missed or false tracks.
+        p (float): 1 ≤ p < ∞ is the OSPA metric order parameter.
+        p_prime (int):  1 ≤ p′ < ∞ is the base distance order parameter.
+        alpha (float): ∈ [0, c] in controls the penalty assigned to the labeling error.
+
+    Returns:
+        ospa_dist (float): Optimal Sub-Pattern Assignment distance.
+    """
+    frames = ground_truth['frame'].unique()
+    gt_groups = ground_truth.groupby('frame')
+    est_groups = estimated_tracks.groupby('frame')
+
+    ospa_dist = 0
+    for frame_num in frames:
+        est_positions = est_groups.get_group(frame_num)
+        gt_positions = gt_groups.get_group(frame_num)
+
+        if len(gt_positions['id'].unique()) <= len(est_positions['id'].unique()):
+            d_positions = est_positions
+            x_positions = gt_positions
+        else:
+            d_positions = gt_positions
+            x_positions = est_positions
+
+        m = len(x_positions['id'].unique())
+        n = len(d_positions['id'].unique())
+        # sum_base_dists = get_optimal_position_assignment(x_positions, d_positions, c, p, p_prime, alpha)
+        sum_base_dists = get_optimal_position_assignment_2(x_positions, d_positions, c, p, p_prime, alpha)
+        # sum_base_dists_3 = get_optimal_position_assignment_3(x_positions, d_positions, c, p, p_prime, alpha)
+        # if sum_base_dists != sum_base_dists_2:
+        #     print("sum_base_dists != sum_base_dists_2")
+        #     print("sum_base_dists = ", sum_base_dists)
+        #     print("sum_base_dists_2: ", sum_base_dists_2)
+        # if sum_base_dists != sum_base_dists_3:
+        #     print("sum_base_dists != sum_base_dists_3")
+        #     print("sum_base_dists = ", sum_base_dists)
+        #     print("sum_base_dists_3: ", sum_base_dists_3)
+        # if sum_base_dists_2 != sum_base_dists_3:
+        #     print("sum_base_dists_2 != sum_base_dists_3")
+        #     print("sum_base_dists_2 = ", sum_base_dists_2)
+        #     print("sum_base_dists_3: ", sum_base_dists_3)
+
+        ospa_dist += ((1/n) * (sum_base_dists**p + (n - m) * (c**p))) ** (1/p)
+
+    return ospa_dist
+
+
+def ospa_multiprocessing_aux(positions):
+    """
+    Función auxiliar para paralelizar en frames el calculo de la distancia ospa.
+    Parameters:
+        positions (tuple): de la forma (est_positions, gt_positions, c, p, p_prime, alpha).
+    Returns:
+        ospa_dist (float): Distancia ospa para un frame.
+    """
+    est_positions, gt_positions, c, p, p_prime, alpha = positions
+
+    if len(gt_positions['id'].unique()) <= len(est_positions['id'].unique()):
+        d_positions = est_positions
+        x_positions = gt_positions
+    else:
+        d_positions = gt_positions
+        x_positions = est_positions
+
+    m = len(x_positions['id'].unique())
+    n = len(d_positions['id'].unique())
+    sum_base_dists = get_optimal_position_assignment_2(x_positions, d_positions, c, p, p_prime, alpha)
+    ospa_dist = ((1 / n) * (sum_base_dists ** p + (n - m) * (c ** p))) ** (1 / p)
+
+    return ospa_dist
+
+
+def ospa_distance_multiprocessing(ground_truth, estimated_tracks, c, p, p_prime, alpha):
+
+    """
+    Calcula la distancia ospa entre conjuntos de trayectorias, toma como entrada dos conjuntos de
+    trayectorias con sus respectivas asignaciones óptimas.
+    Basado en el paper:
+    Ristic, B., Vo, B-N., Clark, D., & Vo, B-T. (2011). A Metric for Performance Evaluation
+    of Multi-Target Tracking Algorithms. IEEE Transactions on Signal Processing, 59(7), 3452-3457.
+    https://doi.org/10.1109/TSP.2011.2140111
+
+    Parameters:
+        ground_truth (pd.DataFrame): contiene las columnas (id, x, y, frame, opt_track_id).
+        estimated_tracks (pd.DataFrame): contiene las columnas (id, x, y, frame, opt_track_id).
+        c (float):  cut-off parameter, a measure of penalty assigned to missed or false tracks.
+        p (float): 1 ≤ p < ∞ is the OSPA metric order parameter.
+        p_prime (int):  1 ≤ p′ < ∞ is the base distance order parameter.
+        alpha (float): ∈ [0, c] in controls the penalty assigned to the labeling error.
+
+    Returns:
+        ospa_dist (float): Optimal Sub-Pattern Assignment distance.
+    """
+
+    frames = ground_truth['frame'].unique()
+    gt_groups = ground_truth.groupby('frame')
+    est_groups = estimated_tracks.groupby('frame')
+    list_tuples = []
+    for frame_num in frames:
+        list_tuples.append((est_groups.get_group(frame_num), gt_groups.get_group(frame_num), c, p, p_prime, alpha))
+
+    pool = multiprocessing.Pool()
+    ospa_dists = pool.map(ospa_multiprocessing_aux, list_tuples)
+    ospa = np.sum(ospa_dists)
+
+    return ospa
+
+
+def detection_error_measures(ground_truth_df, detected_df, max_dist):
     """
     Parameters:
         ground_truth_df (df(id, x, y, total_pixels, mask, frame)): Coordenadas ground truth de las partículas.
@@ -212,9 +439,9 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     """
     Toma como entrada del conjunto de trayectorias a evaluar y el ground truth con que comparar.
     Parameters:
-        ground_truth: dataframe que contiene las columnas (id, x, y, frame).
-        estimated_tracks: dataframe que contiene las columnas (id, x, y, frame).
-        max_dist: distancia máxima, si la distancia entre dos puntos es mayor a la distancia máxima se considera un
+        ground_truth (pd.DataFrame): contiene las columnas (id, x, y, frame).
+        estimated_tracks (pd.DataFrame): contiene las columnas (id, x, y, frame).
+        max_dist (float): distancia máxima, si la distancia entre dos puntos es mayor a la distancia máxima se considera un
                     error en la asignacion.
     Returns:
         performance_measures (dict): con las siguientes keys:
@@ -225,91 +452,94 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
                                 y converge a cero a medida que el número aumenta.
                                 beta(ground_truth, tracks) = (d(ground_truth, dummy_tracks) - d(ground_truth, tracks)) /
                                                         (d(ground_truth, dummy_tracks) + d(right_tracks, dummy_tracks))
-                TP (int): True Positives. Número de trayectorias correctas de tracks.
-                FN (int): False Negatives. Número de trayectorias de ground truth que no se encuentran en tracks.
-                FP (int): False Positives. Número de trayectorias de tracks que no corresponden a ninguna de
+                TP Tracks (int): True Positives. Número de trayectorias correctas de tracks.
+                FN Tracks (int): False Negatives. Número de trayectorias de ground truth que no se encuentran en tracks.
+                FP Tracks (int): False Positives. Número de trayectorias de tracks que no corresponden a ninguna de
                                             ground_truth.
-                JSC (float): Índice de Jaccard. JSC = TP/(TP + FN + FP)
+                JSC Tracks (float): Índice de Jaccard. JSC = TP/(TP + FN + FP)
     """
+
+    if any(estimated_tracks['id'].unique() == 0):
+        estimated_tracks.id = estimated_tracks['id'] + 1  # define tracks id > 0
 
     dummy_tracks = {'id': -ground_truth['id'].unique()}
     dummy_tracks = pd.DataFrame(data=dummy_tracks, columns=['id', 'frame'])
 
     tracks_extended = pd.concat([estimated_tracks, dummy_tracks])
-    # Se calcula la distancia del conjunto de tracks al ground truth
+
+    # Se calcula la distancia entre conjunto de tracks estimadas y el de ground truth
+    t0 = time.time()
     ground_truth, tracks_extended, opt_distances = get_optimal_track_assignment(ground_truth, tracks_extended, max_dist)
+    t1 = time.time()
+    print('Time to run optimal assignment: ', t1 - t0)
     opt_distance = opt_distances.sum()
 
-    # La máxima distancia posible entre tracks y ground_truth, es la distancia entre ground truth
-    # y un conjunto de tracks vacías.
-    _, _, max_distances = get_optimal_track_assignment(ground_truth, dummy_tracks, max_dist)
-    max_distance = max_distances.sum()
+    # La máxima distancia posible entre las tracks estimadas y el ground_truth
+    max_distance = ground_truth.shape[0]*max_dist
 
-    # tracks not assigned to ground_truth tracks
-    wrong_tracks = tracks_extended[tracks_extended['opt_track_id'].isnull()]
-    wrong_tracks = wrong_tracks[wrong_tracks['id'] > 0]                                # only non dummy tracks
-    dummy_tracks = {'id': -wrong_tracks['id'].unique()}
-    dummy_tracks = pd.DataFrame(data=dummy_tracks, columns=['id', 'frame'])
-    _, _, wrong_max_distances = get_optimal_track_assignment(wrong_tracks, dummy_tracks, max_dist)
-    wrong_max_distance = wrong_max_distances.sum()
+    # tracks estimadas que no se asignaron a track de ground_truth
+    wrong_tracks = tracks_extended[tracks_extended['opt_track_id'].isnull()]  # Tracks no asignadas
+    wrong_tracks = wrong_tracks[wrong_tracks['id'] > 0]  # Tracks pertenecientes a estimated_tracks
+    wrong_max_distance = wrong_tracks.shape[0]*max_dist
 
-    # tracks assigned to ground_truth tracks
-    assigned_tracks = tracks_extended[~tracks_extended['opt_track_id'].isnull()]
-    right_tracks = assigned_tracks[assigned_tracks['id'] > 0]                           # only non dummy assigned tracks
-    _, _, right_distances = get_optimal_track_assignment(right_tracks, ground_truth, max_dist)
-    # print('distance: ', opt_distance)
-    # print('max_dist: ', max_distance)
+    # tracks estimadas asignadas a tracks de ground_truth
+    assigned_tracks = tracks_extended[~tracks_extended['opt_track_id'].isnull()]   # Tracks asignadas
+    right_tracks = assigned_tracks[assigned_tracks['id'] > 0]  # Tracks pertenecientes a estimated_tracks
+    right_distances = opt_distances[ground_truth['opt_track_id'].unique() > 0]
 
+    # Parámetros de desempeño:
     alpha = 1 - opt_distance/max_distance
     beta = (max_distance - opt_distance)/(max_distance + wrong_max_distance)
-    # number non dummy tracks assigned to ground_truth tracks:
+    # number non dummy tracks assigned to ground_truth tracks
     TP = len(right_tracks['id'].unique())
     # number of dummy tracks assigned to ground_truth tracks:
-    FN = len(assigned_tracks[assigned_tracks['id'] < 0]['id'].unique())
+    FN = len(assigned_tracks[assigned_tracks['id'] <= 0]['id'].unique())
     # number of non dummy tracks not assigned to ground_truth tracks"
     FP = len(wrong_tracks['id'].unique())
     JSC = TP/(TP + FN + FP)
 
     rmse = np.sqrt(np.mean(right_distances ** 2))
-    min = np.min(right_distances)
-    max = np.max(right_distances)
+    min_error = np.min(right_distances)
+    max_error = np.max(right_distances)
     sd = np.std(right_distances)
 
     # Number of right positions in tracks assigned to ground truth tracks.
     TP_positions = 0
-    # TP = assigned_tracks[assigned_tracks['id'] > 0].shape[0]
-
-    estimated_track_grouped = tracks_extended.groupby('id')
-    gt_grouped = ground_truth.groupby('id')
-    for opt_id in ground_truth['opt_track_id'].unique():
-        if opt_id > 0:
-            estimated_track = estimated_track_grouped.get_group(opt_id)
-            gt_id = estimated_track['opt_track_id'].unique()[0]
-            gt_track = gt_grouped.get_group(gt_id)
-
-            track_frames = estimated_track['frame'].unique()
-            gt_track_frames = gt_track['frame'].unique()
-
-            first_frame = np.max(np.array([track_frames.min(), gt_track_frames.min()]))
-            last_frame = np.min(np.array([track_frames.max(), gt_track_frames.max()]))
-
-            estimated_track = estimated_track[estimated_track['frame'] >= first_frame]
-            estimated_track = estimated_track[estimated_track['frame'] <= last_frame]
-            gt_track = gt_track[gt_track['frame'] >= first_frame]
-            gt_track = gt_track[gt_track['frame'] <= last_frame]
-
-            est_coords = estimated_track.loc[:, ['x', 'y']].to_numpy()
-            gt_coords = gt_track.loc[:, ['x', 'y']].to_numpy()
-
-            dists = np.linalg.norm((est_coords - gt_coords), axis=1)
-            TP_positions += np.sum(dists < max_dist)
-
     # Number of positions assigned to dummy tracks:
-    FN_positions = ground_truth[ground_truth['opt_track_id'] < 0].shape[0]
+    FN_positions = ground_truth[ground_truth['opt_track_id'] <= 0].shape[0]
     # Number of positions of tracks not assigned to ground truth tracks:
     FP_positions = wrong_tracks.shape[0]
 
+    right_tracks_grouped = right_tracks.groupby('id')
+    gt_grouped = ground_truth.groupby('id')
+
+    for track_id in right_tracks['id'].unique():
+        right_track = right_tracks_grouped.get_group(track_id)
+        gt_id = right_track['opt_track_id'].unique()[0]
+        gt_track = gt_grouped.get_group(gt_id)
+
+        num_frames = max(right_track['frame'].to_numpy(dtype='int32').max(),
+                         gt_track['frame'].to_numpy(dtype='int32').max())+1
+        min_frame = min(right_track['frame'].to_numpy(dtype='int32').min(),
+                        gt_track['frame'].to_numpy(dtype='int32').min())
+
+        max_x = max(right_track['x'].to_numpy(dtype='int32').max(), gt_track['x'].to_numpy(dtype='int32').max())
+        max_y = max(right_track['y'].to_numpy(dtype='int32').max(), gt_track['x'].to_numpy(dtype='int32').max())
+
+        tracks_right_np, _ = pandas_tracks_to_numpy(right_track, num_frames, max_x*max_y)
+        tracks_gt_np, _ = pandas_tracks_to_numpy(gt_track, num_frames, max_x*max_y)
+
+        distances = np.linalg.norm((tracks_right_np[:, :, 0] - tracks_gt_np[:, :, 0]), axis=0)
+        TP_positions += np.sum(distances < max_dist) - min_frame
+        FN_positions += np.sum(tracks_gt_np[0, distances > max_dist, 0] < max_x*max_y)
+        FP_positions += np.sum(tracks_right_np[0, distances > max_dist, 0] < max_x * max_y)
+
     JSC_positions = TP_positions/(TP_positions + FN_positions + FP_positions)
+
+    t0 = time.time()
+    ospa = ospa_distance_multiprocessing(ground_truth, tracks_extended[tracks_extended['id'] > 0], c=max_dist, p=0.9, p_prime=2, alpha=max_dist)
+    t1 = time.time()
+    print('Time to run ospa: ', t1 - t0)
 
     performance_measures = {
         'alpha': alpha,
@@ -319,15 +549,17 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
         'FP Tracks': FP,
         'JSC Tracks': JSC,
         'RMSE': rmse,
-        'Min': min,
-        'Max': max,
+        'Min': min_error,
+        'Max': max_error,
         'SD': sd,
         'TP Positions': TP_positions,
         'FN Positions': FN_positions,
         'FP Positions': FP_positions,
-        'JSC Positions': JSC_positions
+        'JSC Positions': JSC_positions,
+        'OSPA': ospa
     }
     return performance_measures
+
 # ----------------------------------------------------------------------------------------------------------------------
 # PRUEBA:
 
@@ -343,7 +575,7 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 # 		X[n*F+f,:] = [250+np.random.normal(0, 20), 250+np.random.normal(0, 20), f]
 # 		Y[n*F+f,:] = [500+np.random.normal(0, 20), 500+np.random.normal(0, 20), f]
 
-# for i in range(30):
+# for i in range(30):ospa_distance(ground_truth, estimated_tracks, c, p, p_prime, alpha)
 # 	Y[i,:] = X[i,:]
 # df_X = pd.DataFrame(X,columns = ['x','y','frame'])
 # df_Y = pd.DataFrame(Y,columns = ['x','y','frame'])
@@ -353,7 +585,6 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 
 # TP, FN, FP, JSC = error_measures(df_X, df_Y, 512, 512, 30)
 # print(TP, FN, FP, JSC)
-
 # ----------------------------------------------------------------------------------------------------------------------
 # PRUEBA: distance_between_two_tracks()
 #
@@ -369,33 +600,55 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
 # ----------------------------------------------------------------------------------------------------------------------
 # PRUEBA: track_set_error()
 #
-tracks_csv = pd.read_csv('tracks_enn_jpdaf.csv')
-gt_tracks = pd.read_csv('_data.csv')
-gt_tracks = gt_tracks[gt_tracks['frame'] < 50]
-tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
-gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
+tracks_csv = pd.read_csv('Spots in tracks statistics-dataset1-10Hz.csv')
+# print(tracks_csv.columns)
+tracks_csv.rename(columns={'TRACK_ID': 'id',
+                           'POSITION_X': 'x',
+                           'POSITION_Y': 'y',
+                           'FRAME': 'frame'}, inplace=True)
+gt_tracks = pd.read_csv('dataset_1_data.csv')
+# print(gt_tracks.columns)
+gt_tracks.rename(columns={'id_particle': 'id'}, inplace=True)
+print('---------------------------------------------------TrackMate---------------------------------------------------')
+# print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
+# print('----------------------------------------------------')
+# print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
+# print('----------------------------------------------------')
+start = time.time()
+error = track_set_error(gt_tracks, tracks_csv, 40)
+end = time.time()
+print('Time to run track_set_error: ', end - start)
+print('\n Performance Measures:')
+PrettyPrinter(sort_dicts=False).pprint(error)
+
 print('---------------------------------------------------ENN JPDAF---------------------------------------------------')
-# print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
-# print('----------------------------------------------------')
-# print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
-# print('----------------------------------------------------')
+gt_tracks = gt_tracks[gt_tracks['frame'] > 1]
+tracks_csv = pd.read_csv('tracks_enn_jpdaf.csv')
+# print(tracks_csv.columns)
+tracks_csv = tracks_csv[tracks_csv['frame'] < 40]
 
+t0 = time.time()
 error = track_set_error(gt_tracks, tracks_csv, 40)
+t1 = time.time()
+print('TIme to run track_set_error: ', t1-t0)
 print('\n Performance Measures:')
 PrettyPrinter(sort_dicts=False).pprint(error)
 
-tracks_csv = pd.read_csv('tracks_NN.csv')
-tracks_csv = tracks_csv[tracks_csv['frame'] < 50]
-print('-------------------------------------------------------NN------------------------------------------------------')
-# print('tracks: \n', 'shape:', tracks_csv.shape, '\n', tracks_csv.head())
-# print('----------------------------------------------------')
-# print('gt: \n', 'shape:', gt_tracks.shape, '\n', gt_tracks.head())
-# print('----------------------------------------------------')
+print('---------------------------------------------------JPDAF C++---------------------------------------------------')
+gt_tracks = gt_tracks[gt_tracks['frame'] > 6]
 
+tracks_csv = pd.read_csv('dataset_1_10Hz_C.csv')
+# print(tracks_csv.columns)
+tracks_csv.rename(columns={'track_id': 'id'}, inplace=True)
+tracks_csv = tracks_csv[tracks_csv['frame'] < 40]
+print(tracks_csv.columns)
+t0 = time.time()
 error = track_set_error(gt_tracks, tracks_csv, 40)
+t1 = time.time()
+print('TIme to run track_set_error: ', t1-t0)
 print('\n Performance Measures:')
 PrettyPrinter(sort_dicts=False).pprint(error)
-
+# ----------------------------------------------------------------------------------------------------------------------
 # tracks_a = {
 #    'id': [3, 4, 4, 4, 55, 55, 3],
 #    'x': [3, 45, 47, 50, 2, 5, 44],
