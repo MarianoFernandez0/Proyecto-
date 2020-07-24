@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import multiprocessing
 import time
+from tqdm import tqdm
 
 
 def pandas_tracks_to_numpy(tracks, num_frames, max_num):
@@ -45,7 +46,7 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
                                 id_track de track_a asignado.
         cost (list): Distancias de las trayectorias asignadas. Ordenado ...
     """
-    num_frames = max(np.nanmax(tracks_a['frame']), np.nanmax(tracks_b['frame'])) + 1
+    num_frames = int(max(np.nanmax(tracks_a['frame']), np.nanmax(tracks_b['frame'])) + 1)
     max_x = max(tracks_a['x'].to_numpy(dtype='int32').max(), tracks_b['x'].to_numpy(dtype='int32').max())
     max_y = max(tracks_a['y'].to_numpy(dtype='int32').max(), tracks_b['x'].to_numpy(dtype='int32').max())
 
@@ -55,11 +56,11 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
     num_tracks_b = len(ids_b)
 
     cost = np.zeros([num_tracks_a, num_tracks_b])
-    for i in range(num_tracks_a):
+    for i in tqdm(range(num_tracks_a), desc='ground truth tracks'):
         for j in range(num_tracks_b):
             distances = np.linalg.norm((tracks_a_np[:, :, i] - tracks_b_np[:, :, j]), axis=0)
             cost[i, j] = np.sum(np.minimum(distances, max_dist))
-
+    print(cost)
     row_ind, col_ind = linear_sum_assignment(cost)
 
     tracks_a_new = tracks_a.copy()
@@ -166,7 +167,7 @@ def ospa_distance(ground_truth, estimated_tracks, c, p, p_prime, alpha):
     list_tuples = []
 
     ospa = 0
-    for frame_num in frames:
+    for frame_num in tqdm(frames, desc='frames'):
         if frame_num in estimated_tracks['frame'].unique():
             list_tuples.append((est_groups.get_group(frame_num), gt_groups.get_group(frame_num), c, p, p_prime, alpha))
         else:
@@ -211,10 +212,11 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     tracks_extended = pd.concat([estimated_tracks, dummy_tracks])
 
     # Se calcula la distancia entre conjunto de tracks estimadas y el de ground truth
+    print('Computing optimal track assignment...')
     t0 = time.time()
     ground_truth, tracks_extended, opt_distances = get_optimal_track_assignment(ground_truth, tracks_extended, max_dist)
     t1 = time.time()
-    print('Time to run optimal assignment: ', t1 - t0)
+    print('Time to run optimal assignment: {:.2f}s'.format(t1 - t0))
     opt_distance = opt_distances.sum()
 
     # La máxima distancia posible entre las tracks estimadas y el ground_truth
@@ -229,7 +231,16 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     assigned_tracks = tracks_extended[~tracks_extended['opt_track_id'].isnull()]   # Tracks asignadas
     right_tracks = assigned_tracks[assigned_tracks['id'] > 0]  # Tracks pertenecientes a estimated_tracks
     right_distances = opt_distances[ground_truth['opt_track_id'].unique() > 0]
-
+    print("ground_truth", ground_truth.shape, type(ground_truth))
+    print(ground_truth.loc[ground_truth['frame'] == 2, ['id', 'x', 'y', 'frame']])
+    print(ground_truth.loc[ground_truth['id'] == 67, ['id', 'x', 'y', 'frame']])
+    print("tracks_extended", tracks_extended.shape, type(tracks_extended))
+    print(tracks_extended.loc[tracks_extended['id'] == 3, ['id', 'x', 'y', 'frame']])
+    print(tracks_extended.loc[tracks_extended['id'] == 60, ['id', 'x', 'y', 'frame']])
+    print("assigned_tracks", assigned_tracks.shape, type(assigned_tracks))
+    print("wrong_tracks", wrong_tracks.shape, type(wrong_tracks))
+    print("right_tracks", right_tracks.shape, type(right_tracks))
+    print("assigned_tracks", assigned_tracks[assigned_tracks['opt_track_id'] == 125, ['x', 'y', 'frame']])
     # Parámetros de desempeño:
     alpha = 1 - opt_distance/max_distance
     beta = (max_distance - opt_distance)/(max_distance + wrong_max_distance)
@@ -280,10 +291,11 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     JSC_positions = TP_positions/(TP_positions + FN_positions + FP_positions)
 
     t0 = time.time()
+    print('Computing ospa distance...')
     ospa = ospa_distance(ground_truth, tracks_extended[tracks_extended['id'] > 0],
                          c=max_dist, p=0.9, p_prime=2, alpha=max_dist)
     t1 = time.time()
-    print('Time to run ospa: ', t1 - t0)
+    print('Time to run ospa: {:.2f}s'.format(t1 - t0))
 
     performance_measures = {
         'alpha': alpha,
