@@ -1,0 +1,10 @@
+Codigo medidas casa
+
+ENTRADA: se espera como entrada un csv que contiene las columnas
+[id, x, y, fluorescence, frame]
+
+1er paso: se precisa que el csv este ordenado primero por id y luego por frame
+2do paso: usar factor de escala 
+3ro paso: usar funcion read_csv para obtener las listas X, Y, T, TRACK_ID
+4to paso: usar funcion get_carac el cual extrae las siguientes medidas
+vcl,vsl,vap_mean,vap_std,alh_mean,alh_std,lin,wob,stra,bcf_mean,bcf_std,mad
