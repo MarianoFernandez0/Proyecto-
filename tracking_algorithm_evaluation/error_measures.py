@@ -60,7 +60,7 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
         for j in range(num_tracks_b):
             distances = np.linalg.norm((tracks_a_np[:, :, i] - tracks_b_np[:, :, j]), axis=0)
             cost[i, j] = np.sum(np.minimum(distances, max_dist))
-    print(cost)
+    # print(cost)
     row_ind, col_ind = linear_sum_assignment(cost)
 
     tracks_a_new = tracks_a.copy()
@@ -167,7 +167,7 @@ def ospa_distance(ground_truth, estimated_tracks, c, p, p_prime, alpha):
     list_tuples = []
 
     ospa = 0
-    for frame_num in tqdm(frames, desc='frames'):
+    for frame_num in frames:
         if frame_num in estimated_tracks['frame'].unique():
             list_tuples.append((est_groups.get_group(frame_num), gt_groups.get_group(frame_num), c, p, p_prime, alpha))
         else:
@@ -231,16 +231,7 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     assigned_tracks = tracks_extended[~tracks_extended['opt_track_id'].isnull()]   # Tracks asignadas
     right_tracks = assigned_tracks[assigned_tracks['id'] > 0]  # Tracks pertenecientes a estimated_tracks
     right_distances = opt_distances[ground_truth['opt_track_id'].unique() > 0]
-    print("ground_truth", ground_truth.shape, type(ground_truth))
-    print(ground_truth.loc[ground_truth['frame'] == 2, ['id', 'x', 'y', 'frame']])
-    print(ground_truth.loc[ground_truth['id'] == 67, ['id', 'x', 'y', 'frame']])
-    print("tracks_extended", tracks_extended.shape, type(tracks_extended))
-    print(tracks_extended.loc[tracks_extended['id'] == 3, ['id', 'x', 'y', 'frame']])
-    print(tracks_extended.loc[tracks_extended['id'] == 60, ['id', 'x', 'y', 'frame']])
-    print("assigned_tracks", assigned_tracks.shape, type(assigned_tracks))
-    print("wrong_tracks", wrong_tracks.shape, type(wrong_tracks))
-    print("right_tracks", right_tracks.shape, type(right_tracks))
-    print("assigned_tracks", assigned_tracks[assigned_tracks['opt_track_id'] == 125, ['x', 'y', 'frame']])
+
     # Parámetros de desempeño:
     alpha = 1 - opt_distance/max_distance
     beta = (max_distance - opt_distance)/(max_distance + wrong_max_distance)

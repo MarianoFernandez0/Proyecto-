@@ -1,8 +1,13 @@
 import os
-import sys
 import multiprocessing
+import argparse
 
-dataset_dir = sys.argv[1]
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--dataset_dir', default='datasets', help='Dataset directory')
+args = parser.parse_args()
+
+dataset_dir = args.dataset_dir
 datasets = [d for d in os.listdir(dataset_dir) if os.path.isdir(os.path.join(dataset_dir, d))]
 
 for dataset in datasets:
