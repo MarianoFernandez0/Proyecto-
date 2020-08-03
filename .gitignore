@@ -10,3 +10,7 @@ video_sequence/
 *.ipynb_checkpoints
 *.jpg
 *.mp4
+bin/jpdaf*
+bin/gospapy*
+development/tracking/test
+tracking_algorithm_evaluation/python_plus_octave/data
