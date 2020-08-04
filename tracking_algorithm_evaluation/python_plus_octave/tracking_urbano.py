@@ -16,7 +16,7 @@ octave.addpath(current_path + '/SpermTrackingProject')
 
 def tracking_urbano(config_params):
     """
-    Perform detectoin and tracking with the .m urbano implementation.
+    Perform detection and tracking with the .m urbano implementation.
     The parameters must be specified in the config_params file.
     """
 
