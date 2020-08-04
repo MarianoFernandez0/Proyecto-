@@ -10,6 +10,7 @@ video_sequence/
 *.ipynb_checkpoints
 *.jpg
 *.mp4
+*.zip
 bin/jpdaf*
 bin/gospapy*
 development/tracking/test
