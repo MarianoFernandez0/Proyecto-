@@ -15,6 +15,15 @@ def build_cost_matrix(tracks_coord, detections_coord):
 
 
 def add_fluorescence_to_tracks(detections, tracks, output_dir="output", type_measure='mgv'):
+    """
+    Function that assigns the fluorescence in the detections file to the particles in the track file.
+    Args:
+        detections: path to csv file with the detections for the sequence
+        tracks: path to csv file with the output of the tracking algorithm
+        output_dir: string with the path to save the csv file with fluorescence
+        type_measure: str with ctcf or mgv
+    """
+
     os.makedirs(output_dir, exist_ok=True)
     fluo_det_df = read_cvs(detections)
     tracks_df = read_cvs(tracks)
