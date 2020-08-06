@@ -12,7 +12,7 @@ if __name__ == "__main__":
         result_files = [file for file in os.listdir(tracking_path) if file.endswith('.csv')]
         result_files.sort()
         for result in result_files:
-            print(dataset+" "+result)
+            print(dataset + " " + result)
             track_path = os.path.join(tracking_path, result)
             get_casa_measures(track_path, out_dir, res)
         print()
