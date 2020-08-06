@@ -14,3 +14,4 @@ bin/jpdaf*
 bin/gospapy*
 development/tracking/test
 tracking_algorithm_evaluation/python_plus_octave/data
+*.avi
