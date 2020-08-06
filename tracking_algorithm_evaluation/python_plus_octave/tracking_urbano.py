@@ -16,7 +16,7 @@ octave.addpath(current_path + '/SpermTrackingProject')
 
 def tracking_urbano(config_params):
     """
-    Perform detectoin and tracking with the .m urbano implementation.
+    Perform detection and tracking with the .m urbano implementation.
     The parameters must be specified in the config_params file.
     """
 
@@ -37,6 +37,7 @@ def tracking_urbano(config_params):
     ROIy = int(config['Input']['ROIy'])
 
     csv_tracks = config['Output']['CSV_TRACKS_PATH']
+    detections_file = config['Output']['CSV_DETECTIONS_PATH']
     video_file_out = config['Output']['VIDEOFILE_OUT_PATH']
 
     detection_algorithm = int(config['Algorithm params']['detectionAlgorithm'])
@@ -64,17 +65,17 @@ def tracking_urbano(config_params):
         # Python implementation for segmentation and detection
         tiff = tifffile.TiffFile(video_file_tiff)
         detected = evaluation(tiff, px2um)
-        detected.to_csv(data_file)
+        detected.to_csv(detections_file)
     else:
         # Urbano matlab implementation for segmentation and detection
-        octave.Detector(data_file, video_file_mp4, num_frames)
+        octave.Detector(detections_file, video_file_mp4, num_frames)
     end = time.time()
     print('Time to run detection: ', end - start)
     # Perform tracking step
     start = time.time()
-    octave.Tracker(data_file, video_file_mp4, video_file_out, csv_tracks, reformat_data_file, num_frames, fps, px2um,
-                   ROIx, ROIy, mtt_algorithm, PG, PD, gv, plot_results, save_movie, snap_shot, plot_track_results,
-                   analyze_motility, nout=0)
+    octave.Tracker(detections_file, video_file_mp4, video_file_out, csv_tracks, reformat_data_file, num_frames, fps,
+                   px2um, ROIx, ROIy, mtt_algorithm, PG, PD, gv, plot_results, save_movie, snap_shot,
+                   plot_track_results, analyze_motility, nout=0)
     end = time.time()
     print('Time to run tracking: ', end - start)
     octave.clear_all(nout=0)
