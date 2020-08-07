@@ -10,12 +10,43 @@ from imageio import mimwrite as mp4_writer
 from imageio import mimread as mp4_reader
 from src.evaluation import evaluation
 from src.draw_tracks import draw_tracks
+from src.add_fluorescence import add_fluorescence_to_tracks
 
 current_path = os.getcwd()
 octave.addpath(current_path + '/src/SpermTrackingProject')
 
 
 class TrackingParams:
+    """
+    Attributes:
+        video_file_tiff (str): Video sequence, in .tif format.
+        fps (int): Frame frequency.
+        px2um (float): scale of the image.
+        ROIx (int): Horizontal region of interest.
+        ROIy (int): Vertical region of interest.
+        video_file_mp4 (str): Input video sequence in .mp4 format.
+        detections_file (str): Output csv with estimated detections.
+        csv_tracks (str): Output csv with estimated tracks.
+        video_file_out (str): Video with estimated tracks drawn.
+        detection_algorithm (int): Detection algorithm.
+                                    0 = MatLab implementation
+                                    1 = Python implementation
+        reformat_detections_file (int): Depends on the detection algorithm implementation.
+                                            0 = MatLab implementation
+                                            1 = Python implementaadd_fluorescence_to_trackstion
+        mtt_algorithm (int): Multi-Target Tracking algorithm.
+                                1 = NN
+                                2 = GNN
+                                3 = PDAF
+                                4 = JPDAF
+                                5 = ENN-JPDAF
+                                6 = Iterated Multi-assignment
+        mtt_algorithm (int): Multi-Target Tracking algorithm.
+        PG (float): Prob. that a detected target falls in validation gate
+        PD (float): Prob. of detection
+        gv (float): Velocity Gate (um/s)
+
+    """
     def __init__(self, params):
 
         self.video_file_tiff = params['Input']['tif_video_input']
@@ -25,8 +56,8 @@ class TrackingParams:
         self.ROIy = int(params['Input']['ROIy'])
 
         self.video_file_mp4 = params['Output']['input_video']
-        self.csv_tracks = params['Output']['tracks_csv']
         self.detections_file = params['Output']['detections_csv']
+        self.csv_tracks = params['Output']['tracks_csv']
         self.video_file_out = params['Output']['tracks_video']
 
         self.detection_algorithm = int(params['Algorithm params']['detection_algorithm'])
@@ -37,6 +68,7 @@ class TrackingParams:
         self.PD = float(params['Algorithm params']['PD'])
         self.gv = float(params['Algorithm params']['gv'])
 
+        # opcionales del código de matlab
         self.save_movie = 0
         self.plot_results = 0
         self.snap_shot = 0
@@ -48,13 +80,15 @@ def tracking_urbano(params, save_vid):
     """
     Perform detection and tracking with the matlab urbano implementation.
     The parameters must be specified in the config_params file.
+    Args:
+        params (TrackingParams): Tracking configuration parameters.
+        save_vid (bool).
     """
 
     tiff = tifffile.TiffFile(params.video_file_tiff)
     sequence = tiff.asarray()
     mp4_writer(params.video_file_mp4, sequence, format='mp4', fps=params.fps)
     num_frames = sequence.shape[0]
-    print('Total frames', num_frames)
 
     # Perform detection step
     print('Running detection: ')
@@ -66,6 +100,7 @@ def tracking_urbano(params, save_vid):
     else:
         # Urbano matlab implementation for segmentation and detection
         octave.Detector(params.detections_file, params.video_file_mp4, num_frames)
+        detected = pd.read_csv(params.detections_file)
     end = time.time()
     print('Time to run detection: ', end - start)
 
@@ -84,14 +119,20 @@ def tracking_urbano(params, save_vid):
     tracks = pd.read_csv(params.csv_tracks)
     tracks.columns = ['id', 'x', 'y', 'frame']
     tracks['fluorescence'] = np.nan
-    tracks['frame'] = tracks['frame']
     tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
     tracks[['x', 'y']] = tracks[['x', 'y']] / params.px2um
-    tracks.to_csv(params.csv_tracks, index=False)
 
+    # fluorescence
+    print('Running fluorescence: ')
+    start = time.time()
+    tracks = add_fluorescence_to_tracks(detected, tracks)
+    end = time.time()
+    print('Time to run fluorescence: ', end - start)
+
+    tracks.to_csv(params.csv_tracks, index=False)
     if save_vid:
         tracks_array = tracks.to_numpy()
-        tracks_array[:, 3] = np.zeros(tracks_array.shape[0])
+        tracks_array[np.isnan(tracks_array)] = 0
         tracks_array = tracks_array[tracks_array[:, 4] < tracks_array[:, 4].max()]
         sequence_tracks = draw_tracks(sequence, tracks_array)
         mp4_writer(params.video_file_out, sequence_tracks, format='mp4', fps=params.fps)
@@ -114,5 +155,4 @@ if __name__ == '__main__':
     with open(args.config, 'r') as f:
         config = json.load(f)
     config_params = TrackingParams(config)
-    # print(config_params.__dict__)
     tracks_df = tracking_urbano(config_params, args.save_vid)
