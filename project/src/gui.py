@@ -8,16 +8,17 @@ def display_gui():
     # All the stuff inside your window.
     layout = [
         [sg.Text('          TDE')],
-        [sg.Text('Save video?:'), sg.InputText('1', key='save_vid')],
+        [sg.Text('Save video?:'), sg.Checkbox('check', default=True, key='save_vid')],
 
         [sg.Text('Input')],
-        [sg.Text('  tif_video_input'),  sg.FileBrowse('sequence.tif', key='tif_video_input')],
+        [sg.Text('  tif_video_input'),
+         sg.FileBrowse('-.tif', key='tif_video_input', initial_folder=current_path)],
         [sg.Text('  fps'), sg.InputText('15', key='fps')],
         [sg.Text('  px2um'), sg.InputText('0.1', key='px2um')],
         [sg.Text('  ROIx:'), sg.InputText('512', key='ROIx')],
         [sg.Text('  ROIy:'), sg.InputText('512', key='ROIy')],
 
-        [sg.Text('Output Folder'),  sg.FolderBrowse('folder', key='output')],
+        [sg.Text('Output Folder'),  sg.FolderBrowse('-', key='output', initial_folder=current_path)],
 
         [sg.Text('Algorithm params (advanced)')],
         [sg.Text('  detection_algorithm'), sg.InputText('1', key='detection_algorithm')],
