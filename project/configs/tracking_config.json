@@ -1,0 +1,31 @@
+{
+  "Input": {
+    "DATAFILE_PATH": "" ,
+    "reformat_dataFile": 1,
+    "VIDEOFILE_MP4_PATH": "" ,
+    "VIDEOFILE_TIFF_PATH": "",
+    "fps": "",
+    "px2um": 0.1,
+    "ROIx": 512,
+    "ROIy": 512
+  },
+
+  "Output": {
+    "CSV_TRACKS_PATH": "",
+    "VIDEOFILE_OUT_PATH": ""
+  },
+  "Algorithm params": {
+    "detectionAlgorithm": 1,
+    "mttAlgorithm": "",
+    "PG": 0.997,
+    "PD": 0.999,
+    "gv": 50
+  },
+  "Do": {
+    "plotResults": 0,
+    "saveMovie": 0,
+    "snapShot": 0,
+    "plotTrackResults": 0,
+    "analyzeMotility": 0
+  }
+}
