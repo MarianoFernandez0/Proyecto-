@@ -1,4 +1,3 @@
-import argparse
 import os
 import time
 import pandas as pd
@@ -10,6 +9,7 @@ from imageio import mimwrite as mp4_writer
 from src.evaluation import evaluation
 from src.draw_tracks import draw_tracks
 from src.add_fluorescence import add_fluorescence_to_tracks
+from gui import display_gui
 
 current_path = os.getcwd()
 octave.addpath(current_path + '/src/SpermTrackingProject')
@@ -48,24 +48,25 @@ class TrackingParams:
     """
     def __init__(self, params):
 
-        self.video_file_tiff = params['Input']['tif_video_input']
-        self.fps = int(params['Input']['fps'])
-        self.px2um = float(params['Input']['px2um'])
-        self.ROIx = int(params['Input']['ROIx'])
-        self.ROIy = int(params['Input']['ROIy'])
+        self.video_file_tiff = params['tif_video_input']
+        self.fps = int(params['fps'])
+        self.px2um = float(params['px2um'])
+        self.ROIx = int(params['ROIx'])
+        self.ROIy = int(params['ROIy'])
 
-        self.video_file_mp4 = params['Output']['input_video']
-        self.detections_file = params['Output']['detections_csv']
-        self.csv_tracks = params['Output']['tracks_csv']
-        self.video_file_out = params['Output']['tracks_video']
+        output_folder = params['output']
+        self.video_file_mp4 = os.path.join(output_folder, 'input.mp4')
+        self.detections_file = os.path.join(output_folder, 'detections.csv')
+        self.csv_tracks = os.path.join(output_folder, 'tracks.csv')
+        self.video_file_out = os.path.join(output_folder, 'tracks.mp4')
 
-        self.detection_algorithm = int(params['Algorithm params']['detection_algorithm'])
+        self.detection_algorithm = int(params['detection_algorithm'])
         self.reformat_detections_file = self.detection_algorithm
 
-        self.mtt_algorithm = int(params['Algorithm params']['mtt_algorithm'])
-        self.PG = float(params['Algorithm params']['PG'])
-        self.PD = float(params['Algorithm params']['PD'])
-        self.gv = float(params['Algorithm params']['gv'])
+        self.mtt_algorithm = int(params['mtt_algorithm'])
+        self.PG = float(params['PG'])
+        self.PD = float(params['PD'])
+        self.gv = float(params['gv'])
 
         # opcionales del código de matlab
         self.save_movie = 0
@@ -145,13 +146,8 @@ def tracking_urbano(params, save_vid):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Estimate tracks from video sequence.')
-    parser.add_argument('--config', default=os.path.join('configs', 'config.json'),
-                        type=str, help='Config file with the tracking parameters.')
-    parser.add_argument('--save_vid', action='store_true', help='Save video with drawn tracks.')
-    args = parser.parse_args()
-
-    with open(args.config, 'r') as f:
-        config = json.load(f)
-    config_params = TrackingParams(config)
-    tracks_df = tracking_urbano(config_params, args.save_vid)
+    event, values = display_gui()
+    if event != 'Cancel':
+        save_vid = values['save_vid'] == '1'
+        config_params = TrackingParams(values)
+        tracks_df = tracking_urbano(config_params, save_vid)
