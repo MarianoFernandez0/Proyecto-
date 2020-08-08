@@ -2,8 +2,9 @@ import pandas as pd
 from read_csv_file import read_csv_file
 from get_carac import get_carac
 import os
+import numpy as np
 
-def get_casa_measures(in_dir, out_dir, scale):
+def get_casa_measures(in_dir, out_dir, scale, fps):
 
     # leer archivo csv con los tracks
     out = pd.read_csv(in_dir)
@@ -15,10 +16,10 @@ def get_casa_measures(in_dir, out_dir, scale):
     out_rearranged["y"] = out_rearranged["y"] * scale
 
     # usar funcion read_csv para obtener las listas X, Y, T, TRACK_ID
-    X, Y, T, TRACK_ID = read_csv_file(out_rearranged)
+    X, Y, F, TRACK_ID = read_csv_file(out_rearranged)
 
     # calcular caracteristicas CASA
-    CARAC_WHO = get_carac(TRACK_ID, X, Y, T, min_detections=3)
+    CARAC_WHO = get_carac(TRACK_ID, X, Y, F, fps, min_detections=3)
 
     # guardar parametros
     param_who = pd.DataFrame(CARAC_WHO)
