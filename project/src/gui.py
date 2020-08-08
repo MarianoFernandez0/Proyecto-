@@ -7,25 +7,28 @@ def display_gui():
     sg.theme('Dark Blue 3')   # Add a touch of color
     # All the stuff inside your window.
     layout = [
-        [sg.Text('          TDE')],
-        [sg.Text('Save video?:'), sg.Checkbox('check', default=True, key='save_vid')],
-
+        [sg.Text('          TDE', font='Courier 25')],
+        [sg.Text('')],
+        [sg.Text('')],
+        [sg.Text('Save video?           '), sg.Checkbox(' check', default=True, key='save_vid')],
+        [sg.Text('')],
         [sg.Text('Input')],
-        [sg.Text('  tif_video_input'),
+        [sg.Text('  tif_video_input:    '),
          sg.FileBrowse('-.tif', key='tif_video_input', initial_folder=current_path)],
-        [sg.Text('  fps'), sg.InputText('15', key='fps')],
-        [sg.Text('  px2um'), sg.InputText('0.1', key='px2um')],
-        [sg.Text('  ROIx:'), sg.InputText('512', key='ROIx')],
-        [sg.Text('  ROIy:'), sg.InputText('512', key='ROIy')],
-
-        [sg.Text('Output Folder'),  sg.FolderBrowse('-', key='output', initial_folder=current_path)],
-
+        [sg.Text('  fps:                '), sg.InputText('15', key='fps')],
+        [sg.Text('  px2um:              '), sg.InputText('0.1', key='px2um')],
+        [sg.Text('  ROIx:               '), sg.InputText('512', key='ROIx')],
+        [sg.Text('  ROIy:               '), sg.InputText('512', key='ROIy')],
+        [sg.Text('')],
+        [sg.Text('Output Folder:        '),
+         sg.FolderBrowse('-', key='output', initial_folder=current_path)],
+        [sg.Text('')],
         [sg.Text('Algorithm params (advanced)')],
-        [sg.Text('  detection_algorithm'), sg.InputText('1', key='detection_algorithm')],
-        [sg.Text('  mtt_algorithm:'), sg.InputText('5', key='mtt_algorithm')],
-        [sg.Text('  PG:'), sg.InputText('0.997', key='PG')],
-        [sg.Text('  PD:'), sg.InputText('0.999', key='PD')],
-        [sg.Text('  gv:'), sg.InputText('50', key='gv')],
+        [sg.Text('  detection_algorithm:'), sg.InputText('1', key='detection_algorithm')],
+        [sg.Text('  mtt_algorithm:      '), sg.InputText('5', key='mtt_algorithm')],
+        [sg.Text('  PG:                 '), sg.InputText('0.997', key='PG')],
+        [sg.Text('  PD:                 '), sg.InputText('0.999', key='PD')],
+        [sg.Text('  gv:                 '), sg.InputText('50', key='gv')],
 
         [sg.Button('Ok'), sg.Button('Cancel')]
     ]
