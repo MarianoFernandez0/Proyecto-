@@ -148,6 +148,5 @@ def tracking_urbano(params, save_vid):
 if __name__ == '__main__':
     event, values = display_gui()
     if event != 'Cancel':
-        save_vid = values['save_vid'] == '1'
         config_params = TrackingParams(values)
-        tracks_df = tracking_urbano(config_params, save_vid)
+        tracks_df = tracking_urbano(config_params, values['save_vid'])

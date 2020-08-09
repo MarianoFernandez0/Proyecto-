@@ -12,7 +12,7 @@
     "detections_csv": "output/dataset_1(15Hz)_detections.csv",
     "tracks_csv": "output/dataset_1(15Hz)_tracks.csv",
     "tracks_video": "output/dataset_1(15Hz)_tracks.mp4"
-  },
+	  },
   "Algorithm params": {
     "detection_algorithm": 1,
     "mtt_algorithm": 5,
