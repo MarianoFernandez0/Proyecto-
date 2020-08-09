@@ -1,8 +1,9 @@
 import numpy as np
+import cv2
 
 
-def fluorescence(mask, gray_img, segmented_img):
-    '''
+def fluorescence(mask_in, gray_img, segmented_img):
+    """
     Indica los valores CTCF (Corrected Total Cell Fluorescence) y mean gray value (promedio del valor de gris) para una mascara dada, los cuales indican dos medidas de fluorescencia para las particulas detectadas
     Entradas:
         mask: imagen de tamaño NxM la cual muestra el area perteneciente a una particula con valor 1 y el resto 0 (atributo de la clase particle)
@@ -10,7 +11,8 @@ def fluorescence(mask, gray_img, segmented_img):
         segmented_img: imagen segmentada de tamaño NxM (salida de la función segmentation)
     Salida:
         CTCF y mean_gray_value - medidas de fluorescencia para la mascara dada
-    '''
+    """
+    mask = cv2.erode(mask_in, kernel=(3, 3), iterations=10)
     # contruccion imagen "fluorescent mask"
     fluorescent_mask = gray_img * mask
     integrated_density = np.sum(fluorescent_mask)
@@ -22,5 +24,4 @@ def fluorescence(mask, gray_img, segmented_img):
     background_img = gray_img * segmented_img_inv
     background_mean = np.sum(background_img) / (gray_img.shape[0] * gray_img.shape[1])
     CTCF = integrated_density - (area_in_pixels * background_mean)
-
     return CTCF, mean_gray_value

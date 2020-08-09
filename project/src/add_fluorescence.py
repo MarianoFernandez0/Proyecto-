@@ -25,8 +25,10 @@ def add_fluorescence_to_tracks(detections, tracks, output_dir="output", type_mea
     """
 
     os.makedirs(output_dir, exist_ok=True)
-    fluo_det_df = read_cvs(detections)
-    tracks_df = read_cvs(tracks)
+    # fluo_det_df = read_cvs(detections)
+    fluo_det_df = detections
+    # tracks_df = read_cvs(tracks)
+    tracks_df = tracks
     tracks_df = tracks_df.assign(fluorescence=np.nan)
 
     measures_types = {'mgv': 'mean_gray_value',
@@ -46,7 +48,8 @@ def add_fluorescence_to_tracks(detections, tracks, output_dir="output", type_mea
             for i, id in enumerate(ids_to_assig):
                 tracks_df.loc[np.logical_and(tracks_df['id'] == id[0], tracks_df['frame'] == frame), 'fluorescence'] = \
                 values_to_assig[i]
-    tracks_df.to_csv(output_dir + '/%s.csv' % (detections.split('/')[-1]).split(".")[0])
+    # tracks_df.to_csv(output_dir + '/%s.csv' % (detections.split('/')[-1]).split(".")[0])
+    return tracks_df
 
 
 # testing

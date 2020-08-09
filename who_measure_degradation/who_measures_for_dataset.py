@@ -5,6 +5,7 @@ if __name__ == "__main__":
     indir = 'results_with_fluorescence'
     out_base = 'measures'
     res = 1
+    fps = 0
     datasets = [directory for directory in os.listdir(indir) if os.path.isdir(os.path.join(indir, directory))]
     for dataset in datasets:
         out_dir = os.path.join(out_base, dataset)
@@ -13,6 +14,12 @@ if __name__ == "__main__":
         result_files.sort()
         for result in result_files:
             print(dataset + " " + result)
+            fps = float((result.split("Hz")[0]).split("_")[-1])
             track_path = os.path.join(tracking_path, result)
+<<<<<<< HEAD
             get_casa_measures(track_path, out_dir, res)
         print()
+=======
+            get_casa_measures(track_path, out_dir, res, fps)
+        print()
+>>>>>>> ed8df5fda5ddc430739921e128b2e9fec770e9a3

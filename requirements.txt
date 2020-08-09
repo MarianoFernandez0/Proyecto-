@@ -9,3 +9,4 @@ pandas
 modest
 imageio-ffmpeg
 oct2py
+pysimplegui
