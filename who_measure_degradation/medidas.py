@@ -14,8 +14,8 @@ def avgPath(X, Y):
             xvals = xvals[1:-1]  # saco el primer y ultimo lugar
             yvals = yvals[1:-1]
         for j in range(len(xvals)):
-            xPath.append(
-                xvals[j])  # obtengo caminos con muchos puntos intermedios (5 entre cada dos puntos originales)
+            # obtengo caminos con muchos puntos intermedios (5 entre cada dos puntos originales)
+            xPath.append(xvals[j])
             yPath.append(yvals[j])
 
     windowSize = NumberNewPoints * 3
