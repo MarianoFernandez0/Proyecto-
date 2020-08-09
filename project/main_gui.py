@@ -9,7 +9,7 @@ from imageio import mimwrite as mp4_writer
 from src.evaluation import evaluation
 from src.draw_tracks import draw_tracks
 from src.add_fluorescence import add_fluorescence_to_tracks
-from gui import display_gui
+from src.gui import display_gui
 
 current_path = os.getcwd()
 octave.addpath(current_path + '/src/SpermTrackingProject')
@@ -148,6 +148,5 @@ def tracking_urbano(params, save_vid):
 if __name__ == '__main__':
     event, values = display_gui()
     if event != 'Cancel':
-        save_vid = values['save_vid'] == '1'
         config_params = TrackingParams(values)
-        tracks_df = tracking_urbano(config_params, save_vid)
+        tracks_df = tracking_urbano(config_params, values['save_vid'])
