@@ -1,6 +1,8 @@
 import PySimpleGUI as sg
 import os
 current_path = os.getcwd()
+os.makedirs(os.path.join(current_path, 'input'), exist_ok=True)
+os.makedirs(os.path.join(current_path, 'output'), exist_ok=True)
 
 
 def display_gui():
@@ -14,14 +16,14 @@ def display_gui():
         [sg.Text('')],
         [sg.Text('Input')],
         [sg.Text('  tif_video_input:    '),
-         sg.FileBrowse('-.tif', key='tif_video_input', initial_folder=current_path)],
+         sg.FileBrowse('-.tif', key='tif_video_input', initial_folder=os.path.join(current_path, 'input'))],
         [sg.Text('  fps:                '), sg.InputText('15', key='fps')],
         [sg.Text('  px2um:              '), sg.InputText('0.1', key='px2um')],
         [sg.Text('  ROIx:               '), sg.InputText('512', key='ROIx')],
         [sg.Text('  ROIy:               '), sg.InputText('512', key='ROIy')],
         [sg.Text('')],
         [sg.Text('Output Folder:        '),
-         sg.FolderBrowse('-', key='output', initial_folder=current_path)],
+         sg.FolderBrowse('-', key='output', initial_folder=os.path.join(current_path, 'output'))],
         [sg.Text('')],
         [sg.Text('Algorithm params (advanced)')],
         [sg.Text('  detection_algorithm:'), sg.InputText('1', key='detection_algorithm')],

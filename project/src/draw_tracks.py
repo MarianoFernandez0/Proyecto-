@@ -3,7 +3,7 @@ import numpy as np
 
 
 def draw_tracks(sequence: np.array, tracks_data: np.array) -> np.array:
-    '''
+    """
     Function that draws the tracks given the sequence and the array of tracks
 
     Input:
@@ -22,7 +22,7 @@ def draw_tracks(sequence: np.array, tracks_data: np.array) -> np.array:
 
     Ouput:
         - seq_out: array of shape (N,H,W,C)
-    '''
+    """
     frames, H, W = sequence.shape[0:3]
     seq_out = sequence.copy()
 
