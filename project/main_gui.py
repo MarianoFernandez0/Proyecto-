@@ -1,15 +1,18 @@
+import json
 import os
 import time
-import pandas as pd
-import numpy as np
-import tifffile
-from oct2py import octave
-from imageio import mimwrite as mp4_writer
-from src.evaluation import evaluation
-from src.draw_tracks import draw_tracks
-from src.add_fluorescence import add_fluorescence_to_tracks
-from src.gui import display_gui
 
+import numpy as np
+import pandas as pd
+import tifffile
+from imageio import mimwrite as mp4_writer
+from oct2py import octave
+
+from src.add_fluorescence import add_fluorescence_to_tracks
+from src.draw_tracks import draw_tracks
+from src.evaluation import evaluation
+import PySimpleGUI as sg
+from src.gui import display_gui
 
 current_path = os.getcwd()
 octave.addpath(current_path + '/src/SpermTrackingProject')
@@ -46,8 +49,8 @@ class TrackingParams:
         gv (float): Velocity Gate (um/s)
 
     """
-    def __init__(self, params):
 
+    def __init__(self, params):
         self.video_file_tiff = params['tif_video_input']
         self.fps = int(params['fps'])
         self.px2um = float(params['px2um'])
@@ -74,6 +77,10 @@ class TrackingParams:
         self.snap_shot = 0
         self.plot_track_results = 0
         self.analyze_motility = 0
+
+        congif_log = os.path.join(output_folder, 'config_log.json')
+        with open(congif_log, 'w') as f:
+            json.dump(self.__dict__, f, indent=4)
 
 
 def tracking_urbano(params, save_vid):
@@ -147,6 +154,6 @@ def tracking_urbano(params, save_vid):
 
 if __name__ == '__main__':
     event, values = display_gui()
-    if event != 'Cancel':
+    if event not in (sg.WIN_CLOSED, 'Cancel'):
         config_params = TrackingParams(values)
         tracks_df = tracking_urbano(config_params, values['save_vid'])
