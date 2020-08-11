@@ -1,37 +1,29 @@
 import numpy as np
 import math
-
-
+from scipy.spatial.distance import cdist
+from itertools import groupby
 def avgPath(X, Y):
-    NumberNewPoints = 5
+    NumberNewPoints = int(np.round(len(X)/5))
     xPath = []
     yPath = []
 
     for i in range(len(X) - 1):
         xvals = np.linspace(X[i], X[i + 1], NumberNewPoints + 2)  # crear 5 puntos en el medio (7 en total)
         yvals = np.linspace(Y[i], Y[i + 1], NumberNewPoints + 2)
-        if i != 0:
-            xvals = xvals[1:-1]  # saco el primer y ultimo lugar
-            yvals = yvals[1:-1]
+
         for j in range(len(xvals)):
             # obtengo caminos con muchos puntos intermedios (5 entre cada dos puntos originales)
             xPath.append(xvals[j])
             yPath.append(yvals[j])
 
-    windowSize = NumberNewPoints * 3
-    xPathSmooth = []  # se promedia con una ventana - al final se obtiene un camino con #windowSize puntos menos
-    yPathSmooth = []  # la ventana movil se hace desde 0+windowsize/2 hasta fin-windowsize/2
-    for i in range(math.trunc(windowSize / 2), int(len(xPath) - math.ceil(windowSize / 2))):
-        xPathSmooth.append(np.mean(xPath[int(i - math.trunc(windowSize / 2)):int(i + math.ceil(windowSize / 2))]))
-        yPathSmooth.append(np.mean(yPath[int(i - math.trunc(windowSize / 2)):int(i + math.ceil(windowSize / 2))]))
+    windowSize = NumberNewPoints * 5
+    xPathSmooth = [np.mean(xPath[i:i + windowSize]) for i in range(0, len(xPath) - windowSize)]
+    yPathSmooth = [np.mean(yPath[i:i + windowSize]) for i in range(0, len(yPath) - windowSize)]
 
-        # uno el primer y ultimo punto con el avg path asi me queda una avg path completo
-
-    xvals1 = np.linspace(X[0], xPathSmooth[0], math.ceil(windowSize / 2) + 2)  # se completa la parte del smoothpath que
-    yvals1 = np.linspace(Y[0], yPathSmooth[0],
-                         math.ceil(windowSize / 2) + 2)  # falta entre el primer valor y el primero
-    xvalsEnd = np.linspace(xPathSmooth[-1], X[-1], math.ceil(windowSize / 2) + 2)  # del array smooth
-    yvalsEnd = np.linspace(yPathSmooth[-1], Y[-1], math.ceil(windowSize / 2) + 2)
+    xvals1 = np.linspace(X[0], xPathSmooth[0], windowSize)  # se completa la parte del smoothpath que
+    yvals1 = np.linspace(Y[0], yPathSmooth[0], windowSize)  # falta entre el primer valor y el primero
+    xvalsEnd = np.linspace(xPathSmooth[-1], X[-1], windowSize)  # del array smooth
+    yvalsEnd = np.linspace(yPathSmooth[-1], Y[-1], windowSize)
     for i in range(len(xvals1) - 1):
         xPathSmooth = [xvals1[-i - 2]] + xPathSmooth + [xvalsEnd[i + 1]]
         yPathSmooth = [yvals1[-i - 2]] + yPathSmooth + [yvalsEnd[i + 1]]
@@ -59,13 +51,11 @@ def VCL(X, Y, T):
 def VAP(X, Y, avgPathX, avgPathY, T):
     vel = []
     minIndexOld = 0
+    xyavgPath = [(avgPathX, avgPathY) for avgPathX, avgPathY in zip(avgPathX, avgPathY)]
     for j in range(1, len(X)):
-        minDist = float('Inf')
-        for i in range(len(avgPathX)):
-            dist = math.sqrt((X[j] - avgPathX[i]) ** 2 + (Y[j] - avgPathY[i]) ** 2)
-            if dist < minDist:
-                minIndex = i
-                minDist = dist
+        # minDist = float('Inf')
+        dists = cdist(np.array([[X[j], Y[j]]]), np.array(xyavgPath))
+        minIndex = np.argmin(dists)
         dist = 0
         if minIndex >= minIndexOld:
             for i in range(minIndexOld, minIndex):
@@ -101,6 +91,7 @@ def LIN(X, Y, T):
 
 
 def WOB(X, Y, avgPathX, avgPathY, T):
+
     vap_mean, vap_std = VAP(X, Y, avgPathX, avgPathY, T)
     wob = vap_mean / VCL(X, Y, T)
     return wob
@@ -114,13 +105,13 @@ def STR(X, Y, avgPathX, avgPathY, T):
 
 def BCF(X, Y, avgPathX, avgPathY, T):
     bcf = []
+    minIndexOld = 0
+    xyavgPath = [(avgPathX, avgPathY) for avgPathX, avgPathY in zip(avgPathX, avgPathY)]
+
     for j in range(1, len(X)):
-        minDist = float('Inf')
-        for i in range(len(avgPathX)):
-            dist = math.sqrt((X[j] - avgPathX[i]) ** 2 + (Y[j] - avgPathY[i]) ** 2)
-            if dist < minDist:
-                minIndexNew = i
-                minDist = dist
+        # minDist = float('Inf')
+        dists = cdist(np.array([[X[j], Y[j]]]), np.array(xyavgPath))
+        minIndexNew = np.argmin(dists)
         if j > 1:
             Ax = avgPathX[minIndexOld]
             Ay = avgPathY[minIndexOld]
