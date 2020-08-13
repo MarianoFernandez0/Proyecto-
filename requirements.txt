@@ -10,3 +10,4 @@ modest
 imageio-ffmpeg
 oct2py
 pysimplegui
+pyinstaller
