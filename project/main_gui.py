@@ -6,16 +6,35 @@ import numpy as np
 import pandas as pd
 import tifffile
 from imageio import mimwrite as mp4_writer
-from oct2py import octave
 
 from src.add_fluorescence import add_fluorescence_to_tracks
 from src.draw_tracks import draw_tracks
 from src.evaluation import evaluation
 import PySimpleGUI as sg
 from src.gui import display_gui
+import sys
+
+if getattr(sys, 'frozen', False):
+    application_path = sys._MEIPASS
+    os.environ["OCTAVE_KERNEL_JSON"] = os.path.join(application_path, 'oct2py/kernel.json')
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+from oct2py import octave
+
 
 current_path = os.getcwd()
-octave.addpath(current_path + '/src/SpermTrackingProject')
+os.makedirs(os.path.join(current_path, 'tmp'), exist_ok=True)
+octave.temp_dir = os.path.join(current_path, 'tmp')
+
+# octave.addpath('/home/mariano/Projects/TDE/git/Proyecto-/project/oct2py')
+# octave.addpath('/home/mariano/Projects/TDE/git/Proyecto-/project/src/SpermTrackingProject')
+# print('------------------------------------------')
+# print('current_path: ', current_path)
+# print('------------------------------------------')
+# print('application_path++: ', os.path.join(application_path, 'src/SpermTrackingProject'))
+# print('listdir: ', os.listdir(os.path.join(application_path, 'src/SpermTrackingProject')))
+os.makedirs('tmp', exist_ok=True)
+octave.addpath(os.path.join(application_path, 'src/SpermTrackingProject'))
 
 
 class TrackingParams:
