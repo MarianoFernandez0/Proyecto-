@@ -4,12 +4,8 @@ from get_carac import get_carac
 import os
 import numpy as np
 
-<<<<<<< HEAD
-=======
-def get_casa_measures(in_dir, out_dir, scale, fps):
->>>>>>> ed8df5fda5ddc430739921e128b2e9fec770e9a3
 
-def get_casa_measures(in_dir, out_dir, scale):
+def get_casa_measures(in_dir, out_dir, scale, fps):
     # leer archivo csv con los tracks
     out = pd.read_csv(in_dir)
     # reordenar dataframe

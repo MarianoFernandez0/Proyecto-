@@ -39,8 +39,10 @@ def add_fluorescence_to_tracks(detections, tracks, output_dir="output", type_mea
         if not tracks_in_frame.empty:
             detections_in_frame = fluo_det_df[fluo_det_df['frame'] == frame]
 
+            # cost_matrix = build_cost_matrix(tracks_in_frame[['x', 'y']].to_numpy(),
+            #                                 detections_in_frame[['x', 'y']].to_numpy())
             cost_matrix = build_cost_matrix(tracks_in_frame[['x', 'y']].to_numpy(),
-                                            detections_in_frame[['x', 'y']].to_numpy())
+                                            detections_in_frame[['y', 'x']].to_numpy())
             assigs = linear_sum_assignment(cost_matrix)
 
             ids_to_assig = (tracks_in_frame[['id']].to_numpy())[assigs[0]]

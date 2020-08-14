@@ -12,7 +12,8 @@ def fluorescence(mask_in, gray_img, segmented_img):
     Salida:
         CTCF y mean_gray_value - medidas de fluorescencia para la mascara dada
     """
-    mask = cv2.erode(mask_in, kernel=(3, 3), iterations=10)
+    # mask = cv2.erode(mask_in, kernel=(3, 3), iterations=10)
+    mask = mask_in
     # contruccion imagen "fluorescent mask"
     fluorescent_mask = gray_img * mask
     integrated_density = np.sum(fluorescent_mask)
