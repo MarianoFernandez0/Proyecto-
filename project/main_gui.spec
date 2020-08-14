@@ -4,8 +4,10 @@ block_cipher = None
 
 octave_scripts = [(os.path.join('src/SpermTrackingProject', s), 'src/SpermTrackingProject')
                   for s in os.listdir('src/SpermTrackingProject')]
-octave_kernel = [('/home/mariano/Projects/TDE/git/Proyecto-/project/oct2py/kernel.json', 'oct2py')]
-data = octave_scripts + octave_kernel
+octave_kernel = [('/home/mariano/Projects/TDE/git/Proyecto-/project/src/oct2py/kernel.json', 'octave_kernel')]
+oct2py_data = [('/home/mariano/Projects/TDE/git/Proyecto-/project/src/oct2py/_pyeval.m', 'oct2py')]
+
+data = octave_scripts + octave_kernel + oct2py_data
 
 a = Analysis(['main_gui.py'],
              pathex=['/home/mariano/Projects/TDE/git/Proyecto-/project'],

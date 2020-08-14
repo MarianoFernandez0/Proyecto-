@@ -16,24 +16,15 @@ import sys
 
 if getattr(sys, 'frozen', False):
     application_path = sys._MEIPASS
-    os.environ["OCTAVE_KERNEL_JSON"] = os.path.join(application_path, 'oct2py/kernel.json')
+    os.environ["OCTAVE_KERNEL_JSON"] = os.path.join(application_path, 'octave_kernel/kernel.json')
 else:
     application_path = os.path.dirname(os.path.abspath(__file__))
-from oct2py import octave
+import oct2py
 
+os.makedirs(os.path.join(application_path, 'tmp'), exist_ok=True)
+octave = oct2py.Oct2Py(temp_dir=os.path.join(application_path, 'tmp'))
 
-current_path = os.getcwd()
-os.makedirs(os.path.join(current_path, 'tmp'), exist_ok=True)
-octave.temp_dir = os.path.join(current_path, 'tmp')
-
-# octave.addpath('/home/mariano/Projects/TDE/git/Proyecto-/project/oct2py')
-# octave.addpath('/home/mariano/Projects/TDE/git/Proyecto-/project/src/SpermTrackingProject')
-# print('------------------------------------------')
-# print('current_path: ', current_path)
-# print('------------------------------------------')
-# print('application_path++: ', os.path.join(application_path, 'src/SpermTrackingProject'))
-# print('listdir: ', os.listdir(os.path.join(application_path, 'src/SpermTrackingProject')))
-os.makedirs('tmp', exist_ok=True)
+octave.addpath(os.path.join(application_path, 'oct2py'))
 octave.addpath(os.path.join(application_path, 'src/SpermTrackingProject'))
 
 
