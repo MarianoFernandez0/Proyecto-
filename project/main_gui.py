@@ -6,16 +6,26 @@ import numpy as np
 import pandas as pd
 import tifffile
 from imageio import mimwrite as mp4_writer
-from oct2py import octave
 
 from src.add_fluorescence import add_fluorescence_to_tracks
 from src.draw_tracks import draw_tracks
 from src.evaluation import evaluation
 import PySimpleGUI as sg
-from src.gui import display_gui
+from src.gui import display_input_gui, display_results_gui
+import sys
 
-current_path = os.getcwd()
-octave.addpath(current_path + '/src/SpermTrackingProject')
+if getattr(sys, 'frozen', False):
+    application_path = sys._MEIPASS
+    os.environ["OCTAVE_KERNEL_JSON"] = os.path.join(application_path, 'octave_kernel/kernel.json')
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+import oct2py
+
+os.makedirs(os.path.join(application_path, 'tmp'), exist_ok=True)
+octave = oct2py.Oct2Py(temp_dir=os.path.join(application_path, 'tmp'))
+
+octave.addpath(os.path.join(application_path, 'oct2py'))
+octave.addpath(os.path.join(application_path, 'src/SpermTrackingProject'))
 
 
 class TrackingParams:
@@ -153,7 +163,8 @@ def tracking_urbano(params, save_vid):
 
 
 if __name__ == '__main__':
-    event, values = display_gui()
-    if event not in (sg.WIN_CLOSED, 'Cancel'):
+    event, values = display_input_gui()
+    if event not in (sg.WIN_CLOSED, 'Cancel', 'Cancelar'):
         config_params = TrackingParams(values)
         tracks_df = tracking_urbano(config_params, values['save_vid'])
+        display_results_gui(tracks_df)
