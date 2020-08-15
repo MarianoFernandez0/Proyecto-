@@ -11,7 +11,7 @@ from src.add_fluorescence import add_fluorescence_to_tracks
 from src.draw_tracks import draw_tracks
 from src.evaluation import evaluation
 import PySimpleGUI as sg
-from src.gui import display_gui
+from src.gui import display_input_gui, display_results_gui
 import sys
 
 if getattr(sys, 'frozen', False):
@@ -163,7 +163,8 @@ def tracking_urbano(params, save_vid):
 
 
 if __name__ == '__main__':
-    event, values = display_gui()
-    if event not in (sg.WIN_CLOSED, 'Cancel'):
+    event, values = display_input_gui()
+    if event not in (sg.WIN_CLOSED, 'Cancel', 'Cancelar'):
         config_params = TrackingParams(values)
         tracks_df = tracking_urbano(config_params, values['save_vid'])
+        display_results_gui(tracks_df)
