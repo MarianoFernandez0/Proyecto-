@@ -16,7 +16,7 @@ def get_carac(TRACK_ID, X, Y, F, fps, min_detections=3):
         T = [float(f) / fps for f in F[i]]
 
         if (np.shape(X)[0]) > min_detections:
-            avgPathX, avgPathY = avgPath(X, Y)
+            avgPathX, avgPathY = avgPath(X, Y, fps)
             vcl = VCL(X, Y, T)
             vsl = VSL(X, Y, T)
             vap_mean, vap_std = VAP(X, Y, avgPathX, avgPathY, T)

@@ -2,8 +2,9 @@ import numpy as np
 import math
 from scipy.spatial.distance import cdist
 from itertools import groupby
-def avgPath(X, Y):
-    NumberNewPoints = int(np.round(len(X)/5))
+
+def avgPath(X, Y, fps):
+    NumberNewPoints = 5 if fps < 30 else 7
     xPath = []
     yPath = []
 
@@ -16,7 +17,7 @@ def avgPath(X, Y):
             xPath.append(xvals[j])
             yPath.append(yvals[j])
 
-    windowSize = NumberNewPoints * 5
+    windowSize = NumberNewPoints * 3
     xPathSmooth = [np.mean(xPath[i:i + windowSize]) for i in range(0, len(xPath) - windowSize)]
     yPathSmooth = [np.mean(yPath[i:i + windowSize]) for i in range(0, len(yPath) - windowSize)]
 
@@ -44,7 +45,7 @@ def VCL(X, Y, T):
         dist = math.sqrt((X[i + 1] - X[i]) ** 2 + (Y[i + 1] - Y[i]) ** 2)
         time = T[i + 1] - T[i]
         vel.append(dist / time)
-    vcl = np.mean(vel)
+    vcl = np.median(vel)
     return vcl
 
 
@@ -66,7 +67,7 @@ def VAP(X, Y, avgPathX, avgPathY, T):
         minIndexOld = minIndex
         time = T[j] - T[j - 1]
         vel.append(dist / time)
-    vap_mean = np.mean(vel)
+    vap_mean = np.median(vel)
     vap_std = np.std(vel)
     return vap_mean, vap_std
 
@@ -80,7 +81,7 @@ def ALH(X, Y, avgPathX, avgPathY):  # promedio del la distancia entre el camino 
             if dist < minDist:
                 minDist = dist
         alh.append(minDist)
-    alh_mean = np.mean(alh)
+    alh_mean = np.median(alh)
     alh_std = np.std(alh)
     return alh_mean, alh_std
 
@@ -124,8 +125,17 @@ def BCF(X, Y, avgPathX, avgPathY, T):
             else:
                 bcf.append(0)
         minIndexOld = minIndexNew
-    bcf_mean = np.mean(bcf)
-    bcf_std = np.std(bcf)
+    time_unit = T[1] - T[0]
+    freqs = []
+    start = -1
+    for i in range(1, len(bcf)):
+        if bcf[i] < bcf[i-1] and start == -1:
+            start = i
+        if bcf[i] > bcf[i-1] and start != -1:
+            freqs.append(1/((i-start)*time_unit))
+            start = -1
+    bcf_mean = np.median(freqs)
+    bcf_std = np.std(freqs)
     return bcf_mean, bcf_std
 
 
@@ -155,4 +165,4 @@ def MAD(X, Y):
         else:
             angle2 = -math.pi / 2
         mad.append(abs(angle1 - angle2))
-    return np.mean(mad)
+    return np.median(mad)
