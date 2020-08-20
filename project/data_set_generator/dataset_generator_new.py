@@ -119,10 +119,14 @@ def make_sequence(sequence_parameters, all_population):
         # Initial speed
         v = np.random.normal(mean_velocity, std_velocity, particles)
         # Initial intensity vector for every particle
-        if mov_type != 'd':
-            intensity[:, 0] = (np.uint8((v-np.min(v))/(np.max(v) - np.min(v))*255)).clip(50, 255)
+        if mov_type == 'a':
+            intensity[:, 0] = (np.uint8((v-np.min(v))/(np.max(v) - np.min(v))*255)).clip(195, 255)
+        elif mov_type == 'b':
+            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(100, 200)
+        elif mov_type == 'c':
+            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(100, 80)
         else:
-            intensity[:, 0] = 50
+            intensity[:, 0] = 80
 
         head_x = head_y = head_angle = np.zeros(particles)
         particles_out = np.zeros(particles)

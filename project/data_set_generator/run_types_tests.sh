@@ -8,7 +8,7 @@ do
 	echo "Running $file configuration"
 	python main_dataset.py "$file"
 	mkdir dataset_"$iteration"
-	mv -i datasets dataset_"$iteration"/datasets
+	mv -i datasets dataset_"$iteration"
 	echo $iteration
 	iteration=$((iteration + 1)) 
 	mkdir datasets

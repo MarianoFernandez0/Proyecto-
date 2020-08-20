@@ -1,6 +1,6 @@
 [Output path]
-	PATH_OUTPUT_DATA_CSV : dataset1
-	PATH_OUTPUT_DATA_SEQ : dataset1
+	PATH_OUTPUT_DATA_CSV :
+	PATH_OUTPUT_DATA_SEQ :
 
 [Sequence parameters]
 	#Duration of the observation in seconds	
@@ -11,7 +11,7 @@
 	std_blur : 3
 	noise_type : gaussian
 	noise_params : 0.08
-	low_limit : 10
+	low_limit : 40
 	file_format : tif mp4
 	file_name : dataset_1
 	#pixels per um
