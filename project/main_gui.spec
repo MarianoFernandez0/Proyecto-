@@ -11,6 +11,7 @@ data = octave_scripts + octave_kernel + oct2py_data
 
 a = Analysis(['main_gui.py'],
              pathex=['/home/lu/Desktop/project/Proyecto-/project'],
+
              binaries=[],
              datas=data,
              hiddenimports=[],

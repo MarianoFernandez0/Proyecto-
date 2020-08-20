@@ -45,7 +45,7 @@ def VCL(X, Y, T):
         dist = math.sqrt((X[i + 1] - X[i]) ** 2 + (Y[i + 1] - Y[i]) ** 2)
         time = T[i + 1] - T[i]
         vel.append(dist / time)
-    vcl = np.median(vel)
+    vcl = np.mean(vel)
     return vcl
 
 
@@ -67,7 +67,7 @@ def VAP(X, Y, avgPathX, avgPathY, T):
         minIndexOld = minIndex
         time = T[j] - T[j - 1]
         vel.append(dist / time)
-    vap_mean = np.median(vel)
+    vap_mean = np.mean(vel)
     vap_std = np.std(vel)
     return vap_mean, vap_std
 
@@ -81,7 +81,7 @@ def ALH(X, Y, avgPathX, avgPathY):  # promedio del la distancia entre el camino 
             if dist < minDist:
                 minDist = dist
         alh.append(minDist)
-    alh_mean = np.median(alh)
+    alh_mean = np.mean(alh)
     alh_std = np.std(alh)
     return alh_mean, alh_std
 
@@ -92,7 +92,6 @@ def LIN(X, Y, T):
 
 
 def WOB(X, Y, avgPathX, avgPathY, T):
-
     vap_mean, vap_std = VAP(X, Y, avgPathX, avgPathY, T)
     wob = vap_mean / VCL(X, Y, T)
     return wob
@@ -134,7 +133,7 @@ def BCF(X, Y, avgPathX, avgPathY, T):
         if bcf[i] > bcf[i-1] and start != -1:
             freqs.append(1/((i-start)*time_unit))
             start = -1
-    bcf_mean = np.median(freqs)
+    bcf_mean = np.mean(freqs)
     bcf_std = np.std(freqs)
     return bcf_mean, bcf_std
 
@@ -165,4 +164,4 @@ def MAD(X, Y):
         else:
             angle2 = -math.pi / 2
         mad.append(abs(angle1 - angle2))
-    return np.median(mad)
+    return np.mean(mad)

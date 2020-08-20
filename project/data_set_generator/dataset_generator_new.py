@@ -10,7 +10,7 @@ from imageio import imwrite
 import numpy as np
 import pandas as pd
 import configparser
-from pathlib import Path
+import os
 import time
 
 
@@ -63,170 +63,188 @@ def make_sequence(sequence_parameters, all_population):
     if not path_seq_out:
         path_seq_out = HOUSING_PATH_SEQ_OUT
 
-    path_data_out = Path(path_data_out)
-    path_seq_out = Path(path_seq_out)
+    os.makedirs(path_data_out, exist_ok=True)
+    os.makedirs(path_seq_out, exist_ok=True)
 
-    Path.mkdir(path_data_out, exist_ok=True, parents=True)
-    Path.mkdir(path_seq_out, exist_ok=True, parents=True)
+    if seed < 0: seed = int(np.random.uniform(0, 2**32-1))
 
-    if seed < 0:
-        seed = int(np.random.uniform(0, 2**32-1))
+    frame_rate = np.max(frame_rates)
+    frame_rates = np.sort(frame_rates).tolist()
+    frame_rates = frame_rates[:-1]
+    np.random.seed(seed)
+    print('Making sequence for %dHz' % frame_rate)
+    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+    next_id = 0
+    frames = int(np.round(duration * frame_rate, 0))
+    time_step = 1 / frame_rate
+    if not rgb:
+        final_sequence = np.zeros((frames, M, N))
+    else:
+        final_sequence = np.zeros((frames, M, N, 3))
 
-    for frame_rate in frame_rates:
-        np.random.seed(seed)
-        print('Making sequence for %dHz' % frame_rate)
-        df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
-        next_id = 0
-        frames = int(np.round(duration * frame_rate, 0))
-        time_step = 1 / frame_rate
-        if not rgb:
-            final_sequence = np.zeros((frames, M, N))
+    final_sequence_segmented = np.zeros((frames, M, N))
+    it = 0
+    tot_it = len(all_population) * frames
+
+    for population in all_population:
+        particles = population['particles']
+        color = population['color']
+        mean, cov_mean = population['mean'] * resolution, population['cov_mean'] * resolution
+        mean_velocity, std_velocity = population['vap'] * resolution, population['vap_deviation'] * resolution
+        Tp = population['Tp']
+        head_displ = population['head_displ']
+        std_depth, mov_type = population['std_depth'], population['movement_type']
+        ALH_mean, ALH_std = population['ALH_mean'] * resolution, population['ALH_std'] * resolution,
+        BCP_mean, BCP_std = population['BCP_mean'], population['BCP_std']
+        if particles == 0 : continue
+        x = np.zeros([particles, frames])
+        y = np.zeros([particles, frames])
+        intensity = np.zeros([particles, frames])
+
+        id_particles = np.arange(next_id, next_id + particles)
+        # Initial positions of the particles in a square of (3N, 3M)
+        inf_x, sup_x, inf_y, sup_y = -N, 2 * N, -M, 2 * M
+        x[:, 0] = np.random.uniform(inf_x, sup_x, particles)
+        y[:, 0] = np.random.uniform(inf_y, sup_y, particles)
+        # Size of the particles population
+        dimensions = np.random.multivariate_normal(mean, cov_mean, particles)
+        a = np.min(dimensions, axis=1)
+        l = np.max(dimensions, axis=1)
+
+        # Initial angle
+        theta = np.random.uniform(-180, 180, particles)
+        (BCP_freq, BCP_fase) = (np.random.normal(BCP_mean, BCP_std, particles),
+                                np.random.uniform(-np.pi, np.pi, particles))
+
+        # Initial speed
+        v = np.random.normal(mean_velocity, std_velocity, particles)
+        # Initial intensity vector for every particle
+        if mov_type != 'd':
+            intensity[:, 0] = (np.uint8((v-np.min(v))/(np.max(v) - np.min(v))*255)).clip(50, 255)
         else:
-            final_sequence = np.zeros((frames, M, N, 3))
+            intensity[:, 0] = 50
 
-        final_sequence_segmented = np.zeros((frames, M, N))
-        it = 0
-        tot_it = len(all_population) * frames
-
-        for population in all_population:
-            particles = population['particles']
-            color = population['color']
-            mean, cov_mean = population['mean'] * resolution, population['cov_mean'] * resolution
-            mean_velocity, std_velocity = population['vap'] * resolution, population['vap_deviation'] * resolution
-            Tp = population['Tp']
-            head_displ = population['head_displ']
-            std_depth, mov_type = population['std_depth'], population['movement_type']
-            ALH_mean, ALH_std = population['ALH_mean'] * resolution, population['ALH_std'] * resolution,
-            BCP_mean, BCP_std = population['BCP_mean'], population['BCP_std']
-            if particles == 0 : continue
-            x = np.zeros([particles, frames])
-            y = np.zeros([particles, frames])
-            intensity = np.zeros([particles, frames])
-            # Initial intensity vector for every particle
-            intensity[:, 0] = np.random.uniform(150, 250, particles)
-            id_particles = np.arange(next_id, next_id + particles)
-            # Initial positions of the particles in a square of (3N, 3M)
-            inf_x, sup_x, inf_y, sup_y = -N, 2 * N, -M, 2 * M
-            x[:, 0] = np.random.uniform(inf_x, sup_x, particles)
-            y[:, 0] = np.random.uniform(inf_y, sup_y, particles)
-            # Size of the particles population
-            dimensions = np.random.multivariate_normal(mean, cov_mean, particles)
-            a = np.min(dimensions, axis=1)
-            l = np.max(dimensions, axis=1)
-
-            # Initial angle
-            theta = np.random.uniform(-180, 180, particles)
-            (BCP_freq, BCP_fase) = (np.random.normal(BCP_mean, BCP_std, particles),
-                                    np.random.uniform(-np.pi, np.pi, particles))
-
-            # Initial speed
-            v = np.random.normal(mean_velocity, std_velocity, particles)
-
-            head_x = head_y = head_angle = np.zeros(particles)
-            particles_out = np.zeros(particles)
-            # Each frame is created
-            for f in range(frames):
-                # Progress bar printing
-                it += 1
-                printProgressBar(it, tot_it)
-                if f > 0:
-                    x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta)) * time_step
-                    y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta)) * time_step
-
-                    # Fuera del campo de observación, sentido opuesto
-                    indexes = np.logical_or(
-                        np.logical_or(np.logical_or(x[:, f] < inf_x, x[:, f] > sup_x), y[:, f] < inf_y),
-                        y[:, f] > sup_y)
-                    theta[indexes] *= -1
-                    if head_displ and mov_type != "d":
-                        head_pos = np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
-                        ALH = np.random.normal(ALH_mean, ALH_std, particles)
-                        head_pos *= ALH
-                        head_x = head_pos * np.cos(np.radians(theta + 90))
-                        head_y = head_pos * np.sin(np.radians(theta + 90))
-                        head_angle = np.pi / 6 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
-
-                image_aux = final_sequence[f, :, :].copy()
-                image_segmented = final_sequence_segmented[f, :, :].copy()
-                # Each particle is added
-                for p in range(particles):
-                    rr, cc = ellipse(x[p, f] + head_x[p],
-                                     y[p, f] + head_y[p], l[p], a[p], image_aux.shape,
-                                     np.radians(theta[p]) + head_angle[p])
-                    if f > 0:
-                        random_int_add = np.random.normal(0, std_depth)
-                        intensity[p, f] = intensity[p, f - 1] + random_int_add
-                    if low_limit < intensity[p, f] <= 255:
-                        image_segmented[rr, cc] = 255
-                    if intensity[p, f] <= low_limit:
-                        image_aux[rr, cc] = 0
-                        intensity[p, f] = 0
-                    if intensity[p, f] > 255:
-                        intensity[p, f] = 255
-                    if not rgb:
-                        image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
-                                                     image_aux[rr, cc])
-                    else:
-                        image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
-                                                     image_aux[rr, cc]) * color
-                    # Agrego aquellas que entran en el cuadro
-                    if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
-                        particles_out[p] = 0
-                        df_info = df_info.append(
-                            {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
-                             'fluorescence': intensity[p, f], 'frame': f},
-                            ignore_index=True)
-                    elif particles_out[p] == 0:
-                        particles_out[p] = 1
-                        id_particles[p] = np.max(id_particles) + 1
-                # Add blur so there are no drastic changes in the border of the particles
-                if not rgb:
-                    image_normalized = gaussian(image_aux, std_blur, truncate=3)
-                else:
-                    image_normalized = gaussian(image_aux, std_blur, truncate=3, multichannel=True)
-                final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
-                image_normalized = image_normalized.clip(0, 255)
-                if not rgb:
-                    final_sequence[f] = np.uint8(image_normalized)
-                else:
-                    final_sequence[f] = np.uint8(image_normalized)
-
-                # Next step
-                if mov_type == "d":
-                    continue
-                else:
-                    theta += np.random.normal(0, 1, theta.shape) * np.sqrt(2 / Tp) * time_step
-            next_id = np.max(id_particles)
-
-        final_sequence *= 255 / np.max(final_sequence)
-
-        #cambio seed para generar ruidos distintos en cada frame
-        t = 1000 * time.time()  # current time in milliseconds
-        np.random.seed(int(t) % 2 ** 32)
-        it = 0
-        tot_it = len(noise_params)
-
-        for param in noise_params:
+        head_x = head_y = head_angle = np.zeros(particles)
+        particles_out = np.zeros(particles)
+        # Each frame is created
+        for f in range(frames):
+            # Progress bar printing
             it += 1
-            print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
-            sequence_plus_noise = add_noise(final_sequence, noise=noise_type, param=param)
-            save_video_file(np.uint8(sequence_plus_noise), extension,
-                            file_name + ('(%dHz)' % frame_rate) + noise_type + "_noise_added_" + str(param).replace(".", "_"),
-                            path_seq_out, frame_rate)
-            print() if it == tot_it else False
+            printProgressBar(it, tot_it)
+            if f > 0:
+                x[:, f] = x[:, f - 1] + v * np.cos(np.radians(theta)) * time_step
+                y[:, f] = y[:, f - 1] + v * np.sin(np.radians(theta)) * time_step
 
-        final_sequence = np.uint8(final_sequence)
-        print("Saving sequence without noise...")
-        save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
+                # Fuera del campo de observación, sentido opuesto
+                indexes = np.logical_or(
+                    np.logical_or(np.logical_or(x[:, f] < inf_x, x[:, f] > sup_x), y[:, f] < inf_y),
+                    y[:, f] > sup_y)
+                theta[indexes] *= -1
+                if head_displ and mov_type != "d":
+                    head_pos = np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+                    ALH = np.random.normal(ALH_mean, ALH_std, particles)
+                    head_pos *= ALH
+                    head_x = head_pos * np.cos(np.radians(theta + 90))
+                    head_y = head_pos * np.sin(np.radians(theta + 90))
+                    head_angle = np.pi / 6 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+
+            image_aux = final_sequence[f, :, :].copy()
+            image_segmented = final_sequence_segmented[f, :, :].copy()
+            # Each particle is added
+            for p in range(particles):
+                rr, cc = ellipse(x[p, f] + head_x[p],
+                                 y[p, f] + head_y[p], l[p], a[p], image_aux.shape,
+                                 np.radians(theta[p]) + head_angle[p])
+                if f > 0:
+                    random_int_add = np.random.normal(0, std_depth)
+                    intensity[p, f] = intensity[p, f - 1] + random_int_add
+                if low_limit < intensity[p, f] <= 255:
+                    image_segmented[rr, cc] = 255
+                if intensity[p, f] <= low_limit:
+                    image_aux[rr, cc] = 0
+                    intensity[p, f] = 0
+                if intensity[p, f] > 255:
+                    intensity[p, f] = 255
+                if not rgb:
+                    image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
+                                                 image_aux[rr, cc])
+                else:
+                    image_aux[rr, cc] = np.where(image_aux[rr, cc] < intensity[p, f], intensity[p, f],
+                                                 image_aux[rr, cc]) * color
+                # Agrego aquellas que entran en el cuadro
+                if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
+                    particles_out[p] = 0
+                    df_info = df_info.append(
+                        {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
+                         'fluorescence': intensity[p, f], 'frame': f},
+                        ignore_index=True)
+                elif particles_out[p] == 0:
+                    particles_out[p] = 1
+                    id_particles[p] = np.max(id_particles) + 1
+            # Add blur so there are no drastic changes in the border of the particles
+            if not rgb:
+                image_normalized = gaussian(image_aux, std_blur, truncate=3)
+            else:
+                image_normalized = gaussian(image_aux, std_blur, truncate=3, multichannel=True)
+            final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
+            image_normalized = image_normalized.clip(0, 255)
+            if not rgb:
+                final_sequence[f] = np.uint8(image_normalized)
+            else:
+                final_sequence[f] = np.uint8(image_normalized)
+
+            # Next step
+            if mov_type == "d":
+                continue
+            else:
+                theta += np.random.normal(0, 1, theta.shape) * np.sqrt(2 / Tp) * time_step
+        next_id = np.max(id_particles)
+
+    final_sequence *= 255 / np.max(final_sequence)
+
+    # cambio seed para generar ruidos distintos en cada frame
+    t = 1000 * time.time()  # current time in milliseconds
+    np.random.seed(int(t) % 2 ** 32)
+    it = 0
+    tot_it = len(noise_params)
+
+    for param in noise_params:
+        it += 1
+        print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
+        sequence_plus_noise = add_noise(final_sequence, noise=noise_type, param=param)
+        save_video_file(np.uint8(sequence_plus_noise), extension,
+                        file_name + ('(%dHz)' % frame_rate) + noise_type + "_noise_added_" + str(param).replace(".", "_"),
+                        path_seq_out, frame_rate)
+        print() if it == tot_it else False
+
+    final_sequence = np.uint8(final_sequence)
+    print("Saving sequence without noise...")
+    save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
+                    frame_rate)
+
+    print("Saving segmented sequence...")
+    save_video_file(np.uint8(final_sequence_segmented), extension,
+                    file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
+
+    save_data_file(df_info, path_data_out, file_name + ('(%dHz)' % frame_rate))
+
+    max_fr = frame_rate
+    for frame_rate in frame_rates:
+
+        step = int(np.round(max_fr/frame_rate))
+        frames = range(0, final_sequence.shape[0] - 1, step)
+        seq_sub_sampled = final_sequence[frames]
+        new_frames = range(0, seq_sub_sampled.shape[0])
+        seq_seg_sub_sampled = final_sequence_segmented[frames]
+        save_video_file(seq_sub_sampled, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
                         frame_rate)
-
-        print("Saving segmented sequence...")
-        save_video_file(np.uint8(final_sequence_segmented), extension,
+        save_video_file(np.uint8(seq_seg_sub_sampled), extension,
                         file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
+        sub_data_df = df_info[df_info['frame'].isin(frames)]
+        sub_data_df['frame'].replace(frames, new_frames)
+        save_data_file(sub_data_df, path_data_out, file_name + ('(%dHz)' % frame_rate))
 
-        save_data_file(df_info, str(path_data_out), file_name + ('(%dHz)' % frame_rate))
-
-    return 0
+    return
 
 
 def add_noise(sequence_in, noise='gaussian', param=1):
@@ -266,7 +284,8 @@ def save_data_file(data_frame_in, path_data_out, file_name):
         - data_frame_in: DataFrame with the data
         - path_data_out: Directory where the data will be saved
     """
-    data_frame_in.to_csv(path_data_out + "/" + file_name + "_data.csv", index=False)
+    full_path = os.path.join(path_data_out, file_name + '_data.csv')
+    data_frame_in.to_csv(full_path, index=False)
     return
 
 
@@ -281,23 +300,22 @@ def save_video_file(sequence, extensions, file_name, path_out, fps=None):
      - path_out path to the directory where the output is going to be saved
      - fps: if the format is mp4, is necessary to specify the fps. Type float
     '''
-    path_out = Path(path_out)
     for extension in extensions:
         if extension == "tif":
-            path_out_tiff = Path.joinpath(path_out, "tiff_output")
-            Path.mkdir(path_out_tiff, exist_ok=True)
-            path_out_tiff = Path.joinpath(path_out_tiff, file_name + ".tif")
+            path_out_tiff = os.path.join(path_out, "tiff_output")
+            os.makedirs(path_out_tiff, exist_ok=True)
+            path_out_tiff = os.path.join(path_out_tiff, file_name + ".tif")
             # Guardo como tiff
             with TiffWriter(str(path_out_tiff), bigtiff=True) as tif:
                 for frame in range(sequence.shape[0]):
                     tif.save((sequence[frame]))
         elif extension == "mp4":
-            path_out_mp4 = Path.joinpath(path_out, "mp4_output")
-            Path.mkdir(path_out_mp4, exist_ok=True)
+            path_out_mp4 = os.path.join(path_out, "mp4_output")
+            os.makedirs(path_out_mp4, exist_ok=True)
             mp4_writer(str(path_out_mp4) + "/" + file_name + ".mp4", sequence, fps=fps)
         elif extension == "jpg":
-            path_out_jpg = Path.joinpath(path_out, "jpg_output")
-            Path.mkdir(path_out_jpg, exist_ok=True)
+            path_out_jpg = os.path.join(path_out, "jpg_output")
+            os.makedirs(path_out_jpg, exist_ok=True)
             for frame in range(sequence.shape[0]):
                 imwrite(str(path_out_jpg) + file_name + "{0:04d}.jpg".format(frame), sequence[frame], format="jpg")
 

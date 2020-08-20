@@ -16,15 +16,15 @@ def get_casa_measures(in_dir, out_dir, scale, fps):
     out_rearranged["y"] = out_rearranged["y"] * scale
 
     # usar funcion read_csv para obtener las listas X, Y, T, TRACK_ID
-    X, Y, F, TRACK_ID = read_csv_file(out_rearranged)
+    X, Y, F, TRACK_ID, fluo = read_csv_file(out_rearranged)
 
     # calcular caracteristicas CASA
-    CARAC_WHO = get_carac(TRACK_ID, X, Y, F, fps, min_detections=3)
+    CARAC_WHO = get_carac(TRACK_ID, X, Y, F, fps, fluo, min_detections=3)
 
     # guardar parametros
     param_who = pd.DataFrame(CARAC_WHO)
-    param_who.columns = ['track_id', 'vcl', 'vsl', 'vap_mean', 'vap_std', 'alh_mean', 'alh_std', 'lin', 'wob', 'stra',
-                         'bcf_mean', 'bcf_std', 'mad']
+    param_who.columns = ['track_id', 'vcl', 'vsl', 'vap_mean', 'vap_std', 'alh_mean', 'alh_std', 'lin', 'wob', 'str',
+                         'bcf_mean', 'bcf_std', 'mad', 'fluo']
     os.makedirs(out_dir, exist_ok=True)
     param_who.to_csv(out_dir + '/' + (in_dir.split('/')[-1]).split('.')[0] + '_WHO.csv', index=False)
 
