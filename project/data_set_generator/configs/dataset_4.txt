@@ -11,13 +11,13 @@
 	std_blur : 3
 	noise_type : gaussian
 	noise_params : 0.08
-	low_limit : 10
+	low_limit : 40
 	file_format : tif mp4
-	file_name : dataset_1
+	file_name : dataset_4
 	#pixels per um
 	resolution : 1
 	# If not seed required, put -1
-	seed : 40
+	seed : -1
 
 [PopulationA]
 	tot_particles : 30

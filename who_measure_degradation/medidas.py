@@ -2,8 +2,9 @@ import numpy as np
 import math
 from scipy.spatial.distance import cdist
 from itertools import groupby
-def avgPath(X, Y):
-    NumberNewPoints = int(np.round(len(X)/5))
+
+def avgPath(X, Y, fps):
+    NumberNewPoints = 5 if fps < 30 else 7
     xPath = []
     yPath = []
 
@@ -16,7 +17,7 @@ def avgPath(X, Y):
             xPath.append(xvals[j])
             yPath.append(yvals[j])
 
-    windowSize = NumberNewPoints * 5
+    windowSize = NumberNewPoints * 3
     xPathSmooth = [np.mean(xPath[i:i + windowSize]) for i in range(0, len(xPath) - windowSize)]
     yPathSmooth = [np.mean(yPath[i:i + windowSize]) for i in range(0, len(yPath) - windowSize)]
 
@@ -91,7 +92,6 @@ def LIN(X, Y, T):
 
 
 def WOB(X, Y, avgPathX, avgPathY, T):
-
     vap_mean, vap_std = VAP(X, Y, avgPathX, avgPathY, T)
     wob = vap_mean / VCL(X, Y, T)
     return wob
@@ -124,8 +124,17 @@ def BCF(X, Y, avgPathX, avgPathY, T):
             else:
                 bcf.append(0)
         minIndexOld = minIndexNew
-    bcf_mean = np.mean(bcf)
-    bcf_std = np.std(bcf)
+    time_unit = T[1] - T[0]
+    freqs = []
+    start = -1
+    for i in range(1, len(bcf)):
+        if bcf[i] < bcf[i-1] and start == -1:
+            start = i
+        if bcf[i] > bcf[i-1] and start != -1:
+            freqs.append(1/((i-start)*time_unit))
+            start = -1
+    bcf_mean = np.mean(freqs)
+    bcf_std = np.std(freqs)
     return bcf_mean, bcf_std
 
 
