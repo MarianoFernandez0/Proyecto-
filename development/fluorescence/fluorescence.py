@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def fluorescence(mask, gray_img, segmented_img):
+def fluorescence(gray_img, mask, segmented_img):
     '''
     Indica los valores CTCF (Corrected Total Cell Fluorescence) y mean gray value (promedio del valor de gris) para una mascara dada, los cuales indican dos medidas de fluorescencia para las particulas detectadas
     Entradas:
