@@ -5,11 +5,13 @@ import time
 import numpy as np
 import pandas as pd
 import tifffile
-from imageio import mimwrite as mp4_writer
+from imageio import mimwrite, mimread
 
 from src.add_fluorescence import add_fluorescence_to_tracks
 from src.draw_tracks import draw_tracks
 from src.evaluation import evaluation
+from src.gray_detection import gray_evaluation
+
 import PySimpleGUI as sg
 from src.gui import display_input_gui, display_results_gui
 import sys
@@ -61,7 +63,7 @@ class TrackingParams:
     """
 
     def __init__(self, params):
-        self.video_file_tiff = params['tif_video_input']
+        self.video_file = params['tif_video_input']
         self.fps = int(params['fps'])
         self.px2um = float(params['px2um'])
         self.ROIx = int(params['ROIx'])
@@ -101,23 +103,34 @@ def tracking_urbano(params, save_vid):
         params (TrackingParams): Tracking configuration parameters.
         save_vid (bool).
     """
-
-    tiff = tifffile.TiffFile(params.video_file_tiff)
-    sequence = tiff.asarray()
-    mp4_writer(params.video_file_mp4, sequence, format='mp4', fps=params.fps)
+    vid_format = params.video_file.split(sep='.')
+    if vid_format == 'tif':
+        tiff = tifffile.TiffFile(params.video_file)
+        sequence = tiff.asarray()
+    else:
+        sequence_list = mimread(params.video_file)
+        sequence = np.array(sequence_list)
     num_frames = sequence.shape[0]
+
+    mimwrite(params.video_file_mp4, sequence, format='mp4', fps=params.fps)
 
     # Perform detection step
     print('Running detection: ')
     start = time.time()
-    if params.detection_algorithm:
+    if params.detection_algorithm == 1:
         # Python implementation for segmentation and detection
-        detected = evaluation(tiff, params.px2um)
+        detected = evaluation(sequence, params.px2um)
         detected.to_csv(params.detections_file)
-    else:
+    elif params.detection_algorithm == 2:
+        # Python implementation for segmentation and detection (campo claro)
+        detected = gray_evaluation(sequence)
+        detected.to_csv(params.detections_file)
+    elif params.detection_algorithm == 0:
         # Urbano matlab implementation for segmentation and detection
         octave.Detector(params.detections_file, params.video_file_mp4, num_frames)
         detected = pd.read_csv(params.detections_file)
+    else:
+        return
     end = time.time()
     print('Time to run detection: ', end - start)
 
@@ -140,11 +153,12 @@ def tracking_urbano(params, save_vid):
     tracks[['x', 'y']] = tracks[['x', 'y']] / params.px2um
 
     # fluorescence
-    print('Running fluorescence: ')
-    start = time.time()
-    tracks = add_fluorescence_to_tracks(detected, tracks)
-    end = time.time()
-    print('Time to run fluorescence: ', end - start)
+    if params.detection_algorithm != 2:
+        print('Running fluorescence: ')
+        start = time.time()
+        tracks = add_fluorescence_to_tracks(detected, tracks)
+        end = time.time()
+        print('Time to run fluorescence: ', end - start)
 
     tracks.to_csv(params.csv_tracks, index=False)
     if save_vid:
@@ -152,7 +166,7 @@ def tracking_urbano(params, save_vid):
         tracks_array[np.isnan(tracks_array)] = 0
         tracks_array = tracks_array[tracks_array[:, 4] < tracks_array[:, 4].max()]
         sequence_tracks = draw_tracks(sequence, tracks_array)
-        mp4_writer(params.video_file_out, sequence_tracks, format='mp4', fps=params.fps)
+        mimwrite(params.video_file_out, sequence_tracks, format='mp4', fps=params.fps)
 
     return tracks
 
