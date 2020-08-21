@@ -174,7 +174,7 @@ def ospa_distance(ground_truth, estimated_tracks, c, p, p_prime, alpha):
             ospa += 2*c
     pool = multiprocessing.Pool()
     ospa_dists = pool.map(ospa_multiprocessing_aux, list_tuples)
-    ospa += np.sum(ospa_dists)
+    ospa += np.sum(ospa_dists)/len(frames)
 
     return ospa
 

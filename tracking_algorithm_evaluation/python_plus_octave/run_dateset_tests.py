@@ -4,7 +4,7 @@ import argparse
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_dir', default='datasets', help='Dataset directory')
+parser.add_argument('--dataset_dir', default='datasets_19_08_2020', help='Dataset directory')
 args = parser.parse_args()
 
 dataset_dir = args.dataset_dir

@@ -14,7 +14,7 @@ def get_freq(file_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_dir', default='datasets', help='Dataset directory')
+    parser.add_argument('--dataset_dir', default='datasets_19_08_2020', help='Dataset directory')
     parser.add_argument('--default_config_dir', default='datasets/config.json', help='Base config directory')
 
     args = parser.parse_args()
