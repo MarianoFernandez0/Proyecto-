@@ -15,9 +15,9 @@ if __name__ == '__main__':
     algorithms = ['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF']
 
     parser = argparse.ArgumentParser(description='Compute tracking performance measures')
-    parser.add_argument('--dataset_dir', default='python_plus_octave/datasets/dataset_1',
+    parser.add_argument('--dataset_dir', default='python_plus_octave/datasets_25_08_2020/dataset_1',
                         help='directory of the dataset')
-    parser.add_argument('--results_file', default='dataset_1_performance_measures_results',
+    parser.add_argument('--results_file', default='error_results/datasets_25_08_2020/dataset_1_performance_measures_results.csv',
                         help='file to save performance results')
     parser.add_argument('--save_vid', default=True, help='Flag')
     args = parser.parse_args()
