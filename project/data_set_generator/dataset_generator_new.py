@@ -55,7 +55,7 @@ def make_sequence(sequence_parameters, all_population):
     seed = sequence_parameters['seed']
     resolution = sequence_parameters['resolution']
 
-    if noise_type == 'poisson' : noise_params=[0]
+    if noise_type == 'poisson': noise_params = [0]
 
     M, N = int(M), int(N)
     if not path_data_out:
@@ -66,11 +66,12 @@ def make_sequence(sequence_parameters, all_population):
     os.makedirs(path_data_out, exist_ok=True)
     os.makedirs(path_seq_out, exist_ok=True)
 
-    if seed < 0: seed = int(np.random.uniform(0, 2**32-1))
+    if seed < 0: seed = int(np.random.uniform(0, 2 ** 32 - 1))
 
-    frame_rate = np.max(frame_rates)
-    frame_rates = np.sort(frame_rates).tolist()
-    frame_rates = frame_rates[:-1]
+    # frame_rate = np.max(frame_rates)
+    # frame_rates = np.sort(frame_rates).tolist()
+    # frame_rates = frame_rates[:-1]
+    frame_rate = 120
     np.random.seed(seed)
     print('Making sequence for %dHz' % frame_rate)
     df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
@@ -96,7 +97,7 @@ def make_sequence(sequence_parameters, all_population):
         std_depth, mov_type = population['std_depth'], population['movement_type']
         ALH_mean, ALH_std = population['ALH_mean'] * resolution, population['ALH_std'] * resolution,
         BCP_mean, BCP_std = population['BCP_mean'], population['BCP_std']
-        if particles == 0 : continue
+        if particles == 0: continue
         x = np.zeros([particles, frames])
         y = np.zeros([particles, frames])
         intensity = np.zeros([particles, frames])
@@ -120,7 +121,7 @@ def make_sequence(sequence_parameters, all_population):
         v = np.random.normal(mean_velocity, std_velocity, particles)
         # Initial intensity vector for every particle
         if mov_type == 'a':
-            intensity[:, 0] = (np.uint8((v-np.min(v))/(np.max(v) - np.min(v))*255)).clip(195, 255)
+            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(195, 255)
         elif mov_type == 'b':
             intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(100, 200)
         elif mov_type == 'c':
@@ -209,43 +210,44 @@ def make_sequence(sequence_parameters, all_population):
     # cambio seed para generar ruidos distintos en cada frame
     t = 1000 * time.time()  # current time in milliseconds
     np.random.seed(int(t) % 2 ** 32)
-    it = 0
-    tot_it = len(noise_params)
+    '''it = 0
+    tot_it = len(noise_params)'''
 
-    for param in noise_params:
+    '''for param in noise_params:
         it += 1
         print("Saving %d/%d of sequence with noise added..." % (it, tot_it), end="\r")
         sequence_plus_noise = add_noise(final_sequence, noise=noise_type, param=param)
         save_video_file(np.uint8(sequence_plus_noise), extension,
                         file_name + ('(%dHz)' % frame_rate) + noise_type + "_noise_added_" + str(param).replace(".", "_"),
                         path_seq_out, frame_rate)
-        print() if it == tot_it else False
+        print() if it == tot_it else False'''
 
     final_sequence = np.uint8(final_sequence)
-    print("Saving sequence without noise...")
-    save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
-                    frame_rate)
+    # print("Saving sequence without noise...")
+    # save_video_file(final_sequence, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
+    #                frame_rate)
 
-    print("Saving segmented sequence...")
-    save_video_file(np.uint8(final_sequence_segmented), extension,
-                    file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
+    # print("Saving segmented sequence...")
+    # save_video_file(np.uint8(final_sequence_segmented), extension,
+    #                file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
 
-    save_data_file(df_info, path_data_out, file_name + ('(%dHz)' % frame_rate))
+    # save_data_file(df_info, path_data_out, file_name + ('(%dHz)' % frame_rate))
 
     max_fr = frame_rate
+    frame_rates = [6, 15, 30, 40, 60]
     for frame_rate in frame_rates:
-
-        step = int(np.round(max_fr/frame_rate))
-        frames = range(0, final_sequence.shape[0] - 1, step)
+        step = int(np.round(max_fr / frame_rate))
+        frames = (np.arange(0, final_sequence.shape[0] - 1, step)).tolist()
         seq_sub_sampled = final_sequence[frames]
-        new_frames = range(0, seq_sub_sampled.shape[0])
+        new_frames = (np.arange(seq_sub_sampled.shape[0])).tolist()
         seq_seg_sub_sampled = final_sequence_segmented[frames]
         save_video_file(seq_sub_sampled, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
                         frame_rate)
         save_video_file(np.uint8(seq_seg_sub_sampled), extension,
                         file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
+        pd.options.mode.chained_assignment = None
         sub_data_df = df_info[df_info['frame'].isin(frames)]
-        sub_data_df['frame'].replace(frames, new_frames)
+        sub_data_df['frame'] = sub_data_df['frame'].to_numpy()/step
         save_data_file(sub_data_df, path_data_out, file_name + ('(%dHz)' % frame_rate))
 
     return
@@ -255,7 +257,7 @@ def add_noise(sequence_in, noise='gaussian', param=1):
     sequence_out = sequence_in.copy()
     sequence_out /= 255
     if noise == 'gaussian':
-        sequence_out = random_noise(sequence_out, var=param **2, mode="gaussian", clip=True)
+        sequence_out = random_noise(sequence_out, var=param ** 2, mode="gaussian", clip=True)
     elif noise == 's&p':
         sequence_out = random_noise(sequence_out, mode=noise, amount=param)
     elif noise == "poisson":

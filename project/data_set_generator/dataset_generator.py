@@ -141,12 +141,8 @@ def make_sequence(sequence_parameters, all_population):
                 else:
                     id_particles[p] = np.max(id_particles) + 1
             # Add blur so there are no drastic changes in the border of the particles
-<<<<<<< HEAD
             image_normalized = gaussian(image_aux, std_blur, truncate=3)
             final_sequence_segmented[f, :, :] = np.uint8(image_segmented)
-=======
-            image_normalized = gaussian(image_aux, std_blur, mode='reflect', preserve_range=True)
->>>>>>> 412d0be46adf1ad7e5764667f213a418e4d64a0d
             image_normalized = image_normalized.clip(0, 255)
             final_sequence[f, :, :] = np.uint8(image_normalized)
             # Next step

@@ -1,9 +1,23 @@
 import pandas as pd
-from read_csv_file import read_csv_file
 from get_carac import get_carac
 import os
 import numpy as np
 
+def read_csv_file(df):
+    TRACK_ID = []
+    X = []
+    Y = []
+    F = []
+    fluo = []
+    for id in np.unique(df['id'].to_numpy()):
+        TRACK_ID.append(id)
+        new_out = df.loc[df['id'] == id]
+        X.append(new_out['x'].to_list())
+        Y.append(new_out['y'].to_list())
+        F.append((new_out['frame']).to_list())
+        fluo.append(new_out['fluorescence'].to_numpy())
+
+    return X, Y, F, TRACK_ID, fluo
 
 def get_casa_measures(in_dir, out_dir, scale, fps):
     # leer archivo csv con los tracks
