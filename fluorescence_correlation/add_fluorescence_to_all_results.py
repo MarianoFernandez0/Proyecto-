@@ -10,7 +10,6 @@ if __name__ == "__main__":
     indir = 'datasets_octave_results'
     out_base = 'results_with_fluorescence'
     datasets = [directory for directory in os.listdir(indir) if os.path.isdir(os.path.join(indir, directory))]
-    datasets = ['dataset_1']
     for dataset in datasets:
         out_dir = os.path.join(out_base, dataset)
         detections_path = os.path.join(indir, dataset, 'detection_results')
