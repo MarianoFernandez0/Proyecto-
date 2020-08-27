@@ -66,9 +66,11 @@ class TrackingParams:
     def __init__(self, params):
         self.video_file = params['tif_video_input']
         self.fps = int(params['fps'])
-        self.px2um = float(params['px2um'])
-        self.ROIx = int(params['ROIx'])
-        self.ROIy = int(params['ROIy'])
+
+        if params['px2um'].isdigit():
+            self.px2um = float(params['px2um'])
+        else:
+            self.px2um = None
 
         output_folder = params['output']
         self.video_file_mp4 = os.path.join(output_folder, 'input.mp4')
@@ -104,15 +106,19 @@ def tracking_urbano(params, save_vid):
         params (TrackingParams): Tracking configuration parameters.
         save_vid (bool).
     """
-    vid_format = params.video_file.split(sep='.')
+    vid_format = params.video_file.split(sep='.')[-1]
     if vid_format == 'tif':
         tiff = tifffile.TiffFile(params.video_file)
+        tiff_resolution = tiff.pages[0].tags['XResolution'].value
+        if params.px2um is None:
+            params.px2um = tiff_resolution[1] / tiff_resolution[0]
         sequence = tiff.asarray()
     else:
         sequence_list = mimread(params.video_file)
         sequence = np.array(sequence_list)
     num_frames = sequence.shape[0]
-
+    ROIx = sequence.shape[2]
+    ROIy = sequence.shape[1]
     mimwrite(params.video_file_mp4, sequence, format='mp4', fps=params.fps)
 
     # Perform detection step
@@ -139,7 +145,7 @@ def tracking_urbano(params, save_vid):
     print('Running tracking: ')
     start = time.time()
     octave.Tracker(params.detections_file, params.video_file_mp4, params.video_file_out, params.csv_tracks,
-                   params.reformat_detections_file, num_frames, params.fps, params.px2um, params.ROIx, params.ROIy,
+                   params.reformat_detections_file, num_frames, params.fps, params.px2um, ROIx, ROIy,
                    params.mtt_algorithm, params.PG, params.PD, params.gv, params.plot_results, params.save_movie,
                    params.snap_shot, params.plot_track_results, params.analyze_motility, nout=0)
     end = time.time()

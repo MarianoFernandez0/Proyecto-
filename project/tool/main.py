@@ -10,8 +10,8 @@ from imageio import mimwrite as mp4_writer
 from tool.src.vis.draw_tracks import draw_tracks
 from tool.src.detection.evaluation import evaluation
 from tool.src.detection.gray_detection import gray_evaluation
-
-
+from tool.src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
+import cv2
 
 # add .m files to octave path
 current_path = os.path.realpath(__file__).split(sep='/')
@@ -55,9 +55,10 @@ class TrackingParams:
 
         self.video_file_tiff = params['Input']['tif_video_input']
         self.fps = int(params['Input']['fps'])
-        self.px2um = float(params['Input']['px2um'])
-        self.ROIx = int(params['Input']['ROIx'])
-        self.ROIy = int(params['Input']['ROIy'])
+        if params['Input']['px2um'].isdigit():
+            self.px2um = float(params['Input']['px2um'])
+        else:
+            self.px2um = None
 
         self.video_file_mp4 = params['Output']['input_video']
         self.detections_file = params['Output']['detections_csv']
@@ -90,9 +91,15 @@ def tracking_urbano(params, save_vid=True):
     """
 
     tiff = tifffile.TiffFile(params.video_file_tiff)
+    tiff_resolution = tiff.pages[0].tags['XResolution'].value
+    if params.px2um is None:
+        params.px2um = tiff_resolution[1] / tiff_resolution[0]
+
     sequence = tiff.asarray()
     mp4_writer(params.video_file_mp4, sequence, format='mp4', fps=params.fps)
     num_frames = sequence.shape[0]
+    ROIx = sequence.shape[2]
+    ROIy = sequence.shape[1]
 
     # Perform detection step
     print('Running detection: ')
@@ -112,7 +119,7 @@ def tracking_urbano(params, save_vid=True):
     print('Running tracking: ')
     start = time.time()
     octave.Tracker(params.detections_file, params.video_file_mp4, params.video_file_out, params.csv_tracks,
-                   params.reformat_detections_file, num_frames, params.fps, params.px2um, params.ROIx, params.ROIy,
+                   params.reformat_detections_file, num_frames, params.fps, params.px2um, ROIx, ROIy,
                    params.mtt_algorithm, params.PG, params.PD, params.gv, params.plot_results, params.save_movie,
                    params.snap_shot, params.plot_track_results, params.analyze_motility, nout=0)
     end = time.time()
@@ -151,7 +158,7 @@ def tracking_urbano(params, save_vid=True):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Estimate tracks from video sequence.')
-    parser.add_argument('--config', default=os.path.join('configs', 'config.json'),
+    parser.add_argument('--config', default=os.path.join('input/configs', 'tracking_config_test.json'),
                         type=str, help='Config file with the tracking parameters.')
     parser.add_argument('--save_vid', action='store_true', help='Save video with drawn tracks.')
     args = parser.parse_args()

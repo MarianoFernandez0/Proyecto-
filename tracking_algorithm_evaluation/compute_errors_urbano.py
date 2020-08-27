@@ -1,8 +1,7 @@
-from error_measures import track_set_error
-from python_plus_octave.functions.draw_tracks import draw_tracks
+from tool.src.error_measures.error_measures import track_set_error
+from tool.src.vis.draw_tracks import draw_tracks
 import os
 import pandas as pd
-import numpy as np
 import tifffile
 from imageio import mimwrite as mp4_writer
 import argparse
@@ -62,7 +61,7 @@ if __name__ == '__main__':
             tif = tifffile.TiffFile(video_file_in)
             sequence = tif.asarray()[:, :, :]
             tracks_np = tracks.to_numpy()
-            tracks_np[:, 3] = np.zeros(tracks_np.shape[0])
+            # tracks_np[:, 3] = np.zeros(tracks_np.shape[0])
             sequence_tracks = draw_tracks(sequence, tracks_np)
             os.makedirs(videos_dir, exist_ok=True)
             video_file_out = os.path.join(videos_dir, str(frame_rate) + 'Hz_' + algorithm + '.mp4')

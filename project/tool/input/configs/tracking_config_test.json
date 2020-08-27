@@ -1,10 +1,8 @@
 {
   "Input": {
-    "tif_video_input": "input/dataset_1(15Hz).tif",
+    "tif_video_input": "input/26.10.2017/4.tif",
     "fps": 15,
-    "px2um": 0.1,
-    "ROIx": 512,
-    "ROIy": 512
+    "px2um": 0.1
   },
 
   "Output": {
