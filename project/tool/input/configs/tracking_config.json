@@ -1,0 +1,23 @@
+{
+  "Input": {
+    "tif_video_input": "",
+    "fps": ,
+    "px2um": ,
+    "ROIx": ,
+    "ROIy": 
+  },
+
+  "Output": {
+    "input_video": "" ,
+    "detections_csv": "",
+    "tracks_csv": "",
+    "tracks_video": ""
+	  },
+  "Algorithm params": {
+    "detection_algorithm": 1,
+    "mtt_algorithm": 5,
+    "PG": 0.997,
+    "PD": 0.999,
+    "gv": 50
+  }
+}
