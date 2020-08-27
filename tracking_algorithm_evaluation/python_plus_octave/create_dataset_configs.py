@@ -1,5 +1,4 @@
 import os
-import sys
 import re
 import json
 import argparse
@@ -14,8 +13,8 @@ def get_freq(file_name):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset_dir', default='datasets', help='Dataset directory')
-    parser.add_argument('--default_config_dir', default='datasets/config.json', help='Base config directory')
+    parser.add_argument('--dataset_dir', default='datasets_25_08_2020', help='Dataset directory')
+    parser.add_argument('--default_config_dir', default='datasets_25_08_2020/config.json', help='Base config directory')
 
     args = parser.parse_args()
     datasets_dir = args.dataset_dir
@@ -43,25 +42,25 @@ if __name__ == '__main__':
             tiff_file = [f for f in os.listdir(tiff_dir)
                          if str(frequency) in f and 'noise' not in f and 'segmented' not in f][0]
 
-            config['Input']['DATAFILE_PATH'] = os.path.join(datasets_dir, dataset, 'datasets/data_sequence', data_file)
-            config['Input']['VIDEOFILE_MP4_PATH'] = os.path.join(mp4_dir, mp4_file)
-            config['Input']['VIDEOFILE_TIFF_PATH'] = os.path.join(tiff_dir, tiff_file)
+            config['Input']['tif_video_input'] = os.path.join(tiff_dir, tiff_file)
             config['Input']['fps'] = frequency
 
             for i, _ in enumerate(att):
-                config['Algorithm params']['mttAlgorithm'] = i + 1
+                config['Algorithm params']['mtt_algorithm'] = i + 1
                 config_dir = os.path.join(datasets_dir, dataset, 'tracking_configs',
                                           dataset + '_' + str(frequency) + 'Hz_' + str(att[i]) + '.json')
 
-                config['Output']['CSV_TRACKS_PATH'] = os.path.join(datasets_dir, dataset, 'tracking_results',
-                                                                   dataset + '_' + str(frequency) + 'Hz_'
-                                                                   + str(att[i]) + '.csv')
-                config['Output']['CSV_DETECTIONS_PATH'] = os.path.join(datasets_dir, dataset, 'detection_results',
-                                                                       dataset + '_' + str(frequency) + 'Hz_'
-                                                                       + str(att[i]) + '.csv')
-                config['Output']['VIDEOFILE_OUT_PATH'] = os.path.join(datasets_dir, dataset, 'tracking_results',
-                                                                      dataset + '_' + str(frequency) + 'Hz_'
-                                                                      + str(att[i]) + '.csv')
+                config['Output']['input_video'] = os.path.join(mp4_dir, mp4_file)
+                config['Output']['detections_csv'] = os.path.join(datasets_dir, dataset, 'detection_results',
+                                                                  dataset + '_' + str(frequency) + 'Hz_'
+                                                                  + str(att[i]) + '.csv')
+                config['Output']['tracks_csv'] = os.path.join(datasets_dir, dataset, 'tracking_results',
+                                                              dataset + '_' + str(frequency) + 'Hz_'
+                                                              + str(att[i]) + '.csv')
+                os.makedirs(os.path.join(datasets_dir, dataset, 'tracking_results/videos'), exist_ok=True)
+                config['Output']['tracks_video'] = os.path.join(datasets_dir, dataset, 'tracking_results/videos',
+                                                                dataset + '_' + str(frequency) + 'Hz_'
+                                                                + str(att[i]) + '.mp4')
 
                 with open(config_dir, 'w') as f:
                     json.dump(config, f)
