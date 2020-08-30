@@ -12,14 +12,14 @@ SYMBOL_DOWN = '▼'
 def display_input_gui():
     sg.theme('Dark Blue 3')
 
-    advanced_section_esp = [[sg.Text('Parámetros')],
-                            [sg.Text(' detección:          '),
-                             sg.InputText('1', key='detection_algorithm', size=(7, 1))],
-                            [sg.Text(' seguimiento:        '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
-                            [sg.Text(' PG:                 '), sg.InputText('0.997', key='PG', size=(7, 1))],
-                            [sg.Text(' PD:                 '), sg.InputText('0.999', key='PD', size=(7, 1))],
-                            [sg.Text(' gv:                 '), sg.InputText('50', key='gv', size=(7, 1))]]
-
+    # advanced_section_esp = [[sg.Text('Parámetros')],
+    #                         [sg.Text(' detección:          '),
+    #                          sg.InputText('1', key='detection_algorithm', size=(7, 1))],
+    #                         [sg.Text(' seguimiento:        '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
+    #                         [sg.Text(' PG:                 '), sg.InputText('0.997', key='PG', size=(7, 1))],
+    #                         [sg.Text(' PD:                 '), sg.InputText('0.999', key='PD', size=(7, 1))],
+    #                         [sg.Text(' gv:                 '), sg.InputText('50', key='gv', size=(7, 1))]]
+    # #
     advanced_section_en = [[sg.Text('Algorithm params')],
                            [sg.Text(' detection algorithm: '),
                             sg.InputText('1', key='detection_algorithm', size=(7, 1))],
@@ -27,27 +27,43 @@ def display_input_gui():
                            [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
                            [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
                            [sg.Text(' gv:                  '), sg.InputText('50', key='gv', size=(7, 1))]]
-
-    esp_section = [
-        [sg.Text('TDE', font='Courier 25'),
-         sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
-         sg.Text(''), sg.Text(''), sg.Button('EN', size=(1, 1), k='-CHANGE LAN-')],
-        [sg.Text('')],
-        [sg.Text('Entrada')],
-        [sg.FileBrowse('secuencia de video', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
-        [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
-        [sg.Text('  px2um:               '), sg.InputText('', key='px2um', size=(7, 1))],
-        [sg.Text('')],
-        [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
-         sg.T('Avanzado', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
-        [sg.pin(sg.Column(advanced_section_esp, key='-ADV_SEC-', visible=False))],
-        [sg.Button('Ok'), sg.Button('Cancelar')]
-    ]
-
+    #
+    # esp_section = [
+    #     [sg.Text('TDE', font='Courier 25'),
+    #      sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
+    #      sg.Text(''), sg.Text(''), sg.Button('EN', size=(1, 1), k='-CHANGE LAN-')],
+    #     [sg.Text('')],
+    #     [sg.Text('Entrada')],
+    #     [sg.FileBrowse('secuencia de video', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
+    #     [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
+    #     [sg.Text('  px2um:               '), sg.InputText('', key='px2um', size=(7, 1))],
+    #     [sg.Text('')],
+    #     [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
+    #      sg.T('Avanzado', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
+    #     [sg.pin(sg.Column(advanced_section_esp, key='-ADV_SEC-', visible=False))],
+    #     [sg.Button('Ok'), sg.Button('Cancelar')]
+    # ]
+    #
+    # en_section = [
+    #     [sg.Text('TDE', font='Courier 25'),
+    #      sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
+    #      sg.Text(''), sg.Button('ESP', size=(1, 1), k='-CHANGE LAN-')],
+    #     [sg.Text('')],
+    #     [sg.Text('Input')],
+    #     [sg.FileBrowse('video sequence', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
+    #     [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
+    #     [sg.Text('  px2um:               '), sg.InputText('0.1', key='px2um', size=(7, 1))],
+    #     [sg.Text('')],
+    #     [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
+    #      sg.T('Advanced', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
+    #     [sg.pin(sg.Column(advanced_section_en, key='-ADV_SEC-', visible=False))],
+    #     [sg.Button('Ok'), sg.Button('Cancel')]
+    # ]
+    #
+    # layout = [[sg.pin(sg.Column(esp_section, key='-ESP_SEC-', visible=True))],
+    #           [sg.pin(sg.Column(en_section, key='-EN_SEC-', visible=False))]]
     en_section = [
-        [sg.Text('TDE', font='Courier 25'),
-         sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
-         sg.Text(''), sg.Button('ESP', size=(1, 1), k='-CHANGE LAN-')],
+        [sg.Text('TDE', font='Courier 25')],
         [sg.Text('')],
         [sg.Text('Input')],
         [sg.FileBrowse('video sequence', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
@@ -60,13 +76,11 @@ def display_input_gui():
         [sg.Button('Ok'), sg.Button('Cancel')]
     ]
 
-    layout = [[sg.pin(sg.Column(esp_section, key='-ESP_SEC-', visible=True))],
-              [sg.pin(sg.Column(en_section, key='-EN_SEC-', visible=False))]]
-
+    layout = [[sg.pin(sg.Column(en_section, key='-EN_SEC-', visible=True))]]
     window = sg.Window('Tracking de Espermatozoides', layout, no_titlebar=False, alpha_channel=1, grab_anywhere=True)
 
     opened = False
-    esp_opened = False
+    # esp_opened = False
     while True:
         event, values = window.read()
         if event in (sg.WIN_CLOSED, 'Cancel', 'Cancelar', 'Ok'):
@@ -75,10 +89,10 @@ def display_input_gui():
             opened = not opened
             window['-OPEN ADVANCED-'].update(SYMBOL_DOWN if opened else SYMBOL_UP)
             window['-ADV_SEC-'].update(visible=opened)
-        if event.startswith('-CHANGE LAN-'):
-            esp_opened = not esp_opened
-            window['-ESP_SEC-'].update(visible=esp_opened)
-            window['-EN_SEC-'].update(visible=not esp_opened)
+        # if event.startswith('-CHANGE LAN-'):
+        #     esp_opened = not esp_opened
+        #     window['-ESP_SEC-'].update(visible=esp_opened)
+        #     window['-EN_SEC-'].update(visible=not esp_opened)
 
     window.close()
     return event, values

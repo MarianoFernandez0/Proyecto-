@@ -15,9 +15,6 @@ import oct2py
 
 os.makedirs(os.path.join(application_path, 'tmp'), exist_ok=True)
 octave = oct2py.Oct2Py(temp_dir=os.path.join(application_path, 'tmp'))
-print('application_path', application_path)
-# /home/mariano/Projects/TDE/git/Proyecto-/project/tool/src/SpermTrackingProject
-print(os.path.join(application_path, 'src/SpermTrackingProject'))
 octave.addpath(os.path.join(application_path, 'src/SpermTrackingProject'))
 octave.addpath(os.path.join(application_path, 'src/oct2py'))
 
