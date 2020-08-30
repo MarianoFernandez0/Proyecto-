@@ -2,9 +2,7 @@
   "Input": {
     "tif_video_input": "",
     "fps": ,
-    "px2um": ,
-    "ROIx": ,
-    "ROIy": 
+    "px2um":
   },
 
   "Output": {

@@ -1,23 +1,15 @@
 {
-  "Input": {
-    "tif_video_input": "input/dataset_1(15Hz).tif",
-    "fps": 15,
-    "px2um": 0.1,
-    "ROIx": 512,
-    "ROIy": 512
-  },
+  "video_input": "input/dataset_1(15Hz).tif",
+  "fps": 15,
+  "px2um": 0.1,
 
-  "Output": {
-    "input_video": "output/dataset_1(15Hz).mp4" ,
-    "detections_csv": "output/dataset_1(15Hz)_detections.csv",
-    "tracks_csv": "output/dataset_1(15Hz)_tracks.csv",
-    "tracks_video": "output/dataset_1(15Hz)_tracks.mp4"
-	  },
-  "Algorithm params": {
-    "detection_algorithm": 1,
-    "mtt_algorithm": 5,
-    "PG": 0.997,
-    "PD": 0.999,
-    "gv": 50
-  }
+  "detections_csv": "output/test/dataset_1(15Hz)_detections.csv",
+  "tracks_csv": "output/test/dataset_1(15Hz)_tracks.csv",
+  "tracks_video": "output/test/dataset_1(15Hz)_tracks.mp4",
+
+  "detection_algorithm": 1,
+  "mtt_algorithm": 5,
+  "PG": 0.997,
+  "PD": 0.999,
+  "gv": 50
 }
