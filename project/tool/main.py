@@ -1,14 +1,6 @@
 import argparse
-import os
 import json
-from oct2py import octave
-from tool.src.tracking.tracking import Tracker
-
-# add .m files to octave path
-current_path = os.path.realpath(__file__).split(sep='/')
-current_path.pop(-1)
-current_path = '/' + os.path.join(*current_path)
-octave.addpath(current_path + '/src/SpermTrackingProject')
+from tool.src.tracking.tracking import Tracker, delete_tmp
 
 
 if __name__ == '__main__':
@@ -21,7 +13,8 @@ if __name__ == '__main__':
     with open(args.config, 'r') as f:
         config = json.load(f)
 
-    tracker = Tracker(params=config, octave_interpreter=octave)
+    tracker = Tracker(params=config)
     tracker.detect(detections_file=config['detections_csv'])
     tracker.track(detections_file=config['detections_csv'], tracks_file=config['tracks_csv'])
     tracker.save_vid(tracks_file=config['tracks_csv'], video_file=config['tracks_video'])
+    delete_tmp()

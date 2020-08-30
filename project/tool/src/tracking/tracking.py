@@ -1,14 +1,34 @@
 import os
-import time
+import sys
+import shutil
 import pandas as pd
 import numpy as np
 import tifffile
-from oct2py import octave
 from imageio import mimwrite, mimread
 from tool.src.vis.draw_tracks import draw_tracks
 from tool.src.detection.evaluation import evaluation
 from tool.src.detection.gray_detection import gray_evaluation
 from tool.src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
+
+
+if getattr(sys, 'frozen', False):
+    application_path = sys._MEIPASS
+    TOOL_PATH = application_path.split(sep='/')
+    TOOL_PATH.pop(-1)
+    TOOL_PATH.pop(-1)
+    TOOL_PATH.insert(0, '/')
+    os.environ["OCTAVE_KERNEL_JSON"] = os.path.join('/', *TOOL_PATH, 'octave_kernel/kernel.json')
+else:
+    application_path = os.path.dirname(os.path.abspath(__file__))
+    TOOL_PATH = application_path.split(sep='/')
+    TOOL_PATH.pop(-1)
+    TOOL_PATH.pop(-1)
+import oct2py
+TOOL_PATH[0] = '/'
+os.makedirs(os.path.join(*TOOL_PATH, 'tmp'), exist_ok=True)
+octave = oct2py.Oct2Py(temp_dir=os.path.join(*TOOL_PATH, 'tmp'))
+octave.addpath(os.path.join(*TOOL_PATH, 'src/SpermTrackingProject'))
+octave.addpath(os.path.join(*TOOL_PATH, 'src/oct2py'))
 
 
 class Tracker:
@@ -141,3 +161,7 @@ class Tracker:
         tracks_array = tracks_array[tracks_array[:, 4] < tracks_array[:, 4].max()]
         sequence_tracks = draw_tracks(self.sequence, tracks_array, text=(self.detection_algorithm != 2))
         mimwrite(video_file, sequence_tracks, format='mp4', fps=self.fps)
+
+
+def delete_tmp():
+    shutil.rmtree(os.path.join(*TOOL_PATH, 'tmp'))
