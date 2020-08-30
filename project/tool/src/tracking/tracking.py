@@ -39,9 +39,9 @@ class Tracker:
     """
     def __init__(self, params, octave_interpreter=octave):
         self.octave = octave_interpreter
-
         self.fps = int(params['fps'])
-        if isinstance(params['px2um'], (int, float)):
+
+        if isinstance(params['px2um'], (int, float)) or params['px2um'].replace('.', '', 1).isdigit():
             self.px2um = float(params['px2um'])
         else:
             self.px2um = None

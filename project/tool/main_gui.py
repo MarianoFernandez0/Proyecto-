@@ -1,11 +1,10 @@
-import json
 import os
 import sys
 import shutil
 from tool.src.tracking.tracking import Tracker
 
 import PySimpleGUI as sg
-from tool.src.gui.gui import display_input_gui, display_results_gui
+from tool.src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
 
 if getattr(sys, 'frozen', False):
     application_path = sys._MEIPASS
@@ -28,18 +27,18 @@ octave.addpath(os.path.join(application_path, 'src/oct2py'))
 if __name__ == '__main__':
     event, values = display_input_gui()
     if event not in (sg.WIN_CLOSED, 'Cancel', 'Cancelar'):
-        output_folder = values['output']
-
-        detections_csv = os.path.join(output_folder, 'detections.csv')
-        tracks_csv = os.path.join(output_folder, 'tracks.csv')
-        tracks_video = os.path.join(output_folder, 'tracks.mp4')
 
         tracker = Tracker(params=values, octave_interpreter=octave)
-        tracker.detect(detections_file=detections_csv)
-        tracks = tracker.track(detections_file=detections_csv, tracks_file=tracks_csv)
-        tracker.save_vid(tracks_file=tracks_csv, video_file=tracks_video)
 
-        display_results_gui(tracks)
+        detections_csv = save_detections_gui()
+        tracker.detect(detections_file=detections_csv)
+
+        tracks_csv = save_tracks_gui(os.path.dirname(detections_csv))
+        tracks = tracker.track(detections_file=detections_csv, tracks_file=tracks_csv)
+
+        tracks_video = save_vid_gui(tracks, os.path.dirname(tracks_csv))
+        if tracks_video:
+            tracker.save_vid(tracks_file=tracks_csv, video_file=tracks_video)
 
 # delete temporal folder
 shutil.rmtree(os.path.join(application_path, 'tmp'))

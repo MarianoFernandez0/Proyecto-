@@ -10,7 +10,7 @@ SYMBOL_DOWN = '▼'
 
 
 def display_input_gui():
-    sg.theme('Dark Blue 3')  # Add a touch of color
+    sg.theme('Dark Blue 3')
 
     advanced_section_esp = [[sg.Text('Parámetros')],
                             [sg.Text(' detección:          '),
@@ -33,18 +33,10 @@ def display_input_gui():
          sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
          sg.Text(''), sg.Text(''), sg.Button('EN', size=(1, 1), k='-CHANGE LAN-')],
         [sg.Text('')],
-        [sg.Text('')],
-        [sg.Text('Guardar video?           '), sg.Checkbox('', default=True, key='save_vid')],
-        [sg.Text('')],
         [sg.Text('Entrada')],
-        [sg.Text('  secuencia:     '),
-         sg.FileBrowse('', key='video_input', initial_folder=os.path.join(current_path, 'input'),
-                       size=(4, 1))],
+        [sg.FileBrowse('secuencia de video', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
         [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
         [sg.Text('  px2um:               '), sg.InputText('', key='px2um', size=(7, 1))],
-        [sg.Text('')],
-        [sg.Text('Carpeta de resultados: '),
-         sg.FolderBrowse('', key='output', initial_folder=os.path.join(current_path, 'output'), size=(4, 1))],
         [sg.Text('')],
         [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
          sg.T('Avanzado', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
@@ -57,18 +49,10 @@ def display_input_gui():
          sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''), sg.Text(''),
          sg.Text(''), sg.Button('ESP', size=(1, 1), k='-CHANGE LAN-')],
         [sg.Text('')],
-        [sg.Text('')],
-        [sg.Text('Save video?           '), sg.Checkbox('', default=True, key='save_vid')],
-        [sg.Text('')],
         [sg.Text('Input')],
-        [sg.Text('  sequence:      '),
-         sg.FileBrowse('', key='video_input', initial_folder=os.path.join(current_path, 'input'),
-                       size=(4, 1))],
+        [sg.FileBrowse('video sequence', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
         [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
         [sg.Text('  px2um:               '), sg.InputText('0.1', key='px2um', size=(7, 1))],
-        [sg.Text('')],
-        [sg.Text('Output Folder:         '),
-         sg.FolderBrowse('', key='output', initial_folder=os.path.join(current_path, 'output'), size=(4, 1))],
         [sg.Text('')],
         [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
          sg.T('Advanced', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
@@ -78,17 +62,14 @@ def display_input_gui():
 
     layout = [[sg.pin(sg.Column(esp_section, key='-ESP_SEC-', visible=True))],
               [sg.pin(sg.Column(en_section, key='-EN_SEC-', visible=False))]]
-    # All the stuff inside your window.
 
-    # Create the Window
     window = sg.Window('Tracking de Espermatozoides', layout, no_titlebar=False, alpha_channel=1, grab_anywhere=True)
-    # Event Loop to process "events" and get the "values" of the inputs
+
     opened = False
     esp_opened = False
     while True:
         event, values = window.read()
-        if event in (sg.WIN_CLOSED, 'Cancel', 'Cancelar', 'Ok'):  # if user closes window or clicks cancel
-            # print('You entered ', values)
+        if event in (sg.WIN_CLOSED, 'Cancel', 'Cancelar', 'Ok'):
             break
         if event.startswith('-OPEN ADVANCED-'):
             opened = not opened
@@ -103,30 +84,67 @@ def display_input_gui():
     return event, values
 
 
-def display_results_gui(tracks):
-    sg.theme('Dark Blue 3')  # Add a touch of color
+def save_detections_gui():
+    sg.theme('Dark Blue 3')
 
+    layout = [[sg.Text('TDE', font='Courier 25')],
+              [sg.Text('')],
+              [sg.FileSaveAs(button_text='Save detections file', key='detections_csv', initial_folder=current_path,
+                             enable_events=True)]]
+
+    window = sg.Window('Tracking de Espermatozoides', layout, no_titlebar=False, alpha_channel=1, grab_anywhere=True)
+
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == 'detections_csv':
+            break
+
+    window.close()
+    return values['detections_csv']
+
+
+def save_tracks_gui(initial_folder):
+    sg.theme('Dark Blue 3')
+
+    layout = [[sg.Text('TDE', font='Courier 25')],
+              [sg.Text('')],
+              [sg.FileSaveAs(button_text='Save trajectories file', key='tracks_csv', initial_folder=initial_folder,
+                             enable_events=True)]]
+
+    window = sg.Window('Tracking de Espermatozoides', layout, no_titlebar=False, alpha_channel=1, grab_anywhere=True)
+
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+        if event == 'tracks_csv':
+            break
+
+    window.close()
+    return values['tracks_csv']
+
+
+def save_vid_gui(tracks, initial_folder):
+    sg.theme('Dark Blue 3')
     num_tracks = len(tracks['id'].unique())
-    advanced_section = [[sg.Text('Results')],
-                        [sg.Text('  Number of trajectories detected: {}'.format(num_tracks))]]
 
-    # All the stuff inside your window.
     layout = [
         [sg.Text('TDE', font='Courier 25')],
         [sg.Text('')],
         [sg.Text('Results', font='Courier 10')],
         [sg.Text('  {} trajectories detected.'.format(num_tracks), font='Courier 9')],
+        [sg.FileSaveAs(button_text='Save video', key='tracks_video', initial_folder=initial_folder, enable_events=True)],
         [sg.Button('Close')]
     ]
 
-    # Create the Window
     window = sg.Window('Tracking de Espermatozoides', layout, no_titlebar=False, alpha_channel=1, grab_anywhere=True)
-    # Event Loop to process "events" and get the "values" of the inputs
+
     while True:
         event, values = window.read()
-        if event in (sg.WIN_CLOSED, 'Close'):  # if user closes window or clicks cancel
-            # print('You entered ', values)
+        if event in (sg.WIN_CLOSED, 'Close'):
             break
 
     window.close()
-    return event, values
+    return values['tracks_video']
