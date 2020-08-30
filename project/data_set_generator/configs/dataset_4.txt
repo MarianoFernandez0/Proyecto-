@@ -6,7 +6,7 @@
 	#Duration of the observation in seconds	
 	height_width_duration : 512 512 4
 	#In Hz
-	frame_rate : 60 50 40 30 15 7
+	frame_rate : 60 40 30 20 15 6
 	rgb : true
 	std_blur : 3
 	noise_type : gaussian
@@ -30,9 +30,9 @@
 	VAP_deviation : 10
 	Tp : 0.001
 	head_displ : true
-	std_depth : 3
+	std_depth : 2
 	movement_type : a
-	ALH_mean : 5.4
+	ALH_mean : 3
 	ALH_std : 0.1
 	BCF_mean : 15
 	BCF_std : 2
@@ -45,13 +45,13 @@
 	mean : 9 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 90
+	VAP : 70
 	VAP_deviation : 10
 	Tp : 0.0001
 	head_displ : true
 	std_depth : 2
 	movement_type : b
-	ALH_mean : 8
+	ALH_mean : 4
 	ALH_std : 0.5
 	BCF_mean : 10
 	BCF_std : 5
@@ -64,13 +64,13 @@
 	mean : 9 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 80
+	VAP : 50
 	VAP_deviation : 10
 	Tp : 0.000001
 	head_displ : true
 	std_depth : 2
 	movement_type : c
-	ALH_mean : 12
+	ALH_mean : 7
 	ALH_std : 3
 	BCF_mean : 15
 	BCF_std : 10

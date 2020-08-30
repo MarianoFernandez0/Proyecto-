@@ -99,8 +99,8 @@ def WOB(X, Y, avgPathX, avgPathY, T):
 
 def STR(X, Y, avgPathX, avgPathY, T):
     vap_mean, vap_std = VAP(X, Y, avgPathX, avgPathY, T)
-    stra = VSL(X, Y, T) / vap_mean
-    return stra
+    str = VSL(X, Y, T) / vap_mean
+    return str
 
 
 def BCF(X, Y, avgPathX, avgPathY, T):
