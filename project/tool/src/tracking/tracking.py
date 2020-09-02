@@ -5,10 +5,10 @@ import pandas as pd
 import numpy as np
 import tifffile
 from imageio import mimwrite, mimread
-from tool.src.vis.draw_tracks import draw_tracks
-from tool.src.detection.evaluation import evaluation
-from tool.src.detection.gray_detection import gray_evaluation
-from tool.src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
+from src.vis.draw_tracks import draw_tracks
+from src.detection.evaluation import evaluation
+from src.detection.gray_detection import gray_evaluation
+from src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
 
 
 if getattr(sys, 'frozen', False):
