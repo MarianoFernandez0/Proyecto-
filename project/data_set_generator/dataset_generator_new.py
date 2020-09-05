@@ -66,12 +66,9 @@ def make_sequence(sequence_parameters, all_population):
     os.makedirs(path_data_out, exist_ok=True)
     os.makedirs(path_seq_out, exist_ok=True)
 
-    if seed < 0: seed = int(np.random.uniform(0, 2 ** 32 - 1))
-
-    # frame_rate = np.max(frame_rates)
-    # frame_rates = np.sort(frame_rates).tolist()
-    # frame_rates = frame_rates[:-1]
-    frame_rate = 120
+    if seed < 0:
+        seed = int(np.random.uniform(0, 2 ** 32 - 1))
+    frame_rate = np.lcm.reduce(np.array(frame_rates, dtype='int'))
     np.random.seed(seed)
     print('Making sequence for %dHz' % frame_rate)
     df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
@@ -120,12 +117,8 @@ def make_sequence(sequence_parameters, all_population):
         # Initial speed
         v = np.random.normal(mean_velocity, std_velocity, particles)
         # Initial intensity vector for every particle
-        if mov_type == 'a':
-            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(195, 255)
-        elif mov_type == 'b':
-            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(100, 200)
-        elif mov_type == 'c':
-            intensity[:, 0] = (np.uint8((v - np.min(v)) / (np.max(v) - np.min(v)) * 255)).clip(100, 80)
+        if mov_type != 'd':
+            intensity[:, 0] = (v - np.min(v))/(np.max(v) - np.min(v)) * (255 - 100) + 100
         else:
             intensity[:, 0] = 80
 
@@ -151,7 +144,7 @@ def make_sequence(sequence_parameters, all_population):
                     head_pos *= ALH
                     head_x = head_pos * np.cos(np.radians(theta + 90))
                     head_y = head_pos * np.sin(np.radians(theta + 90))
-                    head_angle = np.pi / 6 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
+                    head_angle = np.pi / 12 * np.sin(BCP_freq * 2 * np.pi * time_step * f + BCP_fase)
 
             image_aux = final_sequence[f, :, :].copy()
             image_segmented = final_sequence_segmented[f, :, :].copy()
@@ -161,7 +154,7 @@ def make_sequence(sequence_parameters, all_population):
                                  y[p, f] + head_y[p], l[p], a[p], image_aux.shape,
                                  np.radians(theta[p]) + head_angle[p])
                 if f > 0:
-                    random_int_add = np.random.normal(0, std_depth)
+                    random_int_add = 0
                     intensity[p, f] = intensity[p, f - 1] + random_int_add
                 if low_limit < intensity[p, f] <= 255:
                     image_segmented[rr, cc] = 255
@@ -180,7 +173,7 @@ def make_sequence(sequence_parameters, all_population):
                 if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
                     particles_out[p] = 0
                     df_info = df_info.append(
-                        {'id_particle': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
+                        {'id': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
                          'fluorescence': intensity[p, f], 'frame': f},
                         ignore_index=True)
                 elif particles_out[p] == 0:
@@ -232,14 +225,11 @@ def make_sequence(sequence_parameters, all_population):
     #                file_name + ('(%dHz)' % frame_rate) + "_segmented_", path_seq_out, frame_rate)
 
     # save_data_file(df_info, path_data_out, file_name + ('(%dHz)' % frame_rate))
-
-    max_fr = frame_rate
-    frame_rates = [6, 15, 30, 40, 60]
+    frame_rate_base = frame_rate
     for frame_rate in frame_rates:
-        step = int(np.round(max_fr / frame_rate))
+        step = int(np.round(frame_rate_base / frame_rate))
         frames = (np.arange(0, final_sequence.shape[0] - 1, step)).tolist()
         seq_sub_sampled = final_sequence[frames]
-        new_frames = (np.arange(seq_sub_sampled.shape[0])).tolist()
         seq_seg_sub_sampled = final_sequence_segmented[frames]
         save_video_file(seq_sub_sampled, extension, file_name + ('(%dHz)' % frame_rate), path_seq_out,
                         frame_rate)
@@ -369,7 +359,7 @@ def read_parameters(path='config.txt'):
     sequence_parameters['low_limit'] = float(config["Sequence parameters"]["low_limit"])
     sequence_parameters['file_format'] = config["Sequence parameters"]["file_format"].split()
     sequence_parameters['file_name'] = config["Sequence parameters"]["file_name"]
-    sequence_parameters['frame_rate'] = np.array(config["Sequence parameters"]["frame_rate"].split(), dtype=np.float)
+    sequence_parameters['frame_rate'] = np.array(config["Sequence parameters"]["frame_rate"].split(), dtype='float')
     sequence_parameters['seed'] = int(config["Sequence parameters"]["seed"])
     sequence_parameters['resolution'] = float(config["Sequence parameters"]["resolution"])
 
