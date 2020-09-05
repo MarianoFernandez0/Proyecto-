@@ -34,16 +34,11 @@ octave.addpath(os.path.join(*TOOL_PATH, 'src/oct2py'))
 class Tracker:
     """
     Attributes:
-        video_file (str): Input video sequence.
         fps (int): Frame frequency.
         px2um (float): Scale of the image.
-
         detection_algorithm (int): Detection algorithm.
                                     0 = MatLab implementation
                                     1 = Python implementation
-        reformat_detections_file (int): Depends on the detection algorithm implementation.
-                                            0 = MatLab implementation
-                                            1 = Python implementaadd_fluorescence_to_trackstion
         mtt_algorithm (int): Multi-Target Tracking algorithm.
                                 1 = NN
                                 2 = GNN
@@ -55,10 +50,11 @@ class Tracker:
         PG (float): Prob. that a detected target falls in validation gate
         PD (float): Prob. of detection
         gv (float): Velocity Gate (um/s)
+        sequence (np.ndarray): Video sequence, shape (N, H, W).
 
     """
-    def __init__(self, params, octave_interpreter=octave):
-        self.octave = octave_interpreter
+    def __init__(self, params):
+        self.octave = octave
         self.fps = int(params['fps'])
 
         if isinstance(params['px2um'], (int, float)) or params['px2um'].replace('.', '', 1).isdigit():
@@ -66,8 +62,8 @@ class Tracker:
         else:
             self.px2um = None
 
-        self.detection_algorithm = int(params['detection_algorithm'])
-        self.mtt_algorithm = int(params['mtt_algorithm'])
+        self.detection_algorithm = params['detection_algorithm']
+        self.mtt_algorithm = params['mtt_algorithm']
         self.PG = float(params['PG'])
         self.PD = float(params['PD'])
         self.gv = float(params['gv'])
@@ -82,6 +78,7 @@ class Tracker:
         else:
             sequence_list = mimread(params['video_input'])
             self.sequence = np.array(sequence_list)
+        self.algorithms = ['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF']
 
     def detect(self, detections_file):
         """
@@ -92,15 +89,15 @@ class Tracker:
             detections (pd.DataFrame): Dataframe with the detection results.
 
         """
-        if self.detection_algorithm == 1:
+        if self.detection_algorithm == 'Fluorescence':
             # Python implementation for segmentation and detection
             detections = evaluation(self.sequence, self.px2um)
             detections.to_csv(detections_file)
-        elif self.detection_algorithm == 2:
+        elif self.detection_algorithm == 'Octave':
             # Python implementation for segmentation and detection (campo claro)
             detections = gray_evaluation(self.sequence)
             detections.to_csv(detections_file)
-        elif self.detection_algorithm == 0:
+        elif self.detection_algorithm == 'Brightfield':
             # Urbano matlab implementation for segmentation and detection
             num_frames = self.sequence.shape[0]
             mimwrite('tmp.mp4', self.sequence, format='mp4', fps=self.fps)
@@ -134,8 +131,10 @@ class Tracker:
         ROIx = self.sequence.shape[2]
         ROIy = self.sequence.shape[1]
 
+        mtt_algorithm = self.algorithms.index(self.mtt_algorithm) + 1
+
         self.octave.Tracker(detections_file, mp4_video, output_video, tracks_file, reformat_detections_file, num_frames,
-                            self.fps, self.px2um, ROIx, ROIy, self.mtt_algorithm,  self.PG, self.PD, self.gv,
+                            self.fps, self.px2um, ROIx, ROIy, mtt_algorithm,  self.PG, self.PD, self.gv,
                             plot_results, save_movie, snap_shot, plot_track_results, analyze_motility, nout=0)
         self.octave.clear_all(nout=0)
 

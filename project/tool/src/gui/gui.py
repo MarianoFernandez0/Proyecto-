@@ -1,5 +1,5 @@
-import PySimpleGUI as sg
 import os
+import PySimpleGUI as sg
 
 current_path = os.getcwd()
 os.makedirs(os.path.join(current_path, 'input'), exist_ok=True)
@@ -20,10 +20,20 @@ def display_input_gui():
     #                         [sg.Text(' PD:                 '), sg.InputText('0.999', key='PD', size=(7, 1))],
     #                         [sg.Text(' gv:                 '), sg.InputText('50', key='gv', size=(7, 1))]]
     # #
+    # advanced_section_en = [[sg.Text('Algorithm params')],
+    #                        [sg.Text(' detection algorithm: '),
+    #                         sg.InputText('Fluorescence', key='detection_algorithm', size=(7, 1))],
+    #                        [sg.Text(' mtt_algorithm:       '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
+    #                        [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
+    #                        [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
+    #                        [sg.Text(' gv:                  '), sg.InputText('50', key='gv', size=(7, 1))]]
     advanced_section_en = [[sg.Text('Algorithm params')],
                            [sg.Text(' detection algorithm: '),
-                            sg.InputText('1', key='detection_algorithm', size=(7, 1))],
-                           [sg.Text(' mtt_algorithm:       '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
+                            sg.Combo(values=['Fluorescence', 'Brightfield', 'Octave'], key='detection_algorithm',
+                                     default_value='Fluorescence')],
+                           [sg.Text(' mtt_algorithm:       '),
+                            sg.Combo(values=['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF'], key='mtt_algorithm',
+                                     default_value='ENNJPDAF')],
                            [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
                            [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
                            [sg.Text(' gv:                  '), sg.InputText('50', key='gv', size=(7, 1))]]
