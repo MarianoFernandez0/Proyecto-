@@ -1,6 +1,6 @@
-from tool.src.detection.segmentation import segmentation
-from tool.src.detection.detection import detect_particles, size_filter
-from tool.src.fluorescence.fluorescence import fluorescence
+from src.detection.segmentation import segmentation
+from src.detection.detection import detect_particles, size_filter
+from src.fluorescence.fluorescence import fluorescence
 
 import pandas as pd
 import numpy as np
