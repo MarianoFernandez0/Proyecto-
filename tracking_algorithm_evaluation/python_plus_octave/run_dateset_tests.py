@@ -34,6 +34,7 @@ if __name__ == '__main__':
         if len(configs_list) > 0:
             for config in configs_list:
                 do_tracking(config)
+
             # pool = multiprocessing.Pool(7)
             # pool.map(do_tracking, configs_list)
     delete_tmp()
