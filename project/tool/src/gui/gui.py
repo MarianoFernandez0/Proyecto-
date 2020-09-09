@@ -1,5 +1,5 @@
-import PySimpleGUI as sg
 import os
+import PySimpleGUI as sg
 
 current_path = os.getcwd()
 os.makedirs(os.path.join(current_path, 'input'), exist_ok=True)
@@ -20,13 +20,23 @@ def display_input_gui():
     #                         [sg.Text(' PD:                 '), sg.InputText('0.999', key='PD', size=(7, 1))],
     #                         [sg.Text(' gv:                 '), sg.InputText('50', key='gv', size=(7, 1))]]
     # #
+    # advanced_section_en = [[sg.Text('Algorithm params')],
+    #                        [sg.Text(' detection algorithm: '),
+    #                         sg.InputText('Fluorescence', key='detection_algorithm', size=(7, 1))],
+    #                        [sg.Text(' mtt_algorithm:       '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
+    #                        [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
+    #                        [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
+    #                        [sg.Text(' gv:                  '), sg.InputText('50', key='gv', size=(7, 1))]]
     advanced_section_en = [[sg.Text('Algorithm params')],
                            [sg.Text(' detection algorithm: '),
-                            sg.InputText('1', key='detection_algorithm', size=(7, 1))],
-                           [sg.Text(' mtt_algorithm:       '), sg.InputText('5', key='mtt_algorithm', size=(7, 1))],
+                            sg.Combo(values=['Fluorescence', 'Brightfield', 'Octave'], key='detection_algorithm',
+                                     default_value='Fluorescence')],
+                           [sg.Text(' mtt_algorithm:       '),
+                            sg.Combo(values=['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF'], key='mtt_algorithm',
+                                     default_value='ENNJPDAF')],
                            [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
                            [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
-                           [sg.Text(' gv:                  '), sg.InputText('50', key='gv', size=(7, 1))]]
+                           [sg.Text(' gv:                  '), sg.InputText('100', key='gv', size=(7, 1))]]
     #
     # esp_section = [
     #     [sg.Text('TDE', font='Courier 25'),
@@ -68,7 +78,7 @@ def display_input_gui():
         [sg.Text('Input')],
         [sg.FileBrowse('video sequence', key='video_input', initial_folder=os.path.join(current_path, 'input'))],
         [sg.Text('  fps:                 '), sg.InputText('15', key='fps', size=(7, 1))],
-        [sg.Text('  px2um:               '), sg.InputText('0.1', key='px2um', size=(7, 1))],
+        [sg.Text('  px2um:               '), sg.InputText('', key='px2um', size=(7, 1))],
         [sg.Text('')],
         [sg.T(SYMBOL_UP, enable_events=True, k='-OPEN ADVANCED-', text_color='black'),
          sg.T('Advanced', enable_events=True, text_color='black', k='-OPEN ADVANCED-TEXT')],
