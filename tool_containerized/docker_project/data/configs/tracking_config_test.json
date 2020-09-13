@@ -1,0 +1,15 @@
+{
+  "video_input": "./root/project/data/input/dataset_1(15Hz).tif",
+  "fps": 15,
+  "px2um": 1,
+
+  "detections_csv": "./root/project/data/output/test/dataset_1(15Hz)_detections.csv",
+  "tracks_csv": "./root/project/data/output/test/dataset_1(15Hz)_tracks.csv",
+  "tracks_video": "./root/project/data/output/test/dataset_1(15Hz)_tracks.mp4",
+
+  "detection_algorithm": 1,
+  "mtt_algorithm": 5,
+  "PG": 0.997,
+  "PD": 0.999,
+  "gv": 50
+}
