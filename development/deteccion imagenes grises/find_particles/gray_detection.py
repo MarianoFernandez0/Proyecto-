@@ -1,23 +1,7 @@
 import cv2
-from scipy import ndimage
 import numpy as np
 from skimage.measure import label
 import pandas as pd
-
-
-def morf_operations(img_in, kernel):
-    dilation = cv2.dilate(img_in, kernel, iterations=1)
-    closing = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, kernel)
-    erosion = cv2.erode(closing, kernel, iterations=1)
-    return erosion
-
-
-def sobel_filtering(im):
-    dx = ndimage.sobel(im, 0)  # horizontal derivative
-    dy = ndimage.sobel(im, 1)  # vertical derivative
-    mag = np.hypot(dx, dy)  # magnitude
-    mag *= 255.0 / np.max(mag)  # normalize (Q&D)
-    return mag
 
 
 def gray_to_binary(img_in):
@@ -26,7 +10,7 @@ def gray_to_binary(img_in):
     gaussian_blur = cv2.GaussianBlur(greyscale, (3, 3), 1.6)
     laplacian = cv2.Laplacian(gaussian_blur, cv2.CV_64F)
 
-    positive_laplacian = np.abs(np.min(laplacian)) + laplacian  # Pasar a valores negativos
+    positive_laplacian = np.abs(np.min(laplacian)) + laplacian  # Pasar a valores positivos
     img_inv_uint8 = np.array(positive_laplacian, dtype=np.uint8)  # Pasar a uint8
     _, otsu = cv2.threshold(img_inv_uint8, 0, np.max(img_inv_uint8),
                             cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # aplicar otsu
@@ -54,8 +38,6 @@ def gray_evaluation(video_in):
         binary = gray_to_binary(img_in)  # convertir la imagen a binaria
         df_particles = binary_detection(binary)  # obtener dataframe con la ubicacion de cada particula
 
-        print(df_particles.shape)
-        print(df_out.shape)
         for index, row in df_particles.iterrows():
             df_out = df_out.append({'x': row['x'], 'y': row['y'], 'frame': nro_frame,
                                    'total_pixels': row['total_pixels']}, ignore_index=True) # rellenar dataframe

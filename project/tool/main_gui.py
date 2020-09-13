@@ -1,7 +1,7 @@
 import os
-from src.tracking.tracking import Tracker, delete_tmp
 import PySimpleGUI as sg
-from src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
+from tool.src.tracking.tracking import Tracker, delete_tmp
+from tool.src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
 
 
 if __name__ == '__main__':

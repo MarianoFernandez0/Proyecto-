@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from skimage.measure import label
 import matplotlib.pyplot as plt
+from skimage.measure import label
 
 
 def detect_particles(seg_img):
@@ -9,22 +9,23 @@ def detect_particles(seg_img):
 	Toma la imagen original y la segmentada como entrada, devuelve un dataframe con todas las partículas
 	de la imagen y sus propidades.
 
-	Parametros:
-		seg_img (array(M,N)): imagen segmentada.
+	Args:
+		seg_img (np.ndarray): imagen segmentada, dim (M,N).
 
 	Returns:
-		particles (df(id, x, y, total_pixels, mask)): Dataframe con todas las partículas.
+		particles (pd.DataFrame): Dataframe con todas las partículas, cols (id, x, y, total_pixels, mask).
 	"""
 
 	M = seg_img.shape[0]
 	N = seg_img.shape[1]
+
 	# Etiqueta cada partícula con un entero diferente
 	labeled_img, total_particles = label(seg_img, connectivity=2, return_num=True)
 
 	count = 0
 	particles = pd.DataFrame(index=range(total_particles), columns=['id', 'x', 'y', 'total_pixels', 'mask'])
 
-	# Se recorren todos los pixeles de la imágen para hayar el centro geométrico de cada partícula haciendo
+	# Se recorren todos los pixeles de la imágen para encontrar el centro geométrico de cada partícula haciendo
 	# el promedio de sus coordenadas además se guardan el resto de las propiedades de las partículas
 	for p in range(1, total_particles+1):
 		particles.loc[p - 1, ['id']] = p

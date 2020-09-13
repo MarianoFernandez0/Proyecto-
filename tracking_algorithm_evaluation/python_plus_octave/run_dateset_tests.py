@@ -10,7 +10,6 @@ def do_tracking(config):
     tracker.detect(detections_file=config['detections_csv'])
     tracker.track(detections_file=config['detections_csv'], tracks_file=config['tracks_csv'])
     tracker.save_vid(tracks_file=config['tracks_csv'], video_file=config['tracks_video'])
-    delete_tmp()
 
 
 if __name__ == '__main__':
@@ -33,5 +32,9 @@ if __name__ == '__main__':
             with open(config, 'r') as f:
                 configs_list.append(json.load(f))
         if len(configs_list) > 0:
-            pool = multiprocessing.Pool()
-            pool.map(do_tracking, configs_list)
+            for config in configs_list:
+                do_tracking(config)
+
+            # pool = multiprocessing.Pool(7)
+            # pool.map(do_tracking, configs_list)
+    delete_tmp()

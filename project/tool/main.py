@@ -1,5 +1,5 @@
-import argparse
 import json
+import argparse
 from tool.src.tracking.tracking import Tracker, delete_tmp
 
 
