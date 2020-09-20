@@ -1,0 +1,16 @@
+# build container
+docker build -t tool_container .
+
+# run container that shares a folder with host
+run -it tool_container
+
+
+
+
+# remove all images
+docker rmi $(docker images -q) -f
+
+
+NOTAS:
+Agregar el ffmpeg, pkg-config, y el tar del pkg de video a octave. 
+
