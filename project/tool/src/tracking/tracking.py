@@ -94,11 +94,11 @@ class Tracker:
             # Python implementation for segmentation and detection
             detections = evaluation(self.sequence, self.px2um)
             detections.to_csv(detections_file)
-        elif self.detection_algorithm == 'Octave':
+        elif self.detection_algorithm == 'Brightfield':
             # Python implementation for segmentation and detection (campo claro)
             detections = gray_evaluation(self.sequence)
             detections.to_csv(detections_file)
-        elif self.detection_algorithm == 'Brightfield':
+        elif self.detection_algorithm == 'Octave':
             # Urbano matlab implementation for segmentation and detection
             num_frames = self.sequence.shape[0]
             mimwrite('tmp.mp4', self.sequence, format='mp4', fps=self.fps)
@@ -146,7 +146,7 @@ class Tracker:
         tracks[['x', 'y']] = tracks[['x', 'y']] / self.px2um
 
         # fluorescence
-        if self.detection_algorithm != 2:
+        if self.detection_algorithm != 'Brightfield':
             detections = pd.read_csv(detections_file)
             tracks = add_fluorescence_to_tracks(detections, tracks)
         tracks.to_csv(tracks_file, index=False)

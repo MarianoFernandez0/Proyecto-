@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # print(os.listdir(file))
     detections = pd.read_csv(file, index_col=False, usecols=['x', 'y', 'frame', 'mean_gray_value'])
     print(detections)
-    trajectories = hungarian_tracking(detections.to_numpy())
+    trajectories = hungarian_tracking(detections.to_numpy(), max_dist=5*15)
     trajectories_cols = list(detections.columns) + ['id']
     print(trajectories_cols)
     trajectories = pd.DataFrame(data=trajectories, columns=trajectories_cols)

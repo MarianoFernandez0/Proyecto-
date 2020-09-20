@@ -13,7 +13,8 @@ def do_tracking_hungarian(config):
     # tracker.detect(detections_file=config['detections_csv'])
     detections = pd.read_csv(config['detections_csv'], index_col=False, usecols=['x', 'y', 'frame', 'mean_gray_value'])
     print('detections\n', detections)
-    trajectories = hungarian_tracking(detections.to_numpy())
+    max_dist = 50*config['fps']*config['px2um']
+    trajectories = hungarian_tracking(detections.to_numpy(), max_dist=max_dist)
     print(trajectories)
     trajectories_cols = list(detections.columns) + ['id']
     trajectories = pd.DataFrame(data=trajectories, columns=trajectories_cols)
