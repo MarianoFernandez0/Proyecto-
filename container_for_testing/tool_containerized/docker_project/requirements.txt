@@ -1,0 +1,14 @@
+opencv-python
+matplotlib
+numpy
+scipy
+scikit-image
+Image
+Tifffile
+pandas
+modest
+imageio-ffmpeg
+oct2py
+pysimplegui
+pyinstaller
+tqdm

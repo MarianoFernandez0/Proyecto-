@@ -1,0 +1,71 @@
+from tool.src.tracking.tracking import Tracker, delete_tmp
+from random_generator.generate_random_dataset import generate_config_file
+import shutil
+import os
+import argparse
+import json
+
+def organize_datasets(ds_number, path='datasets'):
+    datasets = os.listdir(os.path.join(path, 'data_sequence'))
+    datasets = [f for f in datasets if f.endswith('.csv')]
+    datasets.sort()
+    freqs = [(f.split('Hz')[0]).split('_')[-1] for f in datasets]
+    for i, f in enumerate(freqs):
+        os.makedirs(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f), exist_ok=True)
+        shutil.move(os.path.join(path, 'data_sequence', datasets[i]), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]))
+        video_file = str(datasets[i].split('_data.csv')[0]) + str('.tif')
+        shutil.move(os.path.join(path, 'video_sequence/tiff_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
+    shutil.rmtree(os.path.join(path))
+    return '../data/datasets/dataset_{}'.format(ds_number)
+
+def do_all_tracking_stuff(config):
+    tracker = Tracker(params=config)
+    tracker.detect()
+    tracker.track()
+    tracker.get_who_measures()
+    tracker.who_classification()
+    delete_tmp()
+
+def organize_output(dataset_path):
+    inference_path = '../data/output'
+    target_path = os.path.join(dataset_path, 'inference')
+    os.makedirs(target_path, exist_ok=True)
+    shutil.move(inference_path, target_path)
+
+
+
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--in_tracker', default='../data/input/sequence', help='Path where to move the synthetic data')
+    parser.add_argument('--config_file', default='../data/input/config/config_tracking.json', help='Path to the config file for the tracker')
+    parser.add_argument('--loops', default=2, help='Number of datasets in which the tool is tested')
+    parser.add_argument('--shared_folder', default='../data', help='Folder shared between the docker and host')
+    args = parser.parse_args()
+
+    for dataset in range(args.loops):
+        generate_config_file()
+        dataset_path = organize_datasets(dataset)
+        freqs = os.listdir(dataset_path)
+        for freq in freqs:
+            # Organize the data to do the tracking
+            freq_path = os.path.join(dataset_path, freq)
+            video = [v for v in os.listdir(freq_path) if v.endswith('.tif')][0]
+            input_tracker_path = os.path.join(args.in_tracker, video)
+            shutil.move(os.path.join(freq_path, video), input_tracker_path)
+            # Loading the config file and changing only the video path and fps
+            with open(args.config_file, 'r') as file:
+                config = json.load(file)
+            config['video_input'] = input_tracker_path
+            config['fps'] = freq
+            # Make the inference
+            do_all_tracking_stuff(config)
+            os.remove(input_tracker_path)
+            organize_output(os.path.join(dataset_path, freq))
+
+
+
+
+
+
