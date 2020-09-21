@@ -29,7 +29,6 @@ def pandas_tracks_to_numpy(tracks, num_frames, max_num):
         if ~(np.isnan(tracks_grouped.get_group(ids[i])[['x', 'y']].to_numpy())).any():
             tracks_new[:, tracks_grouped.get_group(ids[i])['frame'].to_numpy(dtype='int32'), i] = \
                 tracks_grouped.get_group(ids[i])[['x', 'y']].to_numpy().T
-
     return tracks_new, ids
 
 

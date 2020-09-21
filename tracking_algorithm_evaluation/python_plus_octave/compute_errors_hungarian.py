@@ -51,6 +51,7 @@ def compute_errors(dataset_folder, dataset_path, results_file):
         performance_measures = pd.concat((performance_measures, error))
     os.makedirs(os.path.join(results_file.split('/')[0], results_file.split('/')[1]), exist_ok=True)
     print('results_file', results_file)
+    print(performance_measures)
     performance_measures.to_csv(results_file)
 
 
