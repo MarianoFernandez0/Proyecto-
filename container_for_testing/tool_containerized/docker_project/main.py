@@ -24,7 +24,6 @@ def do_all_tracking_stuff(config):
     tracker.track()
     tracker.get_who_measures()
     tracker.who_classification()
-    delete_tmp()
 
 def organize_output(dataset_path):
     inference_path = '../data/output/'
@@ -62,6 +61,7 @@ if __name__ == "__main__":
             os.remove(input_tracker_path)
             organize_output(os.path.join(dataset_path, freq))
 
+    delete_tmp()
 
 
 
