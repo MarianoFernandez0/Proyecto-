@@ -13,8 +13,8 @@ def organize_datasets(ds_number, path='datasets'):
     for i, f in enumerate(freqs):
         os.makedirs(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f), exist_ok=True)
         shutil.move(os.path.join(path, 'data_sequence', datasets[i]), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]))
-        video_file = str(datasets[i].split('_data.csv')[0]) + str('.tif')
-        shutil.move(os.path.join(path, 'video_sequence/tiff_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
+        video_file = str(datasets[i].split('_data.csv')[0]) + str('.mp4')
+        shutil.move(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
     shutil.rmtree(os.path.join(path))
     return '../data/datasets/dataset_{}'.format(ds_number)
 
@@ -27,12 +27,10 @@ def do_all_tracking_stuff(config):
     delete_tmp()
 
 def organize_output(dataset_path):
-    inference_path = '../data/output'
+    inference_path = '../data/output/'
     target_path = os.path.join(dataset_path, 'inference')
     os.makedirs(target_path, exist_ok=True)
     shutil.move(inference_path, target_path)
-
-
 
 
 
@@ -51,7 +49,7 @@ if __name__ == "__main__":
         for freq in freqs:
             # Organize the data to do the tracking
             freq_path = os.path.join(dataset_path, freq)
-            video = [v for v in os.listdir(freq_path) if v.endswith('.tif')][0]
+            video = [v for v in os.listdir(freq_path) if v.endswith('.mp4')][0]
             input_tracker_path = os.path.join(args.in_tracker, video)
             shutil.move(os.path.join(freq_path, video), input_tracker_path)
             # Loading the config file and changing only the video path and fps

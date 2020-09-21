@@ -12,7 +12,7 @@
 	noise_type : gaussian
 	noise_params : 0.08
 	low_limit : 40
-	file_format : tif
+	file_format : mp4
 	file_name : dataset
 	#pixels per um
 	resolution : 1

@@ -75,10 +75,13 @@ class Tracker:
         vid_format = params['video_input'].split(sep='.')[-1]
         if vid_format == 'tif':
             tiff = tifffile.TiffFile(params['video_input'])
+            print(tiff.asarray().shape)
+            print(params['video_input'])
             tiff_resolution = tiff.pages[0].tags['XResolution'].value
             if self.px2um is None:
                 self.px2um = tiff_resolution[1] / tiff_resolution[0]
             self.sequence = tiff.asarray()
+            raise ValueError('TESTING')
         else:
             sequence_list = mimread(params['video_input'])
             self.sequence = np.array(sequence_list)
@@ -167,7 +170,7 @@ class Tracker:
     def get_who_measures(self):
         tracks_file = os.path.join(self.outdir + "/tracks/", self.basename + '_tracks.csv')
         os.makedirs(self.outdir + '/who_measures', exist_ok=True)
-        who_file = self.outdir + 'who_measures'
+        who_file = self.outdir + '/who_measures'
         get_casa_measures(tracks_file, who_file, self.px2um, self.fps)
 
     def who_classification(self):
@@ -175,6 +178,7 @@ class Tracker:
         file = self.outdir + '/who_measures/' + str([f for f in files if f.endswith('.csv')][0])
         df_measures = pd.read_csv(file)
         df_classified = classification(df_measures)
+        os.makedirs(self.outdir + '/who_classification', exist_ok=True)
         classification_file = self.outdir + '/who_classification/' + self.basename + '_who_classification,csv'
         df_classified.to_csv(classification_file)
 

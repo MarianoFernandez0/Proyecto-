@@ -12,7 +12,7 @@
 	noise_type : gaussian
 	noise_params : 0.08
 	low_limit : 40
-	file_format : tif
+	file_format : mp4
 	file_name : dataset
 	#pixels per um
 	resolution : 1
@@ -20,7 +20,7 @@
 	seed : -1
 
 [PopulationA]
-	tot_particles : 18
+	tot_particles : 41
 	color : 1 0 0
 	#dimensions
 	mean : 8 2
@@ -39,7 +39,7 @@
 
 
 [PopulationB]
-	tot_particles : 92
+	tot_particles : 20
 	color : 1 0 0
 	#dimensions
 	mean : 9 2
@@ -58,7 +58,7 @@
 
 
 [PopulationC]
-	tot_particles : 109
+	tot_particles : 114
 	color : 1 0 0
 	#dimensions
 	mean : 9 2
@@ -77,7 +77,7 @@
 
 
 [PopulationD]
-	tot_particles : 73
+	tot_particles : 2
 	color: 1 0 0
 	#dimensions
 	mean : 9 2
