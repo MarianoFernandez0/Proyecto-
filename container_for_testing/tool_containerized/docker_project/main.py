@@ -1,5 +1,7 @@
 from tool.src.tracking.tracking import Tracker, delete_tmp
+from tool.src.error_measures.error_measures import track_set_error
 from random_generator.generate_random_dataset import generate_config_file
+import pandas as pd
 import shutil
 import os
 import argparse
@@ -24,13 +26,24 @@ def do_all_tracking_stuff(config):
     tracker.track()
     tracker.get_who_measures()
     tracker.who_classification()
+    return tracker
+
+def get_errors(tracker, folder_path):
+    tracks_file = tracker.outdir + "/tracks/" + tracker.basename + '_tracks.csv'
+    max_dist = (tracker.gv / (tracker.um_per_px * tracker.fps))
+    gt_file = [gt_file for gt_file in os.listdir(folder_path) if 'who' not in gt_file.lower()]
+    gt_file = os.path.join(folder_path, gt_file[0])
+
+    gt_tracks = pd.read_csv(gt_file)
+    tracks = pd.read_csv(tracks_file)
+    errors = track_set_error(gt_tracks, tracks, max_dist)
+    errors.to_csv(os.path.join(folder_path, 'error_measures', 'error_measures.csv'))
 
 def organize_output(dataset_path):
     inference_path = '../data/output/'
     target_path = os.path.join(dataset_path, 'inference')
     os.makedirs(target_path, exist_ok=True)
     shutil.move(inference_path, target_path)
-
 
 
 if __name__ == "__main__":
@@ -57,7 +70,8 @@ if __name__ == "__main__":
             config['video_input'] = input_tracker_path
             config['fps'] = freq
             # Make the inference
-            do_all_tracking_stuff(config)
+            tracker = do_all_tracking_stuff(config)
+            get_errors(tracker, freq_path)
             os.remove(input_tracker_path)
             organize_output(os.path.join(dataset_path, freq))
 
