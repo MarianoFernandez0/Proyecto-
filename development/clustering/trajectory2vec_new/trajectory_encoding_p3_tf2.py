@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 import tensorflow as tf
 import cv2
 import tifffile
-
+# TODO: pasar de tf.31 a tf2
 
 def tracks_to_list(tracks):
     tracks_dict = {}

@@ -9,7 +9,7 @@ import cv2
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--data', default='../data/real_data')
+    parser.add_argument('--data', default='../data/synthetic_data')
     args = parser.parse_args()
 
     sequences = [l for l in os.listdir(args.data) if '.' not in l]
@@ -33,9 +33,9 @@ if __name__ == '__main__':
 
     all_tracks = np.concatenate(all_tracks, axis=0)
 
-    # encodes = get_encodes(all_tracks[:, :-1])
-    # np.save('../data/real_data/encodes', encodes)
-    encodes = np.load(os.path.join(args.data, 'encodes.npy'))
+    encodes = get_encodes(all_tracks[:, :-1])
+    np.save('../data/real_data/encodes', encodes)
+    # encodes = np.load(os.path.join(args.data, 'encodes.npy'))
 
     km = KMeans(n_clusters=4)
     km.fit(encodes)

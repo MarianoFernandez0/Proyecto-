@@ -1,13 +1,13 @@
 import os
-import pandas
-import numpy as np
-from sklearn import preprocessing
-from argparse import ArgumentParser
-from sklearn.cluster import KMeans
-# from imageio import mimwrite
-import tensorflow as tf
 import cv2
 import tifffile
+import argparse
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
+from sklearn.cluster import KMeans
 
 
 def tracks_to_list(tracks):
@@ -92,8 +92,8 @@ def behavior_ext(windows):
         behaviorFeature = []
         records = np.array(window)
         if len(records) != 0:
-            pd = pandas.DataFrame(records)
-            pdd = pd.describe()
+            df = pd.DataFrame(records)
+            pdd = df.describe()
 
             behaviorFeature.append(pdd[1][1])
             behaviorFeature.append(pdd[2][1])
@@ -274,11 +274,14 @@ def get_encodes(trajectories):
     return encodes_array
 
 
-def draw_labels(sequence, trajectories, labels, out):
+def draw_labels(sequence, trajectories, labels, data_dir):
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out_vid = cv2.VideoWriter(os.path.join(data_dir, 'video.mp4'), fourcc, 4, (512, 512))
+
     ids = np.unique(trajectories[:, 0])
     frames = np.unique(trajectories[:, 4])
-
     colors = [(255, 255, 255), (255, 0, 0), (0, 0, 255), (0, 255, 0)]
+
     img_old = np.zeros((sequence.shape[1], sequence.shape[2], 3))
     for i, frame in enumerate(frames):
         frame_tracks = trajectories[trajectories[:, 4] == frame]
@@ -289,37 +292,80 @@ def draw_labels(sequence, trajectories, labels, out):
             track = frame_tracks[frame_tracks[:, 0] == track_id]
             img_color = colors[int(labels[np.argwhere(ids == track_id)])]
             cv2.circle(img, (int(track[:, 1]), int(track[:, 2])), 2, img_color)
+            cv2.putText(frame_img, str(int(track_id)), (int(track[:, 1]), int(track[:, 2])), 2, 0.5, color=img_color)
         draw_img = frame_img.copy()
         draw_img[img != 0] = img[img != 0]
-        out.write(draw_img.astype(np.uint8))
+        out_vid.write(draw_img.astype(np.uint8))
         img_old = img
-    out.release()
+    out_vid.release()
+
+
+def plot_fluo(tracks, tracks_info, folder):
+    mean_fluorescence = []
+    for k, track_id in enumerate(ids):
+        mean_fluorescence.append(np.nanmean(tracks[tracks[:, 0] == track_id][:, 3]))
+    tracks_info['mean_fluorescence'] = mean_fluorescence
+
+    fig = plt.figure(figsize=(15, 10))
+    ax = fig.gca()
+    plt.scatter(tracks_info['label'], tracks_info['mean_fluorescence'], alpha=0.5)
+    plt.xticks([0, 1, 2, 3])
+    plt.title('Fluorescence distribution')
+    plt.xlabel('label')
+    plt.ylabel('mean_fluorescence')
+    ax.yaxis.grid(True)
+    # plt.show()
+    fig.savefig(os.path.join(folder, 'fluorescence_distribution.png'), dpi=300)
+
+    labels_groups = tracks_info.groupby('label')['mean_fluorescence'].describe()
+    # print(labels_groups)
+    width = 0.3
+    fig = plt.figure(figsize=(15, 10))
+    ax = fig.gca()
+    # ax.bar(labels_groups.index + width*(-2), labels_groups['min'], width, label='min')
+    ax.bar(labels_groups.index + width * (0), labels_groups['mean'], width, label='mean, err=std', alpha=0.7)
+    ax.errorbar(labels_groups.index, labels_groups['mean'], yerr=labels_groups['std'], label='std',
+                fmt=' ', ecolor='k', capsize=10)
+    # ax.bar(labels_groups.index + width*(0), labels_groups['50%'], width, label='median')
+    # ax.bar(labels_groups.index + width*(1), labels_groups['max'], width, label='max')
+    ax.yaxis.grid(True)
+    plt.xticks([0, 1, 2, 3])
+    plt.legend()
+    plt.title('Mean Fluorescence')
+    ax.set_xlabel('label')
+    ax.set_ylabel('mean_fluorescence')
+    # plt.show()
+    fig.savefig(os.path.join(folder, 'mean_fluorescence.png'), dpi=300)
+
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    # parser.add_argument('--tracks', default='../data/individual/dataset_5_15Hz_ennjpdaf/dataset_5_15Hz_ennjpdaf.csv')
-    # parser.add_argument('--tif', default='../data/individual/dataset_5_15Hz_ennjpdaf/dataset_5(15Hz).tif')
-    # parser.add_argument('--video', default='../data/individual/dataset_5_15Hz_ennjpdaf/video.mp4')
-    # parser.add_argument('--encodes', default='../data/individual/dataset_5_15Hz_ennjpdaf/vector')
-    parser.add_argument('--tracks', default='../data/real_data/good_video/tracks.csv')
-    parser.add_argument('--tif', default='../data/real_data/good_video/video.tif')
-    parser.add_argument('--video', default='../data/video_.mp4')
-    parser.add_argument('--encodes', default='../data/vector_')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data_dir', default='../data/individual/1_026')  # id,x,y,fluorescence,frame
+    parser.add_argument('--gen_encodes', action='store_true')
+    parser.add_argument('--fluorescence', action='store_true')
     args = parser.parse_args()
 
-    trajectories = np.genfromtxt(args.tracks, delimiter=',', skip_header=True)  # id,x,y,fluorescence,frame
-    encodes_array = get_encodes(trajectories)
-    np.save(args.encodes, encodes_array)
+    data_dir = args.data_dir
+    trajectories = np.genfromtxt(os.path.join(data_dir, 'tracks.csv'), delimiter=',', skip_header=True)
+
+    if args.gen_encodes:
+        encodes_array = get_encodes(trajectories)
+        np.save(os.path.join(data_dir, 'encodes'), encodes_array)
+    else:
+        encodes_array = np.load(os.path.join(data_dir, 'encodes.npy'))
 
     km = KMeans(n_clusters=4)
     km.fit(encodes_array)
-    print km.labels_
 
-    tif = tifffile.TiffFile(args.tif)
-    sequence = tif.asarray()
-    print 'sequence '
-    print sequence.shape
+    sequence = tifffile.TiffFile(os.path.join(data_dir, 'video.tif')).asarray()
+    draw_labels(sequence, trajectories, km.labels_, data_dir)
 
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(args.video, fourcc, 4, (512, 512))
-    draw_labels(sequence, trajectories, km.labels_, out)
+    ids = np.unique(trajectories[:, 0])
+    tracks_labels = pd.DataFrame(columns=['id', 'label'])
+    tracks_labels['id'] = ids.astype(int)
+    tracks_labels['label'] = km.labels_
+    tracks_labels.to_csv(os.path.join(data_dir, 'id_labels.csv'), index=False)
+    print tracks_labels.groupby('label').describe()['id']['count'].astype(int)
+
+    if args.fluorescence:
+        plot_fluo(trajectories, tracks_labels, data_dir)
