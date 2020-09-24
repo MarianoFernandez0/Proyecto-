@@ -1,11 +1,16 @@
 from tool.src.tracking.tracking import Tracker, delete_tmp
 from tool.src.error_measures.error_measures import track_set_error
 from random_generator.generate_random_dataset import generate_config_file
-import pandas as pd
-import shutil
+from tool.src.who_measures.get_who_measures import get_casa_measures
 import os
-import argparse
 import json
+import shutil
+import argparse
+import pandas as pd
+
+def who_measures(track_path, fps):
+    get_casa_measures(track_path, os.path.join(*track_path.split('/')[:-1]), 1, fps)
+
 
 def organize_datasets(ds_number, path='datasets'):
     datasets = os.listdir(os.path.join(path, 'data_sequence'))
@@ -15,6 +20,7 @@ def organize_datasets(ds_number, path='datasets'):
     for i, f in enumerate(freqs):
         os.makedirs(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f), exist_ok=True)
         shutil.move(os.path.join(path, 'data_sequence', datasets[i]), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]))
+        who_measures(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]), float(f))
         video_file = str(datasets[i].split('_data.csv')[0]) + str('.mp4')
         shutil.move(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
     shutil.rmtree(os.path.join(path))
