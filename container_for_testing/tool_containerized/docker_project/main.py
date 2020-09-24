@@ -7,7 +7,7 @@ import argparse
 import json
 
 def who_measures(track_path, fps):
-    get_casa_measures(track_path, ''.join(track_path.split('/')[:-1]), 1, fps)
+    get_casa_measures(track_path, os.path.join(*track_path.split('/')[:-1]), 1, fps)
 
 
 def organize_datasets(ds_number, path='datasets'):
@@ -18,7 +18,7 @@ def organize_datasets(ds_number, path='datasets'):
     for i, f in enumerate(freqs):
         os.makedirs(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f), exist_ok=True)
         shutil.move(os.path.join(path, 'data_sequence', datasets[i]), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]))
-        who_measures(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]), f)
+        who_measures(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]), float(f))
         video_file = str(datasets[i].split('_data.csv')[0]) + str('.mp4')
         shutil.move(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
     shutil.rmtree(os.path.join(path))
