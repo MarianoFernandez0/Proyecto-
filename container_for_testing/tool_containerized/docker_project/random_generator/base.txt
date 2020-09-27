@@ -93,5 +93,3 @@
 	ALH_std : 0
 	BCF_mean : 0
 	BCF_std : 0
-
-
