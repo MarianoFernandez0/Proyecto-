@@ -67,10 +67,11 @@ def get_optimal_track_assignment(tracks_a, tracks_b, max_dist):
 
     tracks_a_new = tracks_a.copy()
     tracks_b_new = tracks_b.copy()
-
+    tracks_b_new['opt_track_id'] = np.nan
+    tracks_a_new['opt_track_id'] = np.nan
     for i in range(len(col_ind)):
-        tracks_a_new.at[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
-        tracks_b_new.at[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
+        tracks_a_new.loc[tracks_a['id'] == ids_a[row_ind[i]], 'opt_track_id'] = ids_b[col_ind[i]]
+        tracks_b_new.loc[tracks_b['id'] == ids_b[col_ind[i]], 'opt_track_id'] = ids_a[row_ind[i]]
 
     return tracks_a_new, tracks_b_new, cost[row_ind, col_ind]
 
@@ -301,20 +302,20 @@ def track_set_error(ground_truth, estimated_tracks, max_dist):
     print('Time to run ospa: {:.2f}s'.format(t1 - t0))
 
     performance_measures = {
-        'alpha': alpha,
-        'beta': beta,
+        'alpha': float(alpha),
+        'beta': float(beta),
         'TP Tracks': TP,
         'FN Tracks': FN,
         'FP Tracks': FP,
         'JSC Tracks': JSC,
-        'RMSE': rmse,
-        'Min': min_error,
-        'Max': max_error,
-        'SD': sd,
-        'TP Positions': TP_positions,
-        'FN Positions': FN_positions,
-        'FP Positions': FP_positions,
-        'JSC Positions': JSC_positions,
-        'OSPA': ospa
+        'RMSE': float(rmse),
+        'Min': float(min_error),
+        'Max': float(max_error),
+        'SD': float(sd),
+        'TP Positions': int(TP_positions),
+        'FN Positions': int(FN_positions),
+        'FP Positions': int(FP_positions),
+        'JSC Positions': float(JSC_positions),
+        'OSPA': float(ospa)
     }
     return performance_measures

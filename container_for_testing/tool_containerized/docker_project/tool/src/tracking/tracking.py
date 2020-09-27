@@ -36,7 +36,7 @@ class Tracker:
     Attributes:
         video_file (str): Input video sequence.
         fps (int): Frame frequency.
-        px2um (float): Scale of the image.
+        um_per_px (float): Scale of the image.
 
         detection_algorithm (int): Detection algorithm.
                                     0 = MatLab implementation
@@ -62,9 +62,9 @@ class Tracker:
         self.fps = int(params['fps'])
 
         if isinstance(params['px2um'], (int, float)) or params['px2um'].replace('.', '', 1).isdigit():
-            self.px2um = float(params['px2um'])
+            self.um_per_px = float(params['px2um'])
         else:
-            self.px2um = None
+            self.um_per_px = None
 
         self.detection_algorithm = int(params['detection_algorithm'])
         self.mtt_algorithm = int(params['mtt_algorithm'])
@@ -78,8 +78,8 @@ class Tracker:
             print(tiff.asarray().shape)
             print(params['video_input'])
             tiff_resolution = tiff.pages[0].tags['XResolution'].value
-            if self.px2um is None:
-                self.px2um = tiff_resolution[1] / tiff_resolution[0]
+            if self.um_per_px is None:
+                self.um_per_px = tiff_resolution[1] / tiff_resolution[0]
             self.sequence = tiff.asarray()
             raise ValueError('TESTING')
         else:
@@ -103,7 +103,7 @@ class Tracker:
         detections = None
         if self.detection_algorithm == 1:
             # Python implementation for segmentation and detection
-            detections = evaluation(self.sequence, self.px2um)
+            detections = evaluation(self.sequence, self.um_per_px)
             detections.to_csv(detections_file)
         elif self.detection_algorithm == 2:
             # Python implementation for segmentation and detection (campo claro)
@@ -148,7 +148,7 @@ class Tracker:
         ROIy = self.sequence.shape[1]
 
         self.octave.Tracker(detections_file, mp4_video, output_video, tracks_file, reformat_detections_file, num_frames,
-                            self.fps, self.px2um, ROIx, ROIy, self.mtt_algorithm,  self.PG, self.PD, self.gv,
+                            self.fps, self.um_per_px, ROIx, ROIy, self.mtt_algorithm,  self.PG, self.PD, self.gv,
                             plot_results, save_movie, snap_shot, plot_track_results, analyze_motility, nout=0)
         self.octave.clear_all(nout=0)
 
@@ -156,7 +156,7 @@ class Tracker:
         tracks.columns = ['id', 'x', 'y', 'frame']
         tracks['fluorescence'] = np.nan
         tracks = tracks[['id', 'x', 'y', 'fluorescence', 'frame']]
-        tracks[['x', 'y']] = tracks[['x', 'y']] / self.px2um
+        tracks[['x', 'y']] = tracks[['x', 'y']] / self.um_per_px
 
         # fluorescence
         if self.detection_algorithm != 2:
@@ -171,7 +171,7 @@ class Tracker:
         tracks_file = os.path.join(self.outdir + "/tracks/", self.basename + '_tracks.csv')
         os.makedirs(self.outdir + '/who_measures', exist_ok=True)
         who_file = self.outdir + '/who_measures'
-        get_casa_measures(tracks_file, who_file, self.px2um, self.fps)
+        get_casa_measures(tracks_file, who_file, self.um_per_px, self.fps)
 
     def who_classification(self):
         files = os.listdir(self.outdir + '/who_measures')

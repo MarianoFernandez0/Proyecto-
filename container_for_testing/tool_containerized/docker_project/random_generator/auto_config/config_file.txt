@@ -20,7 +20,7 @@
 	seed : -1
 
 [PopulationA]
-	tot_particles : 17
+	tot_particles : 60
 	color : 1 0 0
 	#dimensions
 	mean : 8 2
@@ -39,7 +39,7 @@
 
 
 [PopulationB]
-	tot_particles : 9
+	tot_particles : 68
 	color : 1 0 0
 	#dimensions
 	mean : 9 2
@@ -58,7 +58,7 @@
 
 
 [PopulationC]
-	tot_particles : 62
+	tot_particles : 68
 	color : 1 0 0
 	#dimensions
 	mean : 9 2
@@ -77,7 +77,7 @@
 
 
 [PopulationD]
-	tot_particles : 104
+	tot_particles : 63
 	color: 1 0 0
 	#dimensions
 	mean : 9 2
