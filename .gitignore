@@ -11,8 +11,8 @@ video_sequence/
 *.jpg
 *.mp4
 *.zip
-bin/jpdaf*
-bin/gospapy*
-development/tracking/test
-tracking_algorithm_evaluation/python_plus_octave/data
+*/bin/jpdaf*
+*/bin/gospapy*
+*/development/tracking/test
+*/tracking_algorithm_evaluation/python_plus_octave/data
 *.avi
