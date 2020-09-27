@@ -39,7 +39,6 @@ def get_errors(tracker, folder_path):
     max_dist = (tracker.gv / (tracker.um_per_px * tracker.fps))
     gt_file = [gt_file for gt_file in os.listdir(folder_path) if 'who' not in gt_file.lower()]
     gt_file = os.path.join(folder_path, gt_file[0])
-
     gt_tracks = pd.read_csv(gt_file)
     tracks = pd.read_csv(tracks_file)
     gt_tracks.rename(columns={'id_particle': 'id'})

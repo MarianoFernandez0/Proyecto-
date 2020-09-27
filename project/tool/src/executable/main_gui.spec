@@ -2,14 +2,14 @@
 import os
 block_cipher = None
 
-octave_scripts = [(os.path.join('src/SpermTrackingProject', s), 'src/SpermTrackingProject')
+octave_scripts = [(os.path.join('../SpermTrackingProject', s), 'SpermTrackingProject')
                   for s in os.listdir('src/SpermTrackingProject')]
-octave_kernel = [('src/oct2py/kernel.json', 'octave_kernel')]
-oct2py_data = [('src/oct2py/_pyeval.m', 'oct2py')]
+octave_kernel = [('../oct2py/kernel.json', 'octave_kernel')]
+oct2py_data = [('../oct2py/_pyeval.m', 'oct2py')]
 
 data = octave_scripts + octave_kernel + oct2py_data
 
-a = Analysis(['main_gui.py'],
+a = Analysis(['../../main_gui.py'],
              pathex=[''],
 
              binaries=[],

@@ -2,11 +2,10 @@ import cv2
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-import skimage.color as color
-
-from tool.src.detection.segmentation import segmentation
-from tool.src.fluorescence.fluorescence import fluorescence
-from tool.src.detection.detection import detect_particles, size_filter
+# import skimage.color as color
+from src.detection.segmentation import segmentation
+from src.fluorescence.fluorescence import fluorescence
+from src.detection.detection import detect_particles, size_filter
 
 
 def evaluation(sequence, pixel_size, include_mask=False):
@@ -33,7 +32,8 @@ def evaluation(sequence, pixel_size, include_mask=False):
         particles = detect_particles(seg_img)
         particles = size_filter(particles, pixel_size=[pixel_size, pixel_size])
 
-        image_bw = color.rgb2gray(image)
+        image_bw = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        # image_bw = color.rgb2gray(image)
         grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
         for index, row in particles.iterrows():
             # fluorescencia
