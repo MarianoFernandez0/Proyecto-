@@ -179,7 +179,7 @@ class Tracker:
         df_measures = pd.read_csv(file)
         df_classified = classification(df_measures)
         os.makedirs(self.outdir + '/who_classification', exist_ok=True)
-        classification_file = self.outdir + '/who_classification/' + self.basename + '_who_classification,csv'
+        classification_file = self.outdir + '/who_classification/' + self.basename + '_who_classification.csv'
         df_classified.to_csv(classification_file)
 
 
