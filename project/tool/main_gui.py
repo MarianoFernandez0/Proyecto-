@@ -1,7 +1,7 @@
 import os
 import PySimpleGUI as sg
-from tool.src.tracking.tracking import Tracker, delete_tmp
-from tool.src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
+from src.tracking.tracking import Tracker
+from src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
 
 
 if __name__ == '__main__':
@@ -19,4 +19,3 @@ if __name__ == '__main__':
         tracks_video = save_vid_gui(tracks, os.path.dirname(tracks_csv))
         if tracks_video:
             tracker.save_vid(tracks_file=tracks_csv, video_file=tracks_video)
-    delete_tmp()

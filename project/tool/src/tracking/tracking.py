@@ -1,35 +1,38 @@
 import os
 import sys
-import json
-import shutil
 import tifffile
 import numpy as np
 import pandas as pd
 from imageio import mimwrite, mimread
-from tool.src.vis.draw_tracks import draw_tracks
-from tool.src.detection.evaluation import evaluation
-from tool.src.detection.gray_detection import gray_evaluation
-from tool.src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
+from src.vis.draw_tracks import draw_tracks
+from src.detection.evaluation import evaluation
+from src.detection.gray_detection import gray_evaluation
+from src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
+import tempfile
 
 
-if getattr(sys, 'frozen', False):
+if getattr(sys, 'frozen', False):  # if running from executable
     application_path = sys._MEIPASS
     TOOL_PATH = application_path.split(sep='/')
-    TOOL_PATH.pop(-1)
-    TOOL_PATH.pop(-1)
-    TOOL_PATH.insert(0, '/')
+    TOOL_PATH[0] = '/'
     os.environ["OCTAVE_KERNEL_JSON"] = os.path.join('/', *TOOL_PATH, 'octave_kernel/kernel.json')
-else:
+    import oct2py
+    tmp = tempfile.TemporaryDirectory()
+    octave = oct2py.Oct2Py(temp_dir=tmp.name)
+    octave.addpath(os.path.join(*TOOL_PATH, 'SpermTrackingProject'))
+    octave.addpath(os.path.join(*TOOL_PATH, 'oct2py'))
+
+else:  # if running from python script
     application_path = os.path.dirname(os.path.abspath(__file__))
     TOOL_PATH = application_path.split(sep='/')
     TOOL_PATH.pop(-1)
     TOOL_PATH.pop(-1)
-import oct2py
-TOOL_PATH[0] = '/'
-os.makedirs(os.path.join(*TOOL_PATH, 'tmp'), exist_ok=True)
-octave = oct2py.Oct2Py(temp_dir=os.path.join(*TOOL_PATH, 'tmp'))
-octave.addpath(os.path.join(*TOOL_PATH, 'src/SpermTrackingProject'))
-octave.addpath(os.path.join(*TOOL_PATH, 'src/oct2py'))
+    TOOL_PATH[0] = '/'
+    import oct2py
+    tmp = tempfile.TemporaryDirectory()
+    octave = oct2py.Oct2Py(temp_dir=tmp.name)
+    octave.addpath(os.path.join(*TOOL_PATH, 'src/SpermTrackingProject'))
+    octave.addpath(os.path.join(*TOOL_PATH, 'src/oct2py'))
 
 
 class Tracker:
@@ -169,7 +172,3 @@ class Tracker:
         del config['algorithms']
         with open(os.path.join(folder, 'config.txt'), 'w') as file:
             print(config, file=file)
-
-
-def delete_tmp():
-    shutil.rmtree(os.path.join(*TOOL_PATH, 'tmp'))
