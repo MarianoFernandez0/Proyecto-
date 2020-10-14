@@ -71,7 +71,7 @@ def make_sequence(sequence_parameters, all_population):
     frame_rate = np.lcm.reduce(np.array(frame_rates, dtype='int'))
     np.random.seed(seed)
     print('Making sequence for %dHz' % frame_rate)
-    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+    df_info = pd.DataFrame(columns=['id', 'x', 'y', 'fluorescence', 'frame'])
     next_id = 0
     frames = int(np.round(duration * frame_rate, 0))
     time_step = 1 / frame_rate

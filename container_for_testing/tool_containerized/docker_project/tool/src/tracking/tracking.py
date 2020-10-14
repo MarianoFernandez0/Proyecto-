@@ -10,6 +10,7 @@ from tool.src.detection.gray_detection import gray_evaluation
 from tool.src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
 from tool.src.who_measures.get_who_measures import get_casa_measures
 from tool.src.classification.classification_WHO import classification
+from tool.src.vis.draw_tracks import draw_tracks
 
 if getattr(sys, 'frozen', False):
     application_path = sys._MEIPASS
@@ -181,6 +182,16 @@ class Tracker:
         os.makedirs(self.outdir + '/who_classification', exist_ok=True)
         classification_file = self.outdir + '/who_classification/' + self.basename + '_who_classification.csv'
         df_classified.to_csv(classification_file)
+
+    def save_vid(self):
+        tracks_file = self.outdir + "/tracks/" + self.basename + '_tracks.csv'
+        video_file = self.outdir + "/" + self.basename + '.mp4'
+        tracks = pd.read_csv(tracks_file)
+        tracks_array = tracks.to_numpy()
+        tracks_array[np.isnan(tracks_array)] = 0
+        tracks_array = tracks_array[tracks_array[:, 4] < tracks_array[:, 4].max()]
+        sequence_tracks = draw_tracks(self.sequence, tracks_array, text=(self.detection_algorithm != 2))
+        mimwrite(video_file, sequence_tracks, format='mp4', fps=self.fps)
 
 
 def delete_tmp():
