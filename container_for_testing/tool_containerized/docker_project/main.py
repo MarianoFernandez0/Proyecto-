@@ -1,15 +1,15 @@
 from tool.src.tracking.tracking import Tracker, delete_tmp
 from tool.src.error_measures.error_measures import track_set_error
-from random_generator.generate_random_dataset import generate_config_file
 from tool.src.who_measures.get_who_measures import get_casa_measures
+from random_generator.generate_random_dataset import generate_config_file
 import os
 import json
-import shutil
-import argparse
-import pandas as pd
-import numpy as np
 import time
+import shutil
 import warnings
+import argparse
+import numpy as np
+import pandas as pd
 
 warnings.filterwarnings('ignore')
 
@@ -72,13 +72,13 @@ def update_measures(ds_num, freq, measures_freq, measures_freq_gt):
     path_gt = '../data/datasets/dataset_{}/{}/dataset_{}Hz_data_WHO.csv'.format(ds_num, freq, freq)
     path_tracking = '../data/datasets/dataset_{}/{}/inference/output/who_measures/dataset_{}Hz_tracks_WHO.csv'.format(ds_num, freq, freq)
     who_gt = np.genfromtxt(path_gt, dtype=float, delimiter=',', names=True)
-    who_tk = np.genfromtxt(path_tracking, dtype= float, delimiter=',', names=True)
+    who_tk = np.genfromtxt(path_tracking, dtype=float, delimiter=',', names=True)
     for k in map_keys:
         measures_freq[freq][k].append(np.nanmean(who_tk[map_keys[k]]))
         print('mean trakcer {}: '.format(k), np.nanmean(who_tk[map_keys[k]]))
         measures_freq_gt[freq][k].append(np.nanmean(who_gt[map_keys[k]]))
         print('mean gt {}: '.format(k), np.nanmean(who_gt[map_keys[k]]))
-    #shutil.rmtree('../data/datasets/dataset_{}'.format(ds_num))
+    # shutil.rmtree('../data/datasets/dataset_{}'.format(ds_num))
 
     print(path_gt)
     print(path_tracking)
@@ -118,6 +118,7 @@ if __name__ == "__main__":
         'fluo': 'fluo'
     }
 
+
     measures_freq = {}
     measures_freq_gt = {}
 
@@ -141,8 +142,8 @@ if __name__ == "__main__":
         freqs = os.listdir(dataset_path)
         for freq in freqs:
             if not freq in measures_freq.keys():
-                measures_freq[freq] = measures
-                measures_freq_gt[freq] = measures
+                measures_freq[freq] = measures.copy()
+                measures_freq_gt[freq] = measures.copy()
             # Organize the data to do the tracking
             freq_path = os.path.join(dataset_path, freq)
             video = [v for v in os.listdir(freq_path) if v.endswith('.mp4')][0]
@@ -160,6 +161,9 @@ if __name__ == "__main__":
             os.remove(input_tracker_path)
             organize_output(os.path.join(dataset_path, freq))
             measures_freq, measures_freq_gt = update_measures(dataset, freq, measures_freq, measures_freq_gt)
+            print("----------------------------------------------------------------------------")
+            print(measures_freq == measures_freq_gt)
+            print("----------------------------------------------------------------------------")
             if time.time() - timer > 600:
                 save_results(measures_freq, measures_freq_gt)
                 timer = time.time()
@@ -167,7 +171,7 @@ if __name__ == "__main__":
     #delete_tmp()
 
     with open('//data/final_analysis_tracker.json', 'w') as file:
-        json.dump(measures_freq, file)
+        json.dump(measures_freq, file, indent=4)
 
     with open('//data/final_analysis_gt.json', 'w') as file:
         json.dump(measures_freq_gt, file)
