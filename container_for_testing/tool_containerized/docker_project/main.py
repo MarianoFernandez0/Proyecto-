@@ -27,7 +27,7 @@ def organize_datasets(ds_number, path='datasets'):
         shutil.move(os.path.join(path, 'data_sequence', datasets[i]), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]))
         who_measures(os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, datasets[i]), float(f))
         video_file = str(datasets[i].split('_data.csv')[0]) + str('.mp4')
-        #shutil.copy(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), 'video_sequence', video_file))
+        # shutil.copy(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), 'video_sequence', video_file))
         shutil.move(os.path.join(path, 'video_sequence/mp4_output', video_file), os.path.join('../data/datasets/dataset_{}'.format(ds_number), f, video_file))
     shutil.rmtree(os.path.join(path))
     return '../data/datasets/dataset_{}'.format(ds_number)
@@ -75,13 +75,9 @@ def update_measures(ds_num, freq, measures_freq, measures_freq_gt):
     who_tk = np.genfromtxt(path_tracking, dtype=float, delimiter=',', names=True)
     for k in map_keys:
         measures_freq[freq][k].append(np.nanmean(who_tk[map_keys[k]]))
-        print('mean trakcer {}: '.format(k), np.nanmean(who_tk[map_keys[k]]))
         measures_freq_gt[freq][k].append(np.nanmean(who_gt[map_keys[k]]))
-        print('mean gt {}: '.format(k), np.nanmean(who_gt[map_keys[k]]))
     # shutil.rmtree('../data/datasets/dataset_{}'.format(ds_num))
 
-    print(path_gt)
-    print(path_tracking)
 
     return measures_freq, measures_freq_gt
 
@@ -90,9 +86,9 @@ def save_results(measures_freq, measures_freq_gt):
     out_path_2 = '//data/final_analysis_gt.json'
 
     with open(out_path_1, 'w') as f:
-        json.dump(measures_freq, f)
+        json.dump(measures_freq, f, indent=4)
     with open(out_path_2, 'w') as f:
-        json.dump(measures_freq_gt, f)
+        json.dump(measures_freq_gt, f, indent=4)
 
 
 
@@ -101,7 +97,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--in_tracker', default='../data/input/sequence', help='Path where to move the synthetic data')
     parser.add_argument('--config_file', default='../data/input/config/config_tracking.json', help='Path to the config file for the tracker')
-    parser.add_argument('--loops', default=2, help='Number of datasets in which the tool is tested')
+    parser.add_argument('--loops', default=5, help='Number of datasets in which the tool is tested')
     parser.add_argument('--shared_folder', default='../data', help='Folder shared between the docker and host')
     args = parser.parse_args()
 
@@ -142,21 +138,37 @@ if __name__ == "__main__":
         freqs = os.listdir(dataset_path)
         for freq in freqs:
             if not freq in measures_freq.keys():
-                # measures_freq[freq] = measures.copy()
-                # measures_freq_gt[freq] = measures.copy()
-                measures_freq[freq] = {}
-                for measure in measures_list:
-                    measures_freq[freq][measure] = []
-                measures_freq_gt[freq] = {}
-                for measure in measures_list:
-                    measures_freq_gt[freq][measure] = []
-            measures_freq[freq]['vcl'].append(2)
+                measures_freq[freq] = {
+                    'vcl': [],
+                    'vsl': [],
+                    'vap': [],
+                    'alh': [],
+                    'lin': [],
+                    'wob': [],
+                    'str': [],
+                    'bcf': [],
+                    'mad': [],
+                    'fluo': []
+                }
+                measures_freq_gt[freq] = {
+                    'vcl': [],
+                    'vsl': [],
+                    'vap': [],
+                    'alh': [],
+                    'lin': [],
+                    'wob': [],
+                    'str': [],
+                    'bcf': [],
+                    'mad': [],
+                    'fluo': []
+                }
             # Organize the data to do the tracking
             freq_path = os.path.join(dataset_path, freq)
             video = [v for v in os.listdir(freq_path) if v.endswith('.mp4')][0]
             input_tracker_path = os.path.join(args.in_tracker, video)
             os.makedirs(os.path.join(*input_tracker_path.split(sep='/')[:-1]), exist_ok=True)
-            shutil.move(os.path.join(freq_path, video), input_tracker_path)
+            # Poner move para borrar el video
+            shutil.copy(os.path.join(freq_path, video), input_tracker_path)
             # Loading the config file and changing only the video path and fps
             with open(args.config_file, 'r') as file:
                 config = json.load(file)
@@ -168,9 +180,6 @@ if __name__ == "__main__":
             os.remove(input_tracker_path)
             organize_output(os.path.join(dataset_path, freq))
             measures_freq, measures_freq_gt = update_measures(dataset, freq, measures_freq, measures_freq_gt)
-            print("----------------------------------------------------------------------------")
-            print(measures_freq == measures_freq_gt)
-            print("----------------------------------------------------------------------------")
             if time.time() - timer > 600:
                 save_results(measures_freq, measures_freq_gt)
                 timer = time.time()
@@ -181,7 +190,7 @@ if __name__ == "__main__":
         json.dump(measures_freq, file, indent=4)
 
     with open('//data/final_analysis_gt.json', 'w') as file:
-        json.dump(measures_freq_gt, file)
+        json.dump(measures_freq_gt, file, indent=4)
 
 
 
