@@ -134,7 +134,7 @@ if __name__ == "__main__":
         'mad': [],
         'fluo': []
     }
-
+    measures_list = ['vcl', 'vsl', 'vap', 'alh', 'lin', 'wob', 'str', 'bcf', 'mad', 'fluo']
     timer = time.time()
     for dataset in range(args.loops):
         generate_config_file()
@@ -142,8 +142,15 @@ if __name__ == "__main__":
         freqs = os.listdir(dataset_path)
         for freq in freqs:
             if not freq in measures_freq.keys():
-                measures_freq[freq] = measures.copy()
-                measures_freq_gt[freq] = measures.copy()
+                # measures_freq[freq] = measures.copy()
+                # measures_freq_gt[freq] = measures.copy()
+                measures_freq[freq] = {}
+                for measure in measures_list:
+                    measures_freq[freq][measure] = []
+                measures_freq_gt[freq] = {}
+                for measure in measures_list:
+                    measures_freq_gt[freq][measure] = []
+            measures_freq[freq]['vcl'].append(2)
             # Organize the data to do the tracking
             freq_path = os.path.join(dataset_path, freq)
             video = [v for v in os.listdir(freq_path) if v.endswith('.mp4')][0]
