@@ -1,11 +1,11 @@
 import json
 import argparse
-from tool.src.tracking.tracking import Tracker, delete_tmp
+from src.tracking.tracking import Tracker
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Estimate tracks from video sequence.')
-    parser.add_argument('--config', default='input/configs/tracking_config_test.json', type=str,
+    parser.add_argument('--config', default='input/configs/config.json', type=str,
                         help='Config file with the tracking parameters.')
     parser.add_argument('--save_vid', action='store_true', default=True, help='Save video with drawn tracks.')
     args = parser.parse_args()
@@ -14,7 +14,13 @@ if __name__ == '__main__':
         config = json.load(f)
 
     tracker = Tracker(params=config)
-    tracker.detect(detections_file=config['detections_csv'])
-    tracker.track(detections_file=config['detections_csv'], tracks_file=config['tracks_csv'])
-    tracker.save_vid(tracks_file=config['tracks_csv'], video_file=config['tracks_video'])
-    delete_tmp()
+    # detect
+    tracker.detect()
+    # track
+    tracks = tracker.track()
+    # save_vid
+    tracker.save_vid()
+    # who_measures
+    tracker.who_measures()
+    # who_classification
+    tracker.who_classification()

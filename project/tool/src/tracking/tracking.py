@@ -6,11 +6,13 @@ import numpy as np
 import pandas as pd
 from imageio import mimwrite, mimread
 from src.vis.draw_tracks import draw_tracks
+from src.vis.detections import draw_dets
 from src.detection.evaluation import evaluation
 from src.detection.gray_detection import gray_evaluation
 from src.fluorescence.add_fluorescence import add_fluorescence_to_tracks
 from src.who_measures.get_who_measures import get_casa_measures
 from src.classification.classification_WHO import classification
+import cv2
 
 if getattr(sys, 'frozen', False):  # if running from executable
     application_path = sys._MEIPASS
@@ -65,6 +67,8 @@ class Tracker:
         self.PG = float(params['PG'])
         self.PD = float(params['PD'])
         self.gv = float(params['gv'])
+        self.particle_size = float(params['particle_size'])
+        self.min_len = float(params['min_trk_len'])
 
         vid_format = params['video_input'].split(sep='.')[-1]
         if vid_format == 'tif':
@@ -83,6 +87,7 @@ class Tracker:
         config = self.__dict__.copy()
         del config['octave']
         del config['algorithms']
+        del config['sequence']
         with open(os.path.join(self.out_dir, 'config.txt'), 'w') as file:
             print(config, file=file)
 
@@ -130,16 +135,17 @@ class Tracker:
         plot_track_results = 0
         analyze_motility = 0
 
-        reformat_detections_file = self.detection_algorithm
+        reformat_detections_file = self.detection_algorithm != 'Octave'
         num_frames = self.sequence.shape[0]
         ROIx = self.sequence.shape[2]
         ROIy = self.sequence.shape[1]
 
         mtt_algorithm = self.algorithms.index(self.mtt_algorithm) + 1
-
-        self.octave.Tracker(detections_file, mp4_video, output_video, tracks_file, reformat_detections_file, num_frames,
-                            self.fps, self.um_per_px, ROIx, ROIy, mtt_algorithm,  self.PG, self.PD, self.gv,
-                            plot_results, save_movie, snap_shot, plot_track_results, analyze_motility, nout=0)
+        particle_size = self.particle_size
+        self.octave.Tracker(detections_file, mp4_video, output_video, tracks_file, int(reformat_detections_file),
+                            num_frames, self.fps, self.um_per_px, ROIx, ROIy, mtt_algorithm,  self.PG, self.PD, self.gv,
+                            particle_size, plot_results, save_movie, snap_shot, plot_track_results, analyze_motility,
+                            nout=0)
         self.octave.clear_all(nout=0)
 
         tracks = pd.read_csv(tracks_file)
@@ -152,9 +158,17 @@ class Tracker:
         if self.detection_algorithm != 'Brightfield':
             detections = pd.read_csv(detections_file)
             tracks = add_fluorescence_to_tracks(detections, tracks)
-        tracks.to_csv(tracks_file, index=False)
-        os.remove(mp4_video)
 
+        # filter short tracks
+        track_ids = tracks['id'].unique()
+        if self.min_len:
+            for track_id in track_ids:
+                track = tracks[tracks['id'] == track_id]
+                if len(track) < self.min_len:
+                    tracks[tracks['id'] == track_id] = -1
+        tracks = tracks[tracks['id'] != -1]
+        os.remove(mp4_video)
+        tracks.to_csv(tracks_file, index=False)
         return tracks
 
     def save_vid(self):
@@ -165,8 +179,11 @@ class Tracker:
         tracks_array = tracks.to_numpy()
         tracks_array[np.isnan(tracks_array)] = 0
         tracks_array = tracks_array[tracks_array[:, 4] < tracks_array[:, 4].max()]
+        dets = pd.read_csv(os.path.join(self.out_dir, 'detections.csv'))
         sequence_tracks = draw_tracks(self.sequence, tracks_array, text=(self.detection_algorithm != 2))
-        mimwrite(video_file, sequence_tracks, format='mp4', fps=self.fps)
+        vid_sequence = draw_dets(sequence_tracks, dets)
+
+        mimwrite(video_file, vid_sequence, format='mp4', fps=self.fps)
 
     def who_measures(self):
         tracks_file = os.path.join(self.out_dir, 'trajectories.csv')

@@ -13,15 +13,17 @@ def display_input_gui():
     sg.theme('Dark Blue 3')
 
     advanced_section = [[sg.Text('Algorithm params')],
-                           [sg.Text(' detection algorithm: '),
-                            sg.Combo(values=['Fluorescence', 'Brightfield', 'Octave'], key='detection_algorithm',
-                                     default_value='Fluorescence')],
-                           [sg.Text(' mtt_algorithm:       '),
-                            sg.Combo(values=['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF'], key='mtt_algorithm',
-                                     default_value='ENNJPDAF')],
-                           [sg.Text(' PG:                  '), sg.InputText('0.997', key='PG', size=(7, 1))],
-                           [sg.Text(' PD:                  '), sg.InputText('0.999', key='PD', size=(7, 1))],
-                           [sg.Text(' gv:                  '), sg.InputText('100', key='gv', size=(7, 1))]]
+                        [sg.Text(' detection algorithm: '),
+                         sg.Combo(values=['Fluorescence', 'Brightfield', 'Octave'], key='detection_algorithm',
+                                  default_value='Fluorescence')],
+                        [sg.Text(' mtt_algorithm:       '),
+                         sg.Combo(values=['NN', 'GNN', 'PDAF', 'JPDAF', 'ENNJPDAF'], key='mtt_algorithm',
+                                  default_value='ENNJPDAF')],
+                        [sg.Text(' PG:                  '), sg.InputText('1', key='PG', size=(7, 1))],
+                        [sg.Text(' PD:                  '), sg.InputText('0.95', key='PD', size=(7, 1))],
+                        [sg.Text(' gv:                  '), sg.InputText('200', key='gv', size=(7, 1))],
+                        [sg.Text(' particle_len:                  '), sg.InputText('10', key='gv', size=(7, 1))],
+                        [sg.Text(' min_trk_len:                  '), sg.InputText('10', key='gv', size=(7, 1))]]
 
     section = [
         [sg.Text('TDE', font='Courier 25')],

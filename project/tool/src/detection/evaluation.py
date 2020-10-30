@@ -31,8 +31,10 @@ def evaluation(sequence, pixel_size, include_mask=False):
         seg_img = segmentation(image)
         particles = detect_particles(seg_img)
         particles = size_filter(particles, pixel_size=[pixel_size, pixel_size])
-
-        image_bw = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        if len(image.shape) > 2:
+            image_bw = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        else:
+            image_bw = image
         # image_bw = color.rgb2gray(image)
         grayscale = np.uint8(np.round(((image_bw - np.min(image_bw)) / (np.max(image_bw) - np.min(image_bw)) * 255)))
         for index, row in particles.iterrows():
