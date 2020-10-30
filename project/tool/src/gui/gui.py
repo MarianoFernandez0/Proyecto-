@@ -22,8 +22,8 @@ def display_input_gui():
                         [sg.Text(' PG:                  '), sg.InputText('1', key='PG', size=(7, 1))],
                         [sg.Text(' PD:                  '), sg.InputText('0.95', key='PD', size=(7, 1))],
                         [sg.Text(' gv:                  '), sg.InputText('200', key='gv', size=(7, 1))],
-                        [sg.Text(' particle_len:                  '), sg.InputText('10', key='gv', size=(7, 1))],
-                        [sg.Text(' min_trk_len:                  '), sg.InputText('10', key='gv', size=(7, 1))]]
+                        [sg.Text(' particle_len:        '), sg.InputText('10', key='particle_len', size=(7, 1))],
+                        [sg.Text(' min_trk_len:         '), sg.InputText('10', key='min_trk_len', size=(7, 1))]]
 
     section = [
         [sg.Text('TDE', font='Courier 25')],

@@ -67,7 +67,7 @@ class Tracker:
         self.PG = float(params['PG'])
         self.PD = float(params['PD'])
         self.gv = float(params['gv'])
-        self.particle_size = float(params['particle_size'])
+        self.particle_size = float(params['particle_len'])
         self.min_len = float(params['min_trk_len'])
 
         vid_format = params['video_input'].split(sep='.')[-1]
