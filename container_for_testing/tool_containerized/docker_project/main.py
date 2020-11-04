@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--in_tracker', default='../data/input/sequence', help='Path where to move the synthetic data')
     parser.add_argument('--config_file', default='../data/input/config/config_tracking.json', help='Path to the config file for the tracker')
-    parser.add_argument('--loops', default=5, help='Number of datasets in which the tool is tested')
+    parser.add_argument('--loops', default=6, help='Number of datasets in which the tool is tested')
     parser.add_argument('--shared_folder', default='../data', help='Folder shared between the docker and host')
     args = parser.parse_args()
 
@@ -114,22 +114,8 @@ if __name__ == "__main__":
         'fluo': 'fluo'
     }
 
-
     measures_freq = {}
     measures_freq_gt = {}
-
-    measures = {
-        'vcl': [],
-        'vsl': [],
-        'vap': [],
-        'alh': [],
-        'lin': [],
-        'wob': [],
-        'str': [],
-        'bcf': [],
-        'mad': [],
-        'fluo': []
-    }
 
     timer = time.time()
     for dataset in range(args.loops):
@@ -137,7 +123,7 @@ if __name__ == "__main__":
         dataset_path = organize_datasets(dataset)
         freqs = os.listdir(dataset_path)
         for freq in freqs:
-            if not freq in measures_freq.keys():
+            if not freq in list(measures_freq.keys()):
                 measures_freq[freq] = {
                     'vcl': [],
                     'vsl': [],
@@ -167,8 +153,8 @@ if __name__ == "__main__":
             video = [v for v in os.listdir(freq_path) if v.endswith('.mp4')][0]
             input_tracker_path = os.path.join(args.in_tracker, video)
             os.makedirs(os.path.join(*input_tracker_path.split(sep='/')[:-1]), exist_ok=True)
-            # Poner move para borrar el video
-            shutil.copy(os.path.join(freq_path, video), input_tracker_path)
+            # Poner move para borrar el video, copy para no borrarlo
+            shutil.move(os.path.join(freq_path, video), input_tracker_path)
             # Loading the config file and changing only the video path and fps
             with open(args.config_file, 'r') as file:
                 config = json.load(file)
@@ -180,9 +166,7 @@ if __name__ == "__main__":
             os.remove(input_tracker_path)
             organize_output(os.path.join(dataset_path, freq))
             measures_freq, measures_freq_gt = update_measures(dataset, freq, measures_freq, measures_freq_gt)
-            if time.time() - timer > 600:
-                save_results(measures_freq, measures_freq_gt)
-                timer = time.time()
+            save_results(measures_freq, measures_freq_gt)
 
     #delete_tmp()
 

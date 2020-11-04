@@ -143,13 +143,13 @@ class Tracker:
         plot_track_results = 0
         analyze_motility = 0
 
-        reformat_detections_file = self.detection_algorithm
+        reformat_detections_file = self.detection_algorithm > 0
         num_frames = self.sequence.shape[0]
         ROIx = self.sequence.shape[2]
         ROIy = self.sequence.shape[1]
 
         self.octave.Tracker(detections_file, mp4_video, output_video, tracks_file, reformat_detections_file, num_frames,
-                            self.fps, self.um_per_px, ROIx, ROIy, self.mtt_algorithm,  self.PG, self.PD, self.gv,
+                            self.fps, self.um_per_px, ROIx, ROIy, self.mtt_algorithm,  self.PG, self.PD, self.gv, 10,
                             plot_results, save_movie, snap_shot, plot_track_results, analyze_motility, nout=0)
         self.octave.clear_all(nout=0)
 
