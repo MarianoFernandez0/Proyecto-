@@ -9,7 +9,7 @@
 %
 % /////////////////////////////////////////////////////////////////////// %
 
-function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy, mttAlgorithm, PG, PD, gv, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility)
+function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile, numFrames, fps, px2um, ROIx, ROIy, mttAlgorithm, PG, PD, gv, particle_size, plotResults, saveMovie, snapShot, plotTrackResults, analyzeMotility)
 	pkg load statistics
 	pkg load video
 	pkg load image
@@ -22,7 +22,6 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 	if reformat_dataFile
 		zTotal_aux = csvread(dataFile);
 		zTotal = zTotal_aux(:,[3 2 4])';
-		
 	else
 		zTotal = csvread(dataFile);
 	end
@@ -35,7 +34,7 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 	um2px = 1/px2um;
 
 	% Initalize Filter
-	T = 1/10;   % (sec) sample period
+	T = 1/fps;   % (sec) sample period
 
 	% Dynamical System & Measurement Equation
 	F = [1 0 T 0; 0 1 0 T; 0 0 1 0; 0 0 0 1];
@@ -47,15 +46,15 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 
 	% CWNA Process Noise
 	qMat = [T^3/3 0 T^2/2 0; 0 T^3/3 0 T^2/2; T^2/2 0 T 0; 0 T^2/2 0 T];
-	%deltaV = 20;                             %--------MODIFICADO
-	deltaV = 80;                              %--------MODIFICADO
+	deltaV = 20;                             %--------MODIFICADO
+	%deltaV = 80;                              %--------MODIFICADO
 	qIntensity = deltaV^2/T;                  %--------MODIFICADO
-	qIntensity = 20;                  	   %--------MODIFICADO
+	%qIntensity = 20;                  	   %--------MODIFICADO
 	Q0 = qMat * qIntensity;
 
 	% Initial covariance matrix
-	P0 = [N N./T; N./T 2*N./T^2];  		%MODIFICADO Este anda mejor
-	%P0 = Q0; % [2^2 0 0 0; 0 2^2 0 0; 0 0 1 0; 0 0 0 1];
+	%P0 = [N N./T; N./T 2*N./T^2];  		%MODIFICADO Este anda mejor
+	P0 = Q0; % [2^2 0 0 0; 0 2^2 0 0; 0 0 1 0; 0 0 0 1];
 
 	% Initial residual covariance matrix
 	S0 = H * P0 * H' + N;
@@ -64,23 +63,24 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 
 	% Expected number of measurements due to clutter per unit area of the
 	% surveillance space per scan of data
-	lam_f = 1e-8;
+	lam_f = 1e-6;
 
 	% Expected number of measurements from new targets per unit area of the
 	% surveillance space per scan of data
-	lam_n = 1e-3;
+	lam_n = 1e-5;
 
 	% Track Management Thresholds
 	initialScore = log(lam_n/lam_f);
 	Pdelete = 1e-6;
-	Pconfirm = 1e-4;
+	Pconfirm = 1e-5;
 	threshDelete = log(Pdelete / (1 - Pconfirm));
 	threshConfirm = log((1-Pdelete)/Pconfirm) + initialScore;
 
 	% Position Gate (um)
+
 	gx = chi2inv(PG, 2);
-
-
+    gv = gv + 2*particle_size/T;
+    disp([gx, gv])
 
 	% /////////////////////////////////////////////////////////////////////// %
 	%
@@ -209,8 +209,24 @@ function Tracker(dataFile, videoFile, videoFileOut, csvTracks, reformat_dataFile
 		        d_jt = v_jt' / Sp(:,:,t) * v_jt;
 		        
 		        % Measurement Gating
+		        %disp("-----------------------------------------")
+		        %disp([d_jt, Z(1:2,j)(1), Z(1:2,j)(2), Zp(:,t)(1), Zp(:,t)(2)])
+		        %disp("gx")
+		        %disp(gx)
+		        %disp("d_jt")
+		        %disp(d_jt)
+		        %disp("gv")
+		        %disp(gv)
+		        %disp("Z(1:2,j)")
+		        %disp(Z(1:2,j))
+		        %disp("Zp(:,t)")
+		        %disp(Zp(:,t))
+		        %disp("v_jt")
+		        %disp(v_jt)
+		        %disp("norm(v_jt)/T")
+		        %disp(norm(v_jt)/T)
 		        if (d_jt <= gx) && (norm(v_jt)/T <= gv)
-		            
+
 		            % Distance between Track t and Measurement j
 		            d(j,t) = d_jt;
 		            
