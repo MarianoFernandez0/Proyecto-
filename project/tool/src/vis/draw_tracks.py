@@ -1,5 +1,6 @@
 from cv2 import line, putText, FONT_HERSHEY_SIMPLEX
 import numpy as np
+import cv2
 
 
 def draw_tracks(sequence: np.array, tracks_data: np.array, text=True) -> np.array:
@@ -57,8 +58,8 @@ def draw_tracks(sequence: np.array, tracks_data: np.array, text=True) -> np.arra
         start = 1
         if frame > 5:
             start = frame - 5
-        for i in range(start, frame + 1):
 
+        for i in range(start, frame + 1):
             for tr, track in enumerate(tracks):
                 if track[i, 1] > 0 and track[i - 1, 1] > 0:
                     line(seq_out[frame], (int(track[i - 1, 1]), int(track[i - 1, 2])),

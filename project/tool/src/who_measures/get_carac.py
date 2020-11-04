@@ -1,5 +1,5 @@
 import numpy as np
-from tool.src.who_measures.medidas import VSL, VCL, VAP, ALH, LIN, WOB, STR, BCF, MAD, avgPath
+from src.who_measures.medidas import VSL, VCL, VAP, ALH, LIN, WOB, STR, BCF, MAD, avgPath
 
 
 def get_carac(TRACK_ID, X, Y, F, fps, fluo, min_detections=3):

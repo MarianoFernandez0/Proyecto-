@@ -1,21 +1,39 @@
 import os
 import PySimpleGUI as sg
 from src.tracking.tracking import Tracker
-from src.gui.gui import display_input_gui, save_detections_gui, save_tracks_gui, save_vid_gui
+from src.gui.gui import display_input_gui, drawing_vid_gui, progress_gui
+
+
+def main():
+    event, values = display_input_gui()
+    if event not in (sg.WIN_CLOSED, 'Cancel', 'Cancelar'):
+        tracker = Tracker(params=values)
+
+        # detect
+        window = progress_gui('Detecting...')
+        tracker.detect()
+        window.close()
+
+        # track
+        window = progress_gui('Tracking...')
+        tracks = tracker.track()
+        window.close()
+
+        # save_vid
+        window = drawing_vid_gui(tracks)
+        tracker.save_vid()
+        window.close()
+
+        # who_measures
+        window = progress_gui('Computing WHO measures...')
+        tracker.who_measures()
+        window.close()
+
+        # who_classification
+        window = progress_gui('Classifying...')
+        tracker.who_classification()
+        window.close()
 
 
 if __name__ == '__main__':
-    event, values = display_input_gui()
-    if event not in (sg.WIN_CLOSED, 'Cancel', 'Cancelar'):
-
-        tracker = Tracker(params=values)
-
-        detections_csv = save_detections_gui()
-        tracker.detect(detections_file=detections_csv)
-
-        tracks_csv = save_tracks_gui(os.path.dirname(detections_csv))
-        tracks = tracker.track(detections_file=detections_csv, tracks_file=tracks_csv)
-
-        tracks_video = save_vid_gui(tracks, os.path.dirname(tracks_csv))
-        if tracks_video:
-            tracker.save_vid(tracks_file=tracks_csv, video_file=tracks_video)
+    main()

@@ -1,5 +1,5 @@
 import pandas as pd
-from tool.src.who_measures.get_carac import get_carac
+from src.who_measures.get_carac import get_carac
 import os
 import numpy as np
 
@@ -19,7 +19,7 @@ def read_csv_file(df):
 
     return X, Y, F, TRACK_ID, fluo
 
-def get_casa_measures(in_dir, out_dir, scale, fps):
+def get_casa_measures(in_dir, out_file, scale, fps):
     # leer archivo csv con los tracks
     out = pd.read_csv(in_dir)
     # reordenar dataframe
@@ -39,8 +39,7 @@ def get_casa_measures(in_dir, out_dir, scale, fps):
     param_who = pd.DataFrame(CARAC_WHO)
     param_who.columns = ['track_id', 'vcl', 'vsl', 'vap_mean', 'vap_std', 'alh_mean', 'alh_std', 'lin', 'wob', 'str',
                          'bcf_mean', 'bcf_std', 'mad', 'fluo']
-    os.makedirs(out_dir, exist_ok=True)
-    param_who.to_csv(out_dir + '/' + (in_dir.split('/')[-1]).split('.')[0] + '_WHO.csv', index=False)
+    param_who.to_csv(out_file, index=False)
 
 
 if __name__ == "__main__":
