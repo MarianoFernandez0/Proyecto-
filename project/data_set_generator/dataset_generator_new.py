@@ -71,7 +71,9 @@ def make_sequence(sequence_parameters, all_population):
     frame_rate = np.lcm.reduce(np.array(frame_rates, dtype='int'))
     np.random.seed(seed)
     print('Making sequence for %dHz' % frame_rate)
-    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+    # CHANGE
+    # df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame'])
+    df_info = pd.DataFrame(columns=['id_particle', 'x', 'y', 'fluorescence', 'frame', 'type'])
     next_id = 0
     frames = int(np.round(duration * frame_rate, 0))
     time_step = 1 / frame_rate
@@ -172,9 +174,13 @@ def make_sequence(sequence_parameters, all_population):
                 # Agrego aquellas que entran en el cuadro
                 if 0 < x[p, f] < M and 0 < y[p, f] < N and intensity[p, f] > low_limit:
                     particles_out[p] = 0
+                    #df_info = df_info.append(
+                    #    {'id': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
+                    #     'fluorescence': intensity[p, f], 'frame': f},
+                    #    ignore_index=True)
                     df_info = df_info.append(
                         {'id': id_particles[p], 'x': y[p, f] + head_y[p], 'y': x[p, f] + head_x[p],
-                         'fluorescence': intensity[p, f], 'frame': f},
+                         'fluorescence': intensity[p, f], 'frame': f, 'type': mov_type},
                         ignore_index=True)
                 elif particles_out[p] == 0:
                     particles_out[p] = 1
