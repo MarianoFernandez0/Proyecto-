@@ -11,15 +11,19 @@ from sklearn.cluster import KMeans
 
 
 def tracks_to_list(tracks):
+    print 'tracks'
+    print tracks.shape
+    print len(np.unique(tracks[:, 0]))
     tracks_dict = {}
     for i in range(tracks.shape[0]):
         if tracks[i, 0] in tracks_dict.keys():
             tracks_dict[tracks[i, 0]].append([tracks[i, 4], tracks[i, 1], tracks[i, 2]])
         else:
             tracks_dict[tracks[i, 0]] = [[tracks[i, 4], tracks[i, 1], tracks[i, 2]]]
-
+    print len(tracks_dict.keys())
     tracks_list = []
-    for k in tracks_dict.keys():
+    for k in sorted(tracks_dict.keys()):
+        # print k
         tracks_list.append(tracks_dict[k])
 
     return tracks_list
@@ -60,7 +64,8 @@ def compute_feas(tracks_comps):
                 locCrate = locC/(track_comps[i][0]-track_comps[i-1][0])
                 rec.append(track_comps[i][0])
                 rec.append(locCrate)
-                if locCrate<3:
+                # if locCrate<3:
+                if locCrate<0.1:
                     rec.append(0)
                     rec.append(0)
                 else:
@@ -71,7 +76,7 @@ def compute_feas(tracks_comps):
     return tracks_feas
 
 
-def rolling_window(sample, windowsize=600, offset=300):
+def rolling_window(sample, windowsize=4, offset=2):
     timeLength = sample[len(sample)-1][0]
     windowLength = int(timeLength/offset) + 1
     windows = []
@@ -123,16 +128,16 @@ def behavior_ext(windows):
     return behavior_sequence
 
 
-def generate_behavior_sequences(data):
+def generate_behavior_sequences(data, windowsize=4, offset=2):
     behavior_sequences = []
     for i, sample in enumerate(data):
-        windows = rolling_window(sample)
+        windows = rolling_window(sample, windowsize=windowsize, offset=offset)
         behavior_sequence = behavior_ext(windows)
         behavior_sequences.append(behavior_sequence)
     return behavior_sequences
 
 
-def generate_normal_behavior_sequence(behavior_sequences):
+def     generate_normal_behavior_sequence(behavior_sequences):
     behavior_sequences_normal = []
     templist = []
     for item in behavior_sequences:
@@ -153,7 +158,8 @@ def generate_normal_behavior_sequence(behavior_sequences):
     # print(np.shape(behavior_sequences_normal))
     return behavior_sequences_normal
 
-def trajectory2Vec(input_datas):
+
+def trajectory2Vec(input_datas, size=100):
     def loopf(prev, i):
         return prev
 
@@ -165,11 +171,12 @@ def trajectory2Vec(input_datas):
     # Network Parameters
     # the size of the hidden state for the lstm
     # (notice the lstm uses 2x of this amount so actually lstm will have state of size 2)
-    size = 100
+    # size = 100  # ORIGINAL
+    size = size
     # 2 different sequences total
     batch_size = 1
     # the maximum steps for both sequences is 5
-    max_n_steps = 17
+    max_n_steps = 60
     # each element/frame of the sequence has dimension of 3
     frame_dim = 18
 
@@ -230,6 +237,7 @@ def trajectory2Vec(input_datas):
                 input_data.append(defalt)
             x = np.array(input_data)
             print np.shape(x[0])
+            print x.shape
             x = x.reshape((max_n_steps, batch_size, frame_dim))
             embedding = None
             for epoch in range(training_epochs):
@@ -252,19 +260,19 @@ def trajectory2Vec(input_datas):
 
 
 def get_encodes(trajectories):
-    # print 'trajectories:\n', trajectories
+    print 'trajectories:\n', len(trajectories), trajectories[0, :]
     trajectories_list = tracks_to_list(trajectories)
-    # print 'trajectories_list:\n', trajectories_list
+    print 'trajectories_list:\n', len(trajectories_list), trajectories_list[0][:3]
     trajectories_com = complete_trajectories(trajectories_list)
-    # print 'trajectories_com:\n', trajectories_com
+    print 'trajectories_com:\n', len(trajectories_com), trajectories_com[0][:3]
     trajectories_feas = compute_feas(trajectories_com)
-    # print 'trajectories_feas:\n', trajectories_feas
-    behavior_sequences = generate_behavior_sequences(trajectories_feas)
-    # print 'behavior_sequences:\n', behavior_sequences
+    print 'trajectories_feas:\n', len(trajectories_feas), trajectories_feas[0][:3]
+    behavior_sequences = generate_behavior_sequences(trajectories_feas, windowsize=10, offset=5)
+    print 'behavior_sequences:\n', len(behavior_sequences), behavior_sequences[0][:3]
     behavior_sequences_normal = generate_normal_behavior_sequence(behavior_sequences)
-    # print 'behavior_sequences_normal:\n', behavior_sequences_normal
-    trajectories_vecs = trajectory2Vec(behavior_sequences_normal)
-    # print 'trajectories_vecs:\n', trajectories_vecs
+    print 'behavior_sequences_normal:\n', len(behavior_sequences_normal), behavior_sequences_normal[0][:3]
+    trajectories_vecs = trajectory2Vec(behavior_sequences_normal, size=20)
+    print 'trajectories_vecs:\n', len(trajectories_vecs), trajectories_vecs[0]
 
     encodes_list = []
     for tr in trajectories_vecs:
@@ -285,7 +293,10 @@ def draw_labels(sequence, trajectories, labels, data_dir):
     img_old = np.zeros((sequence.shape[1], sequence.shape[2], 3))
     for i, frame in enumerate(frames):
         frame_tracks = trajectories[trajectories[:, 4] == frame]
-        frame_img = cv2.cvtColor(sequence[int(frame), :, :], cv2.COLOR_GRAY2BGR)
+        if len(sequence.shape) < 4:
+            frame_img = cv2.cvtColor(sequence[int(frame), :, :], cv2.COLOR_GRAY2BGR)
+        else:
+            frame_img = sequence[int(frame), :, :, :]
         img = np.zeros((sequence.shape[1], sequence.shape[2], 3)) + img_old
         frame_ids = np.unique(frame_tracks[:, 0])
         for k, track_id in enumerate(frame_ids):
@@ -346,7 +357,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_dir = args.data_dir
-    trajectories = np.genfromtxt(os.path.join(data_dir, 'tracks.csv'), delimiter=',', skip_header=True)
+    trajectories = np.genfromtxt(os.path.join(data_dir, 'trajectories.csv'), delimiter=',', skip_header=True)
 
     if args.gen_encodes:
         encodes_array = get_encodes(trajectories)

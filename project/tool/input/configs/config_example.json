@@ -1,0 +1,15 @@
+{
+  "video_input": "input/good-video/good-video.tif",
+  "fps": 30,
+  "um_per_px": "",
+
+  "out_dir": "input/good-video",
+
+  "detection_algorithm": "Fluorescence",
+  "mtt_algorithm": "ENNJPDAF",
+  "PG": 0.997,
+  "PD": 0.95,
+  "gv": 200,
+  "particle_len": 10,
+  "min_trk_len": 10
+}

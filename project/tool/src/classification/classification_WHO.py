@@ -11,7 +11,7 @@ def classification(df_medidas_who):
         if vsl > 25.0 and lin > 0.58:
             motility = str('is_straightline_progressive')
 
-        if vsl < 25.0 and vsl > 10.0 and lin > 0.58:
+        if 25.0 > vsl > 10.0 and lin > 0.58:
             motility = str('is_straight_slow_progressive')
 
         if vsl > 10.0 and lin < 0.58:
