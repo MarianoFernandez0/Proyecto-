@@ -124,8 +124,8 @@ class Tracker:
         detections_file = os.path.join(self.out_dir, 'detections.csv')
         tracks_file = os.path.join(self.out_dir, 'trajectories.csv')
 
-        mp4_video = 'tmp.mp4'
-        output_video = 'output.mp4'
+        mp4_video = os.path.join(self.out_dir, 'tmp.mp4')
+        output_video = os.path.join(self.out_dir, 'output.mp4')
         mimwrite(mp4_video, self.sequence, format='mp4', fps=self.fps)
 
         # opcionales del código de matlab
