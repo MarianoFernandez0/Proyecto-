@@ -30,9 +30,9 @@ if __name__ == '__main__':
     # np.save(os.path.join('data/test_2', 'encodes'), encodes)
     encodes = np.load(os.path.join('data/test_2', 'encodes.npy'))
     print np.unique(trajectories_2[:, 0])
-    # encodes_2 = get_encodes(trajectories_2)
-    # np.save(os.path.join('data/test_2', 'encodes_x2'), encodes_2)
-    encodes_2 = np.load(os.path.join('data/test_2', 'encodes_x2.npy'))
+    encodes_2 = get_encodes(trajectories_2)
+    np.save(os.path.join('data/test_2', 'encodes_x2'), encodes_2)
+    # encodes_2 = np.load(os.path.join('data/test_2', 'encodes_x2.npy'))
 
     print 'trajectories'
     print trajectories.shape

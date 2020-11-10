@@ -10,16 +10,16 @@ from sklearn import preprocessing
 from sklearn.cluster import KMeans
 
 
-def tracks_to_list(tracks):
+def tracks_to_list(tracks, fps=1, um_per_px=1):
     print 'tracks'
     print tracks.shape
     print len(np.unique(tracks[:, 0]))
     tracks_dict = {}
     for i in range(tracks.shape[0]):
         if tracks[i, 0] in tracks_dict.keys():
-            tracks_dict[tracks[i, 0]].append([tracks[i, 4], tracks[i, 1], tracks[i, 2]])
+            tracks_dict[tracks[i, 0]].append([tracks[i, 4]/fps, tracks[i, 1]*um_per_px, tracks[i, 2]*um_per_px])
         else:
-            tracks_dict[tracks[i, 0]] = [[tracks[i, 4], tracks[i, 1], tracks[i, 2]]]
+            tracks_dict[tracks[i, 0]] = [[tracks[i, 4]/fps, tracks[i, 1]*um_per_px, tracks[i, 2]*um_per_px]]
     print len(tracks_dict.keys())
     tracks_list = []
     for k in sorted(tracks_dict.keys()):
