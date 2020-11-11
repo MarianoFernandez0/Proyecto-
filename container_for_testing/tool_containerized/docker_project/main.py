@@ -1,4 +1,4 @@
-from tool.src.tracking.tracking import Tracker, delete_tmp
+from tool.src.tracking.tracking import Tracker
 from tool.src.error_measures.error_measures import track_set_error
 from tool.src.who_measures.get_who_measures import get_casa_measures
 from random_generator.generate_random_dataset import generate_config_file
@@ -13,8 +13,9 @@ import pandas as pd
 
 warnings.filterwarnings('ignore')
 
+
 def who_measures(track_path, fps):
-    get_casa_measures(track_path, os.path.join(*track_path.split('/')[:-1]), 1, fps)
+    get_casa_measures(track_path, os.path.join(*track_path.split('/')[:-1], 'who_measures.csv'), 1, fps)
 
 
 def organize_datasets(ds_number, path='datasets'):
@@ -32,6 +33,7 @@ def organize_datasets(ds_number, path='datasets'):
     shutil.rmtree(os.path.join(path))
     return '../data/datasets/dataset_{}'.format(ds_number)
 
+
 def do_all_tracking_stuff(config):
     tracker = Tracker(params=config)
     print('Making detections...')
@@ -39,7 +41,7 @@ def do_all_tracking_stuff(config):
     print('Making tracking...')
     tracker.track()
     print('Calculating WHO measures...')
-    tracker.get_who_measures()
+    tracker.who_measures()
     print('Classifying tracks...')
     tracker.who_classification()
     print('saving video...')
@@ -48,13 +50,13 @@ def do_all_tracking_stuff(config):
 
 
 def get_errors(tracker, folder_path):
-    tracks_file = tracker.outdir + "/tracks/" + tracker.basename + '_tracks.csv'
+    tracks_file = os.path.join(tracker.out_dir, 'trajectories.csv')
     max_dist = (tracker.gv / (tracker.um_per_px * tracker.fps))
     gt_file = [gt_file for gt_file in os.listdir(folder_path) if 'who' not in gt_file.lower()]
     gt_file = os.path.join(folder_path, gt_file[0])
     gt_tracks = pd.read_csv(gt_file)
     tracks = pd.read_csv(tracks_file)
-    gt_tracks.rename(columns={'id_particle': 'id'})
+    # gt_tracks.rename(columns={'id_particle': 'id'})
     errors = track_set_error(gt_tracks, tracks, max_dist)
     os.makedirs(os.path.join(folder_path, 'error_measures'), exist_ok=True)
     with open(os.path.join(folder_path, 'error_measures', 'error_measures.txt'), 'w') as f:
@@ -69,17 +71,16 @@ def organize_output(dataset_path):
 
 
 def update_measures(ds_num, freq, measures_freq, measures_freq_gt):
-    path_gt = '../data/datasets/dataset_{}/{}/dataset_{}Hz_data_WHO.csv'.format(ds_num, freq, freq)
-    path_tracking = '../data/datasets/dataset_{}/{}/inference/output/who_measures/dataset_{}Hz_tracks_WHO.csv'.format(ds_num, freq, freq)
+    path_gt = '../data/datasets/dataset_{}/{}/who_measures.csv'.format(ds_num, freq, freq)
+    path_tracking = '../data/datasets/dataset_{}/{}/inference/output/who_measures.csv'.format(ds_num, freq, freq)
     who_gt = np.genfromtxt(path_gt, dtype=float, delimiter=',', names=True)
     who_tk = np.genfromtxt(path_tracking, dtype=float, delimiter=',', names=True)
     for k in map_keys:
         measures_freq[freq][k].append(np.nanmean(who_tk[map_keys[k]]))
         measures_freq_gt[freq][k].append(np.nanmean(who_gt[map_keys[k]]))
     # shutil.rmtree('../data/datasets/dataset_{}'.format(ds_num))
-
-
     return measures_freq, measures_freq_gt
+
 
 def save_results(measures_freq, measures_freq_gt):
     out_path_1 = '//data/final_analysis_tracker.json'
@@ -89,8 +90,6 @@ def save_results(measures_freq, measures_freq_gt):
         json.dump(measures_freq, f, indent=4)
     with open(out_path_2, 'w') as f:
         json.dump(measures_freq_gt, f, indent=4)
-
-
 
 
 if __name__ == "__main__":
@@ -167,8 +166,6 @@ if __name__ == "__main__":
             organize_output(os.path.join(dataset_path, freq))
             measures_freq, measures_freq_gt = update_measures(dataset, freq, measures_freq, measures_freq_gt)
             save_results(measures_freq, measures_freq_gt)
-
-    #delete_tmp()
 
     with open('//data/final_analysis_tracker.json', 'w') as file:
         json.dump(measures_freq, file, indent=4)
