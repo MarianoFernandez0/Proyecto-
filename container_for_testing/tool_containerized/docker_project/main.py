@@ -97,7 +97,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--in_tracker', default='../data/input/sequence', help='Path where to move the synthetic data')
     parser.add_argument('--config_file', default='../data/input/config/config_tracking.json', help='Path to the config file for the tracker')
-    parser.add_argument('--loops', default=6, help='Number of datasets in which the tool is tested')
+    parser.add_argument('--loops', default=6, type=int, help='Number of datasets in which the tool is tested')
     parser.add_argument('--shared_folder', default='../data', help='Folder shared between the docker and host')
     args = parser.parse_args()
 
