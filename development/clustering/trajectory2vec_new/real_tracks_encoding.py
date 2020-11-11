@@ -40,14 +40,21 @@ if __name__ == '__main__':
     for tr in trajectories_vecs:
         encodes_list.append(tr[0][0])
     encodes_array = np.array(encodes_list)
+    np.save(os.path.join(data_dir, 'encodes'), encodes_array)
     print 'encodes shape', encodes_array.shape
-#
 
     km = KMeans(n_clusters=4)
     km.fit(encodes_array)
 
-    sequence = tifffile.TiffFile(os.path.join(data_dir, 'video.tif')).asarray()
-    draw_labels(sequence, trajectories, km.labels_, data_dir)
+    last_num_tracks = 0
+    for secuence in secuences:
+        sequence_vid = tifffile.TiffFile(os.path.join(data_dir, 'video.tif')).asarray()
+        tracks_array = np.genfromtxt(os.path.join(data_dir, secuence, 'trajectories.csv'),
+                                     delimiter=',', skip_header=True)
+        num_tracks = len(np.unique(tracks_array[:, 0]))
+        draw_labels(sequence_vid, tracks_array, km.labels_[last_num_tracks:num_tracks],
+                    os.path.join(data_dir, secuence))
+        last_num_tracks = num_tracks
 
     ids = np.unique(trajectories[:, 0])
     tracks_labels = pd.DataFrame(columns=['id', 'label'])

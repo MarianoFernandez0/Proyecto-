@@ -1,1 +1,13 @@
-{"video_input":"", "fps": "40", "px2um": 1, "outdir": "/data/output", "detection_algorithm": 1, "mtt_algorithm": 5, "PG": 1, "PD": 0.95, "gv": 200}
+{
+  "video_input":"",
+  "fps": "40",
+  "um_per_px": 1,
+  "out_dir": "/data/output",
+  "detection_algorithm": "Fluorescence",
+  "mtt_algorithm": "ENNJPDAF",
+  "PG": 1,
+  "PD": 0.95,
+  "gv": 200,
+  "particle_len": 10,
+  "min_trk_len": 10
+}

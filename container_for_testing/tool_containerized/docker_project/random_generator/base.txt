@@ -26,15 +26,15 @@
 	mean : 8 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 100
-	VAP_deviation : 10
-	Tp : 0.001
+	VAP : 30
+	VAP_deviation : 1
+	Tp : 0.1
 	head_displ : true
 	std_depth : 2
 	movement_type : a
-	ALH_mean : 3
+	ALH_mean : 0
 	ALH_std : 0.1
-	BCF_mean : 15
+	BCF_mean : 1
 	BCF_std : 2
 
 
@@ -45,13 +45,13 @@
 	mean : 9 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 70
-	VAP_deviation : 10
-	Tp : 0.0001
+	VAP : 17.2
+	VAP_deviation : 1
+	Tp : 0.001
 	head_displ : true
 	std_depth : 2
 	movement_type : b
-	ALH_mean : 4
+	ALH_mean : 0
 	ALH_std : 0.5
 	BCF_mean : 10
 	BCF_std : 5
@@ -64,14 +64,14 @@
 	mean : 9 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 50
-	VAP_deviation : 10
-	Tp : 0.000001
+	VAP : 35
+	VAP_deviation : 2
+	Tp : 1e-5
 	head_displ : true
 	std_depth : 2
 	movement_type : c
 	ALH_mean : 7
-	ALH_std : 3
+	ALH_std : 1
 	BCF_mean : 15
 	BCF_std : 10
 
@@ -83,13 +83,13 @@
 	mean : 9 2
 	cov_mean : 0.3 0 0 0.3
 	#movement mu/s
-	VAP : 0
-	VAP_deviation : 0
-	Tp : 0.000001
+	VAP : 10
+	VAP_deviation : 1
+	Tp : 1e-6
 	head_displ : true
 	std_depth : 2
-	movement_type : d
+	movement_type : f
 	ALH_mean : 0
 	ALH_std : 0
-	BCF_mean : 0
-	BCF_std : 0
+	BCF_mean : 15
+	BCF_std : 5

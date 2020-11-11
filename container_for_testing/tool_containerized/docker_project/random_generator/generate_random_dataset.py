@@ -14,8 +14,7 @@ def generate_config_file(path_out='random_generator/auto_config'):
         lines[line] = lines[line].replace(':', ': {}'.format(int(particles[i])))
     with open(os.path.join(path_out, name), 'w') as f:
         f.writelines(lines)
-
-    sequence_parameters, all_population = read_parameters('random_generator/auto_config/config_file.txt')
+    sequence_parameters, all_population = read_parameters(os.path.join(path_out, name))
     make_sequence(sequence_parameters, all_population)
 
 if __name__ == '__main__':
