@@ -11,6 +11,8 @@ def read_csv_file(df):
     for id in np.unique(df['id'].to_numpy()):
         TRACK_ID.append(id)
         new_out = df.loc[df['id'] == id]
+        if len(np.sum(df['id'] == id)) < 10:
+            continue
         X.append(new_out['x'].to_list())
         Y.append(new_out['y'].to_list())
         F.append((new_out['frame']).to_list())
