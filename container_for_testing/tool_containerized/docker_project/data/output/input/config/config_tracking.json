@@ -2,7 +2,7 @@
   "video_input":"",
   "fps": "40",
   "um_per_px": 1,
-  "out_dir": "../data/output",
+  "out_dir": "/data/output",
   "detection_algorithm": "Fluorescence",
   "mtt_algorithm": "ENNJPDAF",
   "PG": 1,
